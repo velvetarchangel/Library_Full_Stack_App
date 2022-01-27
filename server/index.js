@@ -1,17 +1,42 @@
 // Entrypoint for the server
 
 const http = require("http");
+const express = require("express");
+const app = express();
+const mysql = require("mysql");
+
+const db = mysql.createConnection({
+  user: "root",
+  host: "localhost",
+  password: "YOUR_PASSWORD",
+  database: "librarySystem",
+});
+
 const PORT_NUM = 5000;
 
-// Create an instance of the http server to handle HTTP requests
-let app = http.createServer((req, res) => {
-  // Set a response type of plain text for the response
-  res.writeHead(200, { "Content-Type": "text/plain" });
+//PLACE API REQUESTs here
+//Create routes
 
-  // Send back a response and end the connection
-  res.end("Hello World!\n");
+// The following is an example write to a db
+app.post("/add", (req, res) => {
+  const title = req.body.title;
+  const author = req.body.title;
+
+  // !!!!!please note this DB does not exist yet and will not work!!!!!!
+  db.query(
+    "INSERT INTO books  (title, author) VALUES (?,?)",
+    [title, author],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(200, OK);
+      }
+    }
+  );
 });
 
 // Start the server on port 5000
-app.listen(PORT_NUM, "127.0.0.1");
-console.log("Node server running on port " + PORT_NUM);
+app.listen(PORT_NUM, () => {
+  console.log("Node server running on port " + PORT_NUM);
+});
