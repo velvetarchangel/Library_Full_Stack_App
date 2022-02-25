@@ -24,11 +24,11 @@ CREATE TABLE copy_of_item(
 
 CREATE TABLE movies (
 	item_id INT,
-  pCompany VARCHAR(50), -- production company
+  	pCompany VARCHAR(50), -- production company
 	imdb_id VARCHAR(20) PRIMARY KEY,
-  duration int,
-  CONSTRAINT item_id FOREIGN KEY (item_id)
-		references item(item_id)
+	duration int,
+	CONSTRAINT item_id FOREIGN KEY (item_id)
+			references item(item_id)
 );
     
 CREATE TABLE movie_genre (
@@ -45,28 +45,28 @@ CREATE TABLE actor (
 
 CREATE TABLE director(
 	director_id INT AUTO_INCREMENT PRIMARY KEY,
-  director_name VARCHAR(50)
+  	director_name VARCHAR(50)
 );
 
 CREATE TABLE actor_acts(
 	actor_id INT,
-  imdb_id VARCHAR(13),
+  	imdb_id VARCHAR(13),
 	CONSTRAINT a_actor_id FOREIGN KEY (actor_id)
 		references actor(actor_id),
-  CONSTRAINT a_imdb_id FOREIGN KEY (imdb_id)
+  	CONSTRAINT a_imdb_id FOREIGN KEY (imdb_id)
 		references movies(imdb_id)
 );
 
 CREATE TABLE director_directs(
 	director_id INT,
 	imdb_id VARCHAR(13),
-  CONSTRAINT d_imdb_id FOREIGN KEY (imdb_id)
+  	CONSTRAINT d_imdb_id FOREIGN KEY (imdb_id)
 		references movies(imdb_id)
 );
 
 CREATE TABLE author (
 	author_id INT AUTO_INCREMENT PRIMARY KEY,
-  author_name VARCHAR(50)
+  	author_name VARCHAR(50)
 );
 
 CREATE TABLE book (
@@ -84,7 +84,7 @@ CREATE TABLE book (
 
 CREATE TABLE writes(
 	author_id INT,
-  isbn VARCHAR(13),
+  	isbn VARCHAR(13),
 	CONSTRAINT w_author_id FOREIGN KEY (author_id)
 		references author(author_id),
 	CONSTRAINT w_isbn FOREIGN KEY (isbn)
