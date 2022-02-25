@@ -24,11 +24,11 @@ CREATE TABLE copy_of_item(
 
 CREATE TABLE movies (
 	item_id INT,
-  	pCompany VARCHAR(50), -- production company
+  pCompany VARCHAR(50), -- production company
 	imdb_id VARCHAR(20) PRIMARY KEY,
 	duration int,
 	CONSTRAINT item_id FOREIGN KEY (item_id)
-			references item(item_id)
+		references item(item_id)
 );
     
 CREATE TABLE movie_genre (
@@ -45,7 +45,7 @@ CREATE TABLE actor (
 
 CREATE TABLE director(
 	director_id INT AUTO_INCREMENT PRIMARY KEY,
-  	director_name VARCHAR(50)
+  director_name VARCHAR(50)
 );
 
 CREATE TABLE actor_acts(
