@@ -1,0 +1,4 @@
+db_specs:
+  localhost: locahost
+  username: your_username
+  password: your_password

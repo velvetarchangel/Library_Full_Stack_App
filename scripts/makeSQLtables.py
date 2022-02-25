@@ -1,13 +1,17 @@
 import pandas as pd
 import os
+import yaml
 
 import mysql.connector as msql
 from mysql.connector import Error
 
 def connectToDB():
   try:
-    conn = msql.connect(host='localhost', user='root',  
-                        password='mysqlpassword'
+    db_config_file = open("scripts/DBspecs.yaml")
+    parsed_yaml_file = yaml.load(db_config_file)
+    conn = msql.connect(host=parsed_yaml_file.get("localhost"), 
+                        user=parsed_yaml_file.get("username"),  
+                        password=parsed_yaml_file.get("password")
                         )
     if conn.is_connected():
         cursor = conn.cursor()
