@@ -1,11 +1,16 @@
 show databases;
-USE library;
+# additions: - KellyO
+DROP DATABASE IF EXISTS `library`;
+CREATE DATABASE `library`;
+
+USE `library`;
 SHOW TABLES;
 
 -- remove me after you are done generating schema
 SET FOREIGN_KEY_CHECKS = 0; 
 
-DROP TABLE if exists item, copy_of_item, book, movies, movie_genre, production_company, director, actor, actor_acts, director_directs, author, writes;
+# i commented this out cause we only 'DROP TABLE' a database not the tables in the database - KellyO
+-- DROP TABLE if exists item, copy_of_item, book, movies, movie_genre, production_company, director, actor, actor_acts, director_directs, author, writes;
 
 CREATE TABLE item (
 	item_id INT AUTO_INCREMENT PRIMARY KEY, 
@@ -91,3 +96,76 @@ CREATE TABLE writes(
 		references book(isbn)
 );
 
+
+##### KELLY'S SECTION #####
+-- check lengths of IDs; i have it set to 36
+-- check lengths of user names; i have it set to 50
+-- check length of comments; i have it set to 400
+
+CREATE TABLE library_user (
+    card_no VARCHAR(36) PRIMARY KEY, -- card_no is VARCHAR for now
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    email VARCHAR(50),
+    user_password VARCHAR(20)
+);
+
+CREATE TABLE library_customer (
+	card_no VARCHAR(36) PRIMARY KEY,
+	CONSTRAINT lc_card_no FOREIGN KEY (card_no)
+		REFERENCES library_user(card_no)
+);
+
+CREATE TABLE librarian (
+	card_no VARCHAR(36),
+	CONSTRAINT l_card_no FOREIGN KEY (card_no)
+		REFERENCES library_user(card_no),
+	staff_id INT,
+    start_date VARCHAR(50),
+    salary INT,
+    PRIMARY KEY (card_no, staff_id)
+);
+
+
+CREATE TABLE feedback (
+	card_no VARCHAR(36),
+    CONSTRAINT f_card_no FOREIGN KEY (card_no)
+		REFERENCES library_user(card_no),
+	feedback_id VARCHAR(36),
+	PRIMARY KEY (feedback_id, card_no),
+    user_rating INT,
+    user_comment VARCHAR(400),
+    item_id INT,
+    CONSTRAINT f_item_id FOREIGN KEY (item_id)
+		REFERENCES item(item_id)
+);
+
+CREATE TABLE user_comments ( 
+	card_no VARCHAR(36),
+    CONSTRAINT uc_card_no FOREIGN KEY (card_no)
+		REFERENCES library_user(card_no),
+    feedback_id VARCHAR(36),
+	CONSTRAINT uc_feedback_id FOREIGN KEY (feedback_id)
+		REFERENCES feedback(feedback_id),
+	u_comment VARCHAR(400),
+	PRIMARY KEY (card_no, feedback_id, u_comment)
+);
+
+CREATE TABLE library_record (
+	card_no VARCHAR(36) PRIMARY KEY,
+	CONSTRAINT lr_card_no FOREIGN KEY (card_no)
+		REFERENCES library_user(card_no),
+    fines INT
+);
+
+CREATE TABLE signed_out (
+	card_no VARCHAR(36),
+	CONSTRAINT so_card_no FOREIGN KEY (card_no)
+		REFERENCES library_user(card_no),
+    item_id INT,
+    CONSTRAINT so_item_id FOREIGN KEY (item_id)
+		REFERENCES item(item_id),
+	PRIMARY KEY (card_no, item_id),
+    checkout_date VARCHAR(50),
+    return_date VARCHAR(50)
+);
