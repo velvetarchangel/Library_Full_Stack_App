@@ -120,10 +120,10 @@ CREATE TABLE librarian (
 	card_no VARCHAR(36),
 	CONSTRAINT l_card_no FOREIGN KEY (card_no)
 		REFERENCES library_user(card_no),
-	staff_id INT,
+	staff_id INT PRIMARY KEY,
     start_date VARCHAR(50),
-    salary INT,
-    PRIMARY KEY (card_no, staff_id)
+    salary INT
+  --  PRIMARY KEY (card_no, staff_id) removing card_no as a primary key. 
 );
 
 
@@ -131,8 +131,8 @@ CREATE TABLE feedback (
 	card_no VARCHAR(36),
     CONSTRAINT f_card_no FOREIGN KEY (card_no)
 		REFERENCES library_user(card_no),
-	feedback_id VARCHAR(36),
-	PRIMARY KEY (feedback_id, card_no),
+	feedback_id VARCHAR(36) PRIMARY KEY,
+	-- PRIMARY KEY (feedback_id, card_no), removing card_no as a primary key
     user_rating INT,
     user_comment VARCHAR(400),
     item_id INT,
@@ -147,8 +147,8 @@ CREATE TABLE user_comments (
     feedback_id VARCHAR(36),
 	CONSTRAINT uc_feedback_id FOREIGN KEY (feedback_id)
 		REFERENCES feedback(feedback_id),
-	u_comment VARCHAR(400),
-	PRIMARY KEY (card_no, feedback_id, u_comment)
+	u_comment VARCHAR(400) PRIMARY KEY
+	 -- PRIMARY KEY (card_no, feedback_id, u_comment) removing card_no, feedback_id as primary key
 );
 
 CREATE TABLE library_record (
@@ -162,10 +162,10 @@ CREATE TABLE signed_out (
 	card_no VARCHAR(36),
 	CONSTRAINT so_card_no FOREIGN KEY (card_no)
 		REFERENCES library_user(card_no),
-    item_id INT,
+    item_id INT PRIMARY KEY,
     CONSTRAINT so_item_id FOREIGN KEY (item_id)
 		REFERENCES item(item_id),
-	PRIMARY KEY (card_no, item_id),
+	-- PRIMARY KEY (card_no, item_id), removing card_no as primary key
     checkout_date VARCHAR(50),
     return_date VARCHAR(50)
 );
