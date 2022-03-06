@@ -18,7 +18,7 @@ const PORT_NUM = 5000;
 //Create routes
 
 // The following is an example write to a db
-app.post("/add", (req, res) => {
+app.post("/addBook", (req, res) => {
   const title = req.body.title;
   const author = req.body.title;
 
