@@ -1,5 +1,4 @@
 show databases;
--- additions: - KellyO
 DROP DATABASE IF EXISTS `library`;
 CREATE DATABASE `library`;
 
@@ -9,27 +8,48 @@ SHOW TABLES;
 -- remove me after you are done generating schema
 SET FOREIGN_KEY_CHECKS = 0; 
 
--- i commented this out cause we only 'DROP TABLE' a database not the tables in the database - KellyO
--- DROP TABLE if exists item, copy_of_item, book, movies, movie_genre, production_company, director, actor, actor_acts, director_directs, author, writes;
+DROP TABLE IF EXISTS item;
+DROP TABLE IF EXISTS copy_of_item;
+DROP TABLE IF EXISTS book;
+DROP TABLE IF EXISTS movies;
+DROP TABLE IF EXISTS movie_genre;
+DROP TABLE IF EXISTS director;
+DROP TABLE IF EXISTS actor;
+DROP TABLE IF EXISTS actor_acts;
+DROP TABLE IF EXISTS director_directs;
+DROP TABLE IF EXISTS author;
+DROP TABLE IF EXISTS writes;
+DROP TABLE IF EXISTS library_user;
+DROP TABLE IF EXISTS librarian;
+DROP TABLE IF EXISTS library_customer;
+DROP TABLE IF EXISTS feedback;
+DROP TABLE IF EXISTS signed_out;
+DROP TABLE IF EXISTS coordinates;
+DROP TABLE IF EXISTS hosts_event;
+DROP TABLE IF EXISTS registers;
+DROP TABLE IF EXISTS lib_events;
+DROP TABLE IF EXISTS branch;
+DROP TABLE IF EXISTS has_for_branch_and_item;
+DROP TABLE IF EXISTS places_hold;
 
 CREATE TABLE item (
 	item_id INT AUTO_INCREMENT PRIMARY KEY, 
 	release_date DATE, 
-	item_desc VARCHAR(255), -- may need in increase this value
+	item_desc VARCHAR(1000), -- may need in increase this value
 	item_name VARCHAR(255), 
-	availability BOOL
+	item_availability BOOL -- changed name from availability
 );
 
-CREATE TABLE copy_of_item(
+CREATE TABLE copy_of_item (
 	item_barcode INT PRIMARY KEY, -- used to be INT(13), but changed to get rid of error; replace with checking ranges later
 	item_id INT,
 	CONSTRAINT ic_item_id FOREIGN KEY (item_id)
-		references item(item_id)
+	references item(item_id)
 );
 
 CREATE TABLE movies (
 	item_id INT,
-	productionCompany VARCHAR(50), 
+	production_company VARCHAR(50), 
 	imdb_id VARCHAR(20) PRIMARY KEY,
 	duration int,
 	CONSTRAINT item_id FOREIGN KEY (item_id)
@@ -87,15 +107,14 @@ CREATE TABLE author (
 
 CREATE TABLE book (
 	item_id INT,
-	isbn VARCHAR(13) PRIMARY KEY,
-	num_pages INT,
+	isbn VARCHAR(10) PRIMARY KEY,
 	publisher_name VARCHAR(255),
 	book_type VARCHAR(25)
 );
 
 CREATE TABLE writes(
 	author_id INT,
-  	isbn VARCHAR(13),
+  	isbn VARCHAR(10),
 	CONSTRAINT w_author_id FOREIGN KEY (author_id)
 		references author(author_id),
 	CONSTRAINT w_isbn FOREIGN KEY (isbn)
@@ -104,12 +123,6 @@ CREATE TABLE writes(
 	CONSTRAINT writes_item_id FOREIGN KEY (item_id)
 		references item(item_id)
 );
-
-
--- KELLY'S SECTION #####
--- check lengths of IDs; i have it set to 36
--- check lengths of user names; i have it set to 50
--- check length of comments; i have it set to 400
 
 CREATE TABLE library_user (
     card_no VARCHAR(36) PRIMARY KEY, -- card_no is VARCHAR for now; does it make sense as an INT
@@ -120,19 +133,19 @@ CREATE TABLE library_user (
 );
 
 CREATE TABLE library_customer (
-	card_no VARCHAR(36),-- PRIMARY KEY,
+	card_no VARCHAR(36) NOT NULL,-- PRIMARY KEY,
 	CONSTRAINT lc_card_no FOREIGN KEY (card_no)
 		REFERENCES library_user(card_no)
 );
 
 CREATE TABLE librarian (
-	card_no VARCHAR(36),
+	card_no VARCHAR(36) NOT NULL,
 	CONSTRAINT l_card_no FOREIGN KEY (card_no)
 		REFERENCES library_user(card_no),
-	staff_id INT PRIMARY KEY,
-    start_date DATE,
-    salary INT
-  --  PRIMARY KEY (card_no, staff_id) removing card_no as a primary key. 
+	staff_id INT NOT NULL,
+    staff_start_date DATE,
+    salary FLOAT,
+    UNIQUE KEY (card_no, staff_id) 
 );
 
 
@@ -140,8 +153,8 @@ CREATE TABLE feedback (
 	card_no VARCHAR(36),
     CONSTRAINT f_card_no FOREIGN KEY (card_no)
 		REFERENCES library_user(card_no),
-	feedback_id VARCHAR(36) PRIMARY KEY,
-	-- PRIMARY KEY (feedback_id, card_no), removing card_no as a primary key
+	feedback_id VARCHAR(36) NOT NULL,
+	UNIQUE KEY (feedback_id, card_no),
     user_rating INT,
     item_id INT,
     CONSTRAINT f_item_id FOREIGN KEY (item_id)
@@ -155,15 +168,15 @@ CREATE TABLE user_comments (
     feedback_id VARCHAR(36),
 	CONSTRAINT uc_feedback_id FOREIGN KEY (feedback_id)
 		REFERENCES feedback(feedback_id),
-	u_comment VARCHAR(500) PRIMARY KEY,
+	u_comment VARCHAR(500) NOT NULL,
     item_id INT,
 	CONSTRAINT uc_item_id FOREIGN KEY (item_id)
-		references item(item_id)
-	 -- PRIMARY KEY (card_no, feedback_id, u_comment) removing card_no, feedback_id as primary key
+		references item(item_id),
+	UNIQUE KEY (card_no, feedback_id, u_comment)
 );
 
 CREATE TABLE library_record (
-	card_no VARCHAR(36), -- PRIMARY KEY,
+	card_no VARCHAR(36) NOT NULL, -- PRIMARY KEY,
 	CONSTRAINT lr_card_no FOREIGN KEY (card_no)
 		REFERENCES library_user(card_no),
     fines INT
@@ -173,10 +186,10 @@ CREATE TABLE signed_out (
 	card_no VARCHAR(36),
 	CONSTRAINT so_card_no FOREIGN KEY (card_no)
 		REFERENCES library_user(card_no),
-    item_id INT, -- PRIMARY KEY,
+    item_id INT NOT NULL, -- PRIMARY KEY,
     CONSTRAINT so_item_id FOREIGN KEY (item_id)
 		REFERENCES item(item_id),
-	-- PRIMARY KEY (card_no, item_id), removing card_no as primary key
+	UNIQUE KEY (card_no, item_id),
     checkout_date DATE,
     return_date DATE
 );
@@ -185,25 +198,28 @@ CREATE TABLE signed_out (
 -- Eric's stuff
 
 CREATE TABLE coordinates ( 
-	staff_id INT, -- AUTO_INCREMENT, 
-    card_no VARCHAR(36), -- INT, -- AUTO_INCREMENT,
-    event_id INT , -- AUTO_INCREMENT,
-   -- PRIMARY KEY (staff_id, card_no, event_id),
+	card_no VARCHAR(36) NOT NULL, -- INT, -- AUTO_INCREMENT,
+	staff_id INT NOT NULL, -- AUTO_INCREMENT, 
+    event_id INT NOT NULL, -- AUTO_INCREMENT,
    
-    CONSTRAINT coord_staff_id FOREIGN KEY (staff_id)
-    REFERENCES librarian(staff_id),
+    -- CONSTRAINT coord_staff_id FOREIGN KEY (staff_id)
+    -- REFERENCES librarian(staff_id),
     
-    CONSTRAINT coord_card_no FOREIGN KEY (card_no)
-    REFERENCES library_user(card_no),
+    -- CONSTRAINT coord_card_no FOREIGN KEY (card_no)
+    -- REFERENCES library_user(card_no),
+	
+	FOREIGN KEY (card_no, staff_id) REFERENCES librarian (card_no, staff_id),
     
     CONSTRAINT coord_event_id FOREIGN KEY (event_id)
-    REFERENCES lib_events(event_id)
+    REFERENCES lib_events(event_id),
+	
+	UNIQUE KEY (card_no, staff_id, event_id)
 );
 
 CREATE TABLE hosts_event (
 	event_id INT, -- AUTO_INCREMENT,
     branch_id INT , -- AUTO_INCREMENT,
-   -- PRIMARY KEY (event_id, branch_id),
+    UNIQUE KEY (event_id, branch_id),
    
 	CONSTRAINT hosts_event_id FOREIGN KEY (event_id)
     REFERENCES lib_events(event_id),
@@ -213,9 +229,9 @@ CREATE TABLE hosts_event (
 );
 
 CREATE TABLE registers (
-	event_id INT, -- AUTO_INCREMENT, 
-    card_no VARCHAR(36), -- INT , AUTO_INCREMENT,
-  --  PRIMARY KEY (event_id, card_no),
+	event_id INT,
+    card_no VARCHAR(36),
+    UNIQUE KEY (event_id, card_no),
     
 	CONSTRAINT registers_event_id FOREIGN KEY (event_id)
     REFERENCES lib_events(event_id),
@@ -234,9 +250,9 @@ CREATE TABLE lib_events (
 );
 
 CREATE TABLE event_location (
-	event_id INT, -- AUTO_INCREMENT,
-    location VARCHAR(50) PRIMARY KEY,
-    -- PRIMARY KEY (event_id, location),
+	event_id INT,
+    e_location VARCHAR(50) PRIMARY KEY,
+    UNIQUE KEY (event_id, e_location),
     
     CONSTRAINT event_location_id FOREIGN KEY (event_id)
     REFERENCES lib_events(event_id)
@@ -244,15 +260,15 @@ CREATE TABLE event_location (
 
 CREATE TABLE branch (
 	branch_id INT AUTO_INCREMENT PRIMARY KEY,
-    branch_name VARCHAR(50), -- 50 is a temp value
-    address VARCHAR(50) -- 50 is a temp value
+    branch_name VARCHAR(50),
+    branch_address VARCHAR(50)
 );
 
 CREATE TABLE has_for_branch_and_item (
-	branch_id INT, -- AUTO_INCREMENT,
-    item_id INT , -- AUTO_INCREMENT,   
+	branch_id INT,
+    item_id INT,   
     item_quantity INT,
-   -- PRIMARY KEY(branch_id, item_id),
+    UNIQUE KEY(branch_id, item_id),
     
     CONSTRAINT has_branch_id FOREIGN KEY (branch_id)
     REFERENCES branch(branch_id),
@@ -265,7 +281,7 @@ CREATE TABLE places_hold (
 	card_no VARCHAR(36), -- INT, -- AUTO_INCREMENT, 
     item_id INT , -- AUTO_INCREMENT, 
     hold_position INT,
-    -- PRIMARY KEY (card_no, item_id),
+    UNIQUE KEY (card_no, item_id),
     
     CONSTRAINT hold_card_number FOREIGN KEY (card_no)
     REFERENCES library_user(card_no),
@@ -273,3 +289,198 @@ CREATE TABLE places_hold (
     CONSTRAINT hold_item_id FOREIGN KEY (item_id)
     REFERENCES item(item_id)
 );
+
+
+
+
+-- Real data for the database
+-- card_no: 10 digits
+INSERT INTO library_user (card_no, first_name, last_name, email, user_password)
+VALUES
+(1234567890, 'Kawhi', 'Leonard', 'kawhi@hotmail.com', 'abc'),
+(2346271619, 'Leonardo', 'Dicaprio', 'leo@gmail.com', 'abc'),
+(7920625716, 'Margot', 'Robbie', 'margot@outlook.com', 'abc'),
+(8426482051, 'Paul', 'George', 'paulGeorge@hotmail.com', 'abc'),
+(6830547195, 'Lebron', 'James', 'lebron23@gmail.com', 'abc'),
+(3461246421, 'Matthew', 'Tkachuk', 'mmtkachuk@flames.com', 'abc'),
+(1157422742, 'Alice', 'Smith', 'anon@anonymous.com', 'abc'),
+(9646514567, 'Joe', 'Biden', 'pres@USA.com', 'abc'),
+(9934758123, 'Nick', 'Bosa', 'bosa97@niners.com', 'abc'),
+(7234561552, 'Hailee', 'Steinfeld', 'hailee@hotmail.com', 'abc'),
+(7284096754, 'James', 'Johnson', 'jamesjohnson@test.com', 'abc'),
+(7848961666, 'Himika', 'Dastidar', 'test@test.com', 'abc'),
+(8761346354, 'Kelly', 'Osena', 'kelly@test.com', 'abc'),
+(8611038770, 'Eric', 'Tan', 'erictan@test.com', 'abc'),
+(3912281595, 'Sarah', 'Silverman', 'silverman@test.com', 'abc'),
+(2238324761, 'Fake', 'Foo', 'fakefoo@test.com', 'abc'),
+(6306195165, 'Fake', 'Datatype', 'datatype@test.com', 'abc');
+
+INSERT INTO library_customer(card_no)
+VALUES
+(1234567890),
+(2346271619),
+(7920625716),
+(8426482051),
+(6830547195),
+(3461246421),
+(1157422742),
+(9646514567),
+(9934758123),
+(7234561552);
+
+INSERT INTO librarian (card_no, staff_id, staff_start_date, salary)
+VALUES
+(7284096754, 111, '2000-01-02', 50000.00),
+(7848961666, 222, '2014-07-01', 55000.00),
+(8761346354, 333, '2009-10-01', 57500.00),
+(8611038770, 444, '2011-10-01', 55750.00),
+(3912281595, 555, '2012-11-11', 60000.00),
+(2238324761, 666, '2013-01-01', 65000.00),
+(6306195165, 777, '2014-05-08', 66700.00);
+
+
+INSERT INTO book (item_id, isbn, publisher_name, book_type)
+VALUES
+(1, '0002005018', 'HarperFlamingo Canada', 'Novel'),
+(2, '0399135782', 'Putnam Pub Group', 'Fiction'),
+(3, '0440234743', 'Dell', 'Fiction'),
+(4, '0452264464', 'Plume', 'Fiction'),
+(5, '0609804618', 'Three Rivers Press', 'Humor'),
+(6, '1841721522', 'Ryland Peter Small Ltd.', 'Cooking'),
+(7, '0971880107', 'Bloomberg', 'Fiction'),
+(8, '0345402871', 'Ballantine Books', 'Fiction'),
+(9, '0345417623', 'Ballantine Books', 'Fiction'),
+(10,'0375759778', 'Random House Trade Paperbacks', 'Fiction');
+
+INSERT INTO author(author_id, author_name)
+VALUES
+(1, 'Gina Bari Kolata'),
+(2, 'Amy Tan'),
+(3, 'John Grisham'),
+(4, 'Toni Morrison'),
+(5, 'Harper Lee'),
+(6, 'Celia Brooks Brown'),
+(7, 'Rich Shapero'),
+(8, 'Michael Chrichton'),
+(10, 'Arthur Philips');
+
+
+INSERT INTO writes(author_id, isbn, item_id)
+VALUES
+(1, '0002005018', 1),
+(2, '0399135782', 2),
+(3, '0440234743', 3),
+(4, '0452264464', 4),
+(5, '0609804618', 5),
+(6, '1841721522', 6),
+(7, '0971880107', 7),
+(8, '0345402871', 8),
+(8, '0345417623', 9),
+(10,'0375759778', 10);
+
+INSERT INTO movies (item_id, production_company, imdb_id, duration)
+VALUES 
+(11, 'Paramount Pictures', 'tt0068646', 177),
+(12, 'Warner Bros. Pictures', 'tt0468569', 152),
+(13, 'Paramount Pictures', 'tt0071562',200 ),
+(14, 'Orion-Nova Productions', 'tt0050083', 96),
+(15, 'Universal Pictures', 'tt0108052' ,192),
+(16, 'New Line Cinema', 'tt0167260', 201),
+(17, 'A Band Apart', 'tt0110912', 154),
+(18, 'New Line Cinema', 'tt0120737', 178),
+(19, 'United Artists', 'tt0060196', 177),
+(20, 'Castle Rock Entertainment', 'tt0111161', 142);
+
+INSERT INTO director (director_id, director_name)
+VALUES
+(55692,'Christopher Nolan'),
+(42154,'Sidney Lumet'),
+(67234, 'Steven Spielberg'),
+(92355, 'Quentin Tarantino'),
+(17258, 'Francis Ford Coppola'),
+(74433, 'Peter Jackson'),
+(88832,'Sergio Leone'),
+(23412, 'Frank Darabont');
+
+INSERT INTO director_directs (director_id, imdb_id, item_id)
+VALUES
+(55692, 'tt0468569', 12),
+(42154, 'tt0050083', 14),
+(67234, 'tt0108052', 15),
+(92355, 'tt0110912', 17),
+(17258, 'tt0071562', 13),
+(17258, 'tt0068646', 11),
+(74433, 'tt0167260', 16),
+(74433, 'tt0120737', 18),
+(88832, 'tt0060196', 19),
+(23412, 'tt0111161', 20);
+
+INSERT INTO item (item_id, release_date, item_desc, item_name, item_availability) 
+VALUES 
+(11, '1972-01-01', 'The aging patriarch of an organized crime dynasty in postwar New York City transfers control of his clandestine empire to his reluctant youngest son.', 'The Godfather', TRUE),
+(12, '2008-01-01', 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.', 'The Dark Knight', TRUE),
+(13, '1974-01-01', 'The early life and career of Vito Corleone in 1920s New York City is portrayed, while his son, Michael, expands and tightens his grip on the family crime syndicate.', 'The Godfather: Part II', TRUE),
+(14, '1957-01-01', 'The jury in a New York City murder trial is frustrated by a single member whose skeptical caution forces them to more carefully consider the evidence before jumping to a hasty verdict.', '12 Angry Men', TRUE),
+(15, '1994-01-01', 'In German-occupied Poland during World War II, industrialist Oskar Schindler gradually becomes concerned for his Jewish workforce after witnessing their persecution by the Nazis.', 'Schindlers List', TRUE ),
+(16, '2003-01-01', 'Gandalf and Aragorn lead the World of Men against Saurons army to draw his gaze from Frodo and Sam as they approach Mount Doom with the One Ring.', 'The Lord of the Rings: The Return of the King', TRUE),
+(17, '1996-01-01', 'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.', 'Pulp Fiction', TRUE),
+(18, '2001-01-01', 'A meek Hobbit from the Shire and eight companions set out on a journey to destroy the powerful One Ring and save Middle-earth from the Dark Lord Sauron.', 'The Lord of the Rings: The Fellowship of the Ring', TRUE),
+(19, '1966-01-01', 'A bounty hunting scam joins two men in an uneasy alliance against a third in a race to find a fortune in gold buried in a remote cemetery.', 'The Good, the Bad and the Ugly', TRUE),
+(20, '1994-01-01', 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.', 'The Shawshank Redemption', TRUE), 
+(1, '2001-01-01', "In a small town in Canada, Clara Callan reluctantly takes leave of her sister, 
+				Nora, who is bound for New York. Its a time when the growing threat of fascism in
+				Europe is a constant worry, and people escape from reality through radio and the 
+				movies. Meanwhile, the two sisters -- vastly different in personality, yet inextricably
+				linked by a shared past -- try to find their places within the complex web of social 
+				expectations for young women in the 1930s.",
+				'Clara Callan: A novel',
+				1),
+(2, '1991-01-01', "A Chinese immigrant who is convinced she is dying threatens to celebrate the Chinese New
+				Year by unburdening herself of everybody's hidden truths, thus prompting a series of comic 
+				misunderstandings",
+				"The Kitchen God's Wife",
+				1
+				),
+(3, '1999-01-01', "A suicidal billionaire, a burnt-out Washington litigator, and a woman who has forsaken 
+				  technology to work in the wilds of Brazil are all brought together by an astounding 
+				  mystery of the testament",
+				  "The Testament",
+				  1
+				  ),
+(4, '1994-01-01', "Staring unflinchingly into the abyss of slavery, this novel transforms history
+				 into a story as powerful as Exodus and as intimate as a lulaby.",
+				 "Beloved",
+				 1
+				 ),
+(5, '1999-01-01', "The staff of The Onion presents a satirical collection of mock headlines and news stories,
+				 including an account of the Pentagon's development of an A-bomb-resistant desk for 
+				schoolchildren",
+				"Our Dumb Century: The Onion Presents 100 Years of Headlines from America's Finest News Source",
+				1),
+(6, '2001-01-01', "In New Vegetarian Celia Brooks Brown presents an innovative approach to vegetarian cooking. 
+				  There's practical advice on how to choose and prepare the major vegetarian ingredients, 
+				  followed by 50 original, stylish recipes, all photographed by Philip Webb.",
+				  "New Vegetarian: Bold and Beautiful Recipes for Every Occasion",
+				  1
+				  ),
+(7, '2004-01-01', "Wild animus is a search for the primordial, a test of human foundations and a journey to the breaking point.",
+				"Wild Animus",
+				1),
+(8, '1997-01-01', "A fatal mid-air collision involving a commercial airliner prompts a frantic, desperate investigation into the 
+				causes of the accident, in a thriller exploring the issue of safety and security in the aircraft industry",
+				"Airframe",
+				1
+				),
+(9, '2000-01-01', "Using a quantum time machine, a group of young historians is sent back to the year 1357 to rescue their 
+				  trapped project leader.",
+				  "Timeline",
+				  1),
+(10, '2003-01-01', "Five American expatriates living in Budapest in the early 1990s seek to establish themselves and make 
+				   their fortunes in a city still haunted by the tragedies of its Communist past. A first novel. Reader's
+				   Guide included. Reprint. 100,000 first printing.",
+				   "Prague : A Novel",
+					1);
+
+
+
+
