@@ -16,27 +16,43 @@ const db = mysql.createConnection({
 
 const PORT_NUM = 5001;
 
-//PLACE API REQUESTs here
-//Create routes
+app.post("/addUser", (req, res) => {
+  // This user needs to be populated dynamically
+  const user = {
+    email: "abc@123.com",
+    user_password: "abc",
+    card_no: 123123123,
+    first_name: "Himika",
+    last_name: "Dastidar",
+  };
 
-// The following is an example write to a db
-// app.post("/add", (req, res) => {
-//   const title = req.body.title;
-//   const author = req.body.title;
+  var sql_query =
+    "INSERT INTO library_user (card_no, first_name, last_name, email, user_password)\
+    VALUES(?, ?, ?, ?, ?)";
+  var user_arr = [
+    user.card_no,
+    user.first_name,
+    user.last_name,
+    user.email,
+    user.user_password,
+  ];
 
-//   // !!!!!please note this DB does not exist yet and will not work!!!!!!
-//   db.query(
-//     "INSERT INTO books  (title, author) VALUES (?,?)",
-//     [title, author],
-//     (err, result) => {
-//       if (err) {
-//         console.log(err);
-//       } else {
-//         res.send(200, OK);
-//       }
-//     }
-//   );
-// });
+  db.query(sql_query, user_arr, function (err, result) {
+    if (err) {
+      res.send({
+        code: 400,
+        status: err,
+      });
+      db.end();
+    } else {
+      console.log(result);
+      res.send({
+        code: 200,
+        status: ok,
+      });
+    }
+  });
+});
 
 // This is a test endpoint and can be removed after actual endpoints have been
 // introduced. Testing that frontend talks to backend
