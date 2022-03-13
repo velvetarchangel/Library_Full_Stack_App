@@ -1,13 +1,13 @@
 // Entrypoint for the server
 const http = require("http");
 const express = require("express");
+const bodyparser = require("body-parser");
 const app = express();
-const path = require("path");
 var cors = require("cors");
 const mysql = require("mysql");
 
 app.use(cors());
-// app.use(express.static(path.join(__dirname, "../my-app/build")));
+app.use(bodyparser.json());
 
 const db = mysql.createConnection({
   user: "root",
@@ -18,9 +18,41 @@ const db = mysql.createConnection({
 
 const PORT_NUM = 5001;
 
-//place holder data
-const users = [{ id: 1, name: "Himika" }];
+/**
+ * Get user endpoint where user is able to login using their email and password
+ * Request body passes in email and password from the front end and queries the DB
+ * If there is an user with the email password combination the user object is retured
+ * back to the front end to be utilized downstream
+ */
+app.post("/getUser", async (req, res) => {
+  let body = req.body;
+  // run sql query
+  var sql_query = `SELECT * FROM library_user WHERE email='${body.email}' AND user_password='${body.password}'`;
+  db.query(sql_query, function (err, result) {
+    if (err || result.length == 0) {
+      res.send({
+        code: 400,
+        status: "Incorrect email or password",
+      });
+    } else {
+      let user = {
+        card_no: result[0]["card_no"],
+        first_name: result[0]["first_name"],
+        last_name: result[0]["last_name"],
+      };
+      res.send({
+        code: 200,
+        user,
+      });
+    }
+  });
+});
 
+/**
+ * Add user endpoint where user is able to signup using their name, email and password.
+ * A random 10 digit library card is generated for them.
+ * Endpoint to be used with Signup in the front end.
+ */
 app.post("/addUser", (req, res) => {
   // This user needs to be populated dynamically
   const user = {
@@ -56,18 +88,6 @@ app.post("/addUser", (req, res) => {
     }
   });
 });
-
-// app.get("/books", (req, res) => {
-//   books = [];
-//   db.query("SELECT * FROM library.book", function (err, result, fields) {
-//     if (err) throw err;
-//     for (let i = 0; i < result.length(); i++) {
-//       books.push(result[i]["item_id"]);
-//     }
-
-//     console.log(books);
-//   });
-// });
 
 // This is a test endpoint and can be removed after actual endpoints have been
 // introduced. Testing that frontend talks to backend

@@ -32,12 +32,7 @@
           @click:append="show1 = !show1"
         ></v-text-field>
 
-        <v-btn
-          :disabled="!valid"
-          color="success"
-          class="mr-4"
-          @click="validate"
-        >
+        <v-btn :disabled="!valid" color="success" class="mr-4" @click="login()">
           Login
         </v-btn>
 
@@ -48,7 +43,7 @@
 </template>
 
 <script>
-import { testAPI } from "../services/apiServices";
+import { testAPI, getUserByEmailAndPassword } from "../services/apiServices";
 export default {
   name: "Login",
   data: () => ({
@@ -56,10 +51,6 @@ export default {
     valid: true,
     password: "",
     show1: false,
-    nameRules: [
-      (v) => !!v || "Name is required",
-      (v) => (v && v.length <= 10) || "Name must be less than 10 characters",
-    ],
     email: "",
     emailRules: [
       (v) => !!v || "E-mail is required",
@@ -79,17 +70,24 @@ export default {
 
   methods: {
     // this is a test function and must be removed when actual
-    // functionality is imple
+    // functionality is implented
     async testAPI() {
       await testAPI().then((response) => {
         this.apiRes = response;
-        console.log(this.apiRes);
+      });
+    },
+
+    async login() {
+      let user = { email: this.email, password: this.password };
+      await getUserByEmailAndPassword(user).then((response) => {
+        user = response.data.user; //update the user information
+        console.log(user);
+        this.$router.push(`profile/${user.card_no}`);
       });
     },
 
     validate() {
       this.$refs.form.validate();
-      // write a function where it talks to the API to log in
     },
     goToSignup() {
       this.$router.push("/signup");
