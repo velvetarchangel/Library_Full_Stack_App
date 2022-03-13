@@ -1,19 +1,20 @@
 import { Component } from "react";
+import { Router, Routes, Route } from "react-router-dom";
 import "./App.css";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = { apiResponse: "" };
   }
-
   callAPI() {
     fetch("http://localhost:5001/testAPI")
       .then((res) => res.text())
       .then((res) => this.setState({ apiResponse: res }))
       .catch((err) => err);
   }
-
   componentWillMount() {
     this.callAPI();
   }
@@ -21,10 +22,23 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">{this.state.apiResponse}</p>
+        <div>
+          <p>Please choose a repository from the list below.</p>
+          <ul>
+            <li>
+              <Router>
+                <Routes>
+                  <Route path="/login" element={<Login />}>
+                    Login
+                  </Route>
+                  <Route path="/signup" element={<Signup />}>
+                    Signup
+                  </Route>
+                </Routes>
+              </Router>
+            </li>
+          </ul>
+        </div>
       </div>
     );
   }

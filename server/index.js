@@ -6,15 +6,22 @@ var cors = require("cors");
 const mysql = require("mysql");
 
 app.use(cors());
+app.use(express.static(path.join(__dirname, "../my-app/build")));
+
+const test = "hey this is from the server :)";
 
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
-  password: "YOUR_PASSWORD",
-  database: "librarySystem",
+  password: "mysqlpassword",
+  database: "library",
 });
 
 const PORT_NUM = 5001;
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../my-app/build/index.html"));
+});
 
 app.post("/addUser", (req, res) => {
   // This user needs to be populated dynamically
@@ -43,9 +50,7 @@ app.post("/addUser", (req, res) => {
         code: 400,
         status: err,
       });
-      db.end();
     } else {
-      console.log(result);
       res.send({
         code: 200,
         status: ok,
@@ -54,10 +59,23 @@ app.post("/addUser", (req, res) => {
   });
 });
 
+// app.get("/books", (req, res) => {
+//   books = [];
+//   db.query("SELECT * FROM library.book", function (err, result, fields) {
+//     if (err) throw err;
+//     for (let i = 0; i < result.length(); i++) {
+//       books.push(result[i]["item_id"]);
+//     }
+
+//     console.log(books);
+//   });
+// });
+
 // This is a test endpoint and can be removed after actual endpoints have been
 // introduced. Testing that frontend talks to backend
-app.use("/testAPI", (req, res) => {
-  res.send("API is working correctly");
+app.get("/testAPI", (req, res) => {
+  console.log("testAPI endpoint called");
+  res.json("API is connected to frontend");
 });
 
 // Start the server on port 5000
