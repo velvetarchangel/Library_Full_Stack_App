@@ -2,13 +2,12 @@
 const http = require("http");
 const express = require("express");
 const app = express();
+const path = require("path");
 var cors = require("cors");
 const mysql = require("mysql");
 
 app.use(cors());
-app.use(express.static(path.join(__dirname, "../my-app/build")));
-
-const test = "hey this is from the server :)";
+// app.use(express.static(path.join(__dirname, "../my-app/build")));
 
 const db = mysql.createConnection({
   user: "root",
@@ -19,9 +18,8 @@ const db = mysql.createConnection({
 
 const PORT_NUM = 5001;
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../my-app/build/index.html"));
-});
+//place holder data
+const users = [{ id: 1, name: "Himika" }];
 
 app.post("/addUser", (req, res) => {
   // This user needs to be populated dynamically
@@ -44,7 +42,7 @@ app.post("/addUser", (req, res) => {
     user.user_password,
   ];
 
-  db.query(sql_query, user_arr, function (err, result) {
+  db.query(sql_query, user_arr, function (err) {
     if (err) {
       res.send({
         code: 400,
@@ -74,8 +72,7 @@ app.post("/addUser", (req, res) => {
 // This is a test endpoint and can be removed after actual endpoints have been
 // introduced. Testing that frontend talks to backend
 app.get("/testAPI", (req, res) => {
-  console.log("testAPI endpoint called");
-  res.json("API is connected to frontend");
+  res.json("testAPI is working");
 });
 
 // Start the server on port 5000

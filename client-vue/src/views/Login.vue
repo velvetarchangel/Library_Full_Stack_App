@@ -10,7 +10,7 @@
   >
     <v-card>
       <v-card-title align-middle class="center accent white--text">
-        Login Form
+        Login
       </v-card-title>
       <v-form ref="form" v-model="valid" lazy-validation>
         <v-text-field
@@ -46,6 +46,7 @@
     </v-card>
   </v-container>
 </template>
+
 <script>
 import { testAPI } from "../services/apiServices";
 export default {
@@ -72,10 +73,17 @@ export default {
     select: null,
   }),
 
+  created: function () {
+    this.testAPI();
+  },
+
   methods: {
-    testAPI() {
-      testAPI().then((response) => {
+    // this is a test function and must be removed when actual
+    // functionality is imple
+    async testAPI() {
+      await testAPI().then((response) => {
         this.apiRes = response;
+        console.log(this.apiRes);
       });
     },
 
@@ -89,9 +97,6 @@ export default {
     resetValidation() {
       this.$refs.form.resetValidation();
     },
-  },
-  mounted() {
-    this.testAPI();
   },
 };
 </script>

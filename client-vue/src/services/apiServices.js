@@ -1,6 +1,8 @@
 export async function testAPI() {
-  const response = fetch(`/api/testAPI`);
-  return await response;
+  const test = await fetch(`http://localhost:5001/testAPI`).then((response) =>
+    response.json()
+  );
+  return await test;
 }
 
 export async function getAllBooks() {
