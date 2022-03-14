@@ -242,8 +242,8 @@ CREATE TABLE registers (
 
 CREATE TABLE lib_events (
 	event_id INT AUTO_INCREMENT PRIMARY KEY,
-    event_name VARCHAR(50), -- 50 for now
-    start_date DATE,
+    event_name VARCHAR(100), -- 100 for now
+    event_start_date DATE,
     end_date DATE, 
     start_time TIME, 
     end_time TIME
@@ -260,8 +260,8 @@ CREATE TABLE event_location (
 
 CREATE TABLE branch (
 	branch_id INT AUTO_INCREMENT PRIMARY KEY,
-    branch_name VARCHAR(50),
-    branch_address VARCHAR(50)
+    branch_name VARCHAR(100),
+    branch_address VARCHAR(100)
 );
 
 CREATE TABLE has_for_branch_and_item (
@@ -481,6 +481,44 @@ VALUES
 				   "Prague : A Novel",
 					1);
 
+INSERT INTO branch(branch_id, branch_name, branch_address)
+VALUES
+(1, 'Central Library', '800 3 St SE, Calgary, AB T2G 2E7'),
+(2, 'Fish Creek Library', '11161 Bonaventure Dr SE, Calgary, AB T2J 6S1'),
+(3, 'Shawnessy Library', '333 Shawville Blvd SE, Calgary, AB T2Y 4H3'),
+(4, 'Seton Library', '4995 Market St SE, Calgary, AB T3M 2P9'),
+(5, 'Bowness Library', '6532 Bowness Rd NW, Calgary, AB T3B 0E8'),
+(6, 'Nose Hill Library', '1530 Northmount Dr NW, Calgary, AB T2L 0G6'),
+(7, 'Crowfoot Library', '8665 Nose Hill Dr NW, Calgary, AB T3G 5T3'),
+(8, 'Louise Riley Library', '1904 14 Ave NW, Calgary, AB T2N 1M5'),
+(9, 'Judith Umbach Library', '6617 Centre St N, Calgary, AB T2K 4Y5');
 
 
+INSERT INTO lib_events (event_id, event_name, event_start_date, end_date, start_time, end_time)
+VALUES
+(1234, 'Family Storytime', '2020-01-21', '2020-01-21', '14:00:00', '13:00:00'),
+(1235, 'Career Basics: Interview skills', '2021-06-11', '2021-06-11', '12:00:00', '14:00:00'),
+(1236, 'Creative Writing', '2022-04-13', '2022-04-13', '10:00:00', '13:00:00'),
+(1237, 'Digital Literacy', '2022-04-13', '2022-04-13', '10:00:00', '13:00:00'),
+(1238, 'Author Meet and Greet', '2022-04-13', '2022-04-13', '10:00:00', '13:00:00'),
+(1239, 'Family Storytime', '2022-05-08', '2022-05-08', '13:00:00', '14:00:00'),
+(1240, 'Drop In Drawing', '2023-02-10', '2023-02-10', '15:00:00', '18:00:00'),
+(1241, 'Drop in Drawing', '2023-02-11', '2023-02-11', '15:00:00', '18:00:00'),
+(1242, 'Book Discussion: The Lord Of the Rings', '2022-08-03', '2022-08-03', '17:00:00', '21:00:00'),
+(1243, 'Making Comics: Getting Started', '2024-04-27', '2024-04-27', '16:00:00', '19:00:00');
+
+
+
+INSERT INTO event_location (event_id, e_location)
+VALUES
+(1234, 'Central Library'),
+(1235, 'ONLINE'),
+(1236, 'Fish Creek Library'),
+(1237, 'Shawnessy Library'),
+(1238, 'Bowness Library'),
+(1239, 'Nose Hill Library'),
+(1240, 'Seton Library'),
+(1241, 'Crowfoot Library'),
+(1242, 'Louise Riley Library'),
+(1243, 'Judith Umbach Library');
 
