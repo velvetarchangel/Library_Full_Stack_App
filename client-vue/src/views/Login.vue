@@ -25,9 +25,10 @@
           :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
           :rules="[passwordRules.required, passwordRules.min]"
           :type="show1 ? 'text' : 'password'"
+          :error-messages="errormessage"
           name="input-10-1"
           label="Type your password here"
-          hint="At least 8 characters"
+          hint="At least 3 characters"
           counter
           @click:append="show1 = !show1"
         ></v-text-field>
@@ -50,6 +51,7 @@ export default {
     apiRes: null,
     valid: true,
     password: "",
+    errormessage: "",
     show1: false,
     email: "",
     emailRules: [
@@ -80,9 +82,14 @@ export default {
     async login() {
       let user = { email: this.email, password: this.password };
       await getUserByEmailAndPassword(user).then((response) => {
-        user = response.data.user; //update the user information
-        console.log(user);
-        this.$router.push(`profile/${user.card_no}`);
+        if (response.data.status == 200) {
+          user = response.data.user; //update the user information
+          console.log(user);
+          this.$router.push(`profile/${user.card_no}`);
+        } else {
+          this.errormessage = response.data.message;
+          this.resetValidation();
+        }
       });
     },
 
