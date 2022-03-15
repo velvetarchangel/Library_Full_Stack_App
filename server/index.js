@@ -5,6 +5,7 @@ const bodyparser = require("body-parser");
 const app = express();
 var cors = require("cors");
 const mysql = require("mysql");
+const res = require("express/lib/response");
 
 app.use(cors());
 app.use(bodyparser.json());
@@ -18,6 +19,7 @@ const db = mysql.createConnection({
 
 const PORT_NUM = 5001;
 
+var library_users = [];
 /**
  * Get user endpoint where user is able to login using their email and password
  * Request body passes in email and password from the front end and queries the DB
@@ -54,14 +56,22 @@ app.post("/getUser", async (req, res) => {
  * Endpoint to be used with Signup in the front end.
  */
 app.post("/addUser", (req, res) => {
-  // This user needs to be populated dynamically
-  const user = {
-    email: "abc@123.com",
-    user_password: "abc",
-    card_no: 123123123,
-    first_name: "Himika",
-    last_name: "Dastidar",
-  };
+  var user = req.body;
+  var all_cards = [];
+  var card_query = `SELECT card_no FROM library_user`;
+  db.query(card_query, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        all_cards.push(parseInt(result[i]["card_no"]));
+      }
+      let max_card_no = Math.max(...all_cards);
+      user["card_no"] = (max_card_no + 1).toString();
+    }
+  });
+
+  console.log(user);
 
   var sql_query =
     "INSERT INTO library_user (card_no, first_name, last_name, email, user_password)\
@@ -84,6 +94,7 @@ app.post("/addUser", (req, res) => {
       res.send({
         code: 200,
         status: ok,
+        user,
       });
     }
   });
