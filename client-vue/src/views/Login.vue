@@ -3,7 +3,7 @@
     fluid
     style="
       margin: 0 auto 0 auto;
-      padding: 0px;
+      padding: 50px;
       max-width: 800px;
       width: 90% !important;
     "

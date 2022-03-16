@@ -3,7 +3,7 @@
     fluid
     style="
       margin: 0 auto 0 auto;
-      padding: 0px;
+      padding: 10 px;
       max-width: 800px;
       width: 90% !important;
     "
@@ -12,7 +12,7 @@
       <v-card-title align-middle class="center accent white--text">
         Sign Up
       </v-card-title>
-      <form>
+      <v-form ref="form" v-model="valid" lazy-validation>
         <v-container fluid style="margin: 0 auto 0 auto; width: 90%">
           <v-row justify="center">
             <v-col cols="12" sm="10">
@@ -97,7 +97,7 @@
             </v-col>
           </v-row>
         </v-container>
-      </form>
+      </v-form>
     </v-card>
   </v-container>
 </template>
@@ -132,9 +132,13 @@ export default {
     };
   },
   methods: {
+    resetValidation() {
+      this.$refs.form.resetValidation();
+    },
     async signUp() {
       if (this.email == "" || this.password == "") {
         this.errormessage = "Email and password required";
+        this.resetValidation();
       } else {
         let newUser = {
           first_name: this.first_name,
@@ -158,3 +162,8 @@ export default {
   },
 };
 </script>
+<style scoped>
+.v-text-field--outlined >>> fieldset {
+  border-width: medium !important;
+}
+</style>
