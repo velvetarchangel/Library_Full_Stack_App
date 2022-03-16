@@ -141,8 +141,9 @@ export default {
       };
 
       await createUser(newUser).then((response) => {
-        if (response.data.status == 200) {
+        if (response.status == 200) {
           newUser = response.data.user;
+          console.log("inside 200");
           this.$router.push(`profile/${newUser.card_no}`);
         } else {
           this.errormessage = response.data.message;

@@ -84,7 +84,6 @@ export default {
       await getUserByEmailAndPassword(user).then((response) => {
         if (response.data.status == 200) {
           user = response.data.user; //update the user information
-          console.log(user);
           this.$router.push(`profile/${user.card_no}`);
         } else {
           this.errormessage = response.data.message;
