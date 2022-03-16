@@ -83,7 +83,7 @@
                   color="accent"
                   width="100%"
                   margin-bottom="1em"
-                  :disabled="!isValid"
+                  :disabled="!valid"
                   @click="signUp()"
                 >
                   Sign Up
@@ -114,7 +114,7 @@ export default {
       password: "",
       checkpassword: "",
       passwordVisible: false,
-      isValid: true,
+      valid: true,
       errormessage: "",
       emailrules: [
         (v) =>
@@ -133,22 +133,27 @@ export default {
   },
   methods: {
     async signUp() {
-      let newUser = {
-        first_name: this.first_name,
-        last_name: this.last_name,
-        email: this.email,
-        user_password: this.password,
-      };
+      if (this.email == "" || this.password == "") {
+        this.errormessage = "Email and password required";
+      } else {
+        let newUser = {
+          first_name: this.first_name,
+          last_name: this.last_name,
+          email: this.email,
+          user_password: this.password,
+        };
 
-      await createUser(newUser).then((response) => {
-        if (response.status == 200) {
-          newUser = response.data.user;
-          console.log("inside 200");
-          this.$router.push(`profile/${newUser.card_no}`);
-        } else {
-          this.errormessage = response.data.message;
-        }
-      });
+        await createUser(newUser).then((response) => {
+          if (response.status == 200) {
+            newUser = response.data.user;
+            if (response.data.status == 400) {
+              this.errormessage = response.data.message;
+            } else {
+              this.$router.push(`profile/${newUser.card_no}`);
+            }
+          }
+        });
+      }
     },
   },
 };

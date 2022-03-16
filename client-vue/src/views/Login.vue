@@ -80,6 +80,7 @@ export default {
     },
 
     async login() {
+      this.validate();
       let user = { email: this.email, password: this.password };
       await getUserByEmailAndPassword(user).then((response) => {
         if (response.data.status == 200) {
