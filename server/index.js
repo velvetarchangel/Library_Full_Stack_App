@@ -11,7 +11,7 @@ app.use(bodyparser.json());
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
-  password: "mysqlpassword",
+  password: "password1!",
   database: "library",
 });
 
@@ -127,6 +127,98 @@ app.post("/addUser", (req, res) => {
 app.get("/testAPI", (req, res) => {
   res.json("testAPI is working");
 });
+
+
+//himika 
+app.post("/sendFeedback", (req, res) => {
+ //figure out if reply
+});
+
+//himika 
+app.get("/getFeedback", (req, res) => {
+
+});
+
+//next 2 are lower priority
+app.get("/getFines", (req, res) => {
+
+});
+
+app.post("/payFines", (req, res) => {
+//really simple/dummy
+});
+
+//these 2 are similar
+//kelly
+app.post("/signoutItem", (req, res) => {
+
+});
+
+//kelly
+app.post("/placeHold", (req, res) => {
+
+});
+
+//kelly
+app.get("/getCheckedOutItems", (req, res) => {
+
+});
+
+//kelly
+app.get("/getCurrentHolds", (req, res) => {
+
+});
+
+//eric 
+app.put("/returnItems", (req, res) => {
+
+});
+//eric 
+app.post("/userRegistersEvents", (req, res) => {
+
+});
+//eric 
+app.post("/createEvent", (req, res) => {
+
+});
+
+//eric
+app.put("/updateItemQuantityForBranch", (req, res) => {
+//condition to check if preferred branch has items available, else update for different branch with item 
+});
+//eric 
+app.put("/addItem", (req, res) => {
+//condition if item exists in db yet 
+});
+
+//himika (searching)
+app.get("/searchTitle", (req, res) => {
+
+});
+
+//tbd
+app.get("/searchAuthor", (req, res) => {
+
+});
+
+app.get("/searchDirector", (req, res) => {
+
+});
+
+app.get("/searchActor", (req, res) => {
+
+});
+
+//kelly 
+app.get("/users", (req, res) => {
+//sees all the users and their records/ actual info. json object
+});
+
+//kelly
+app.get("/itemRecord", (req, res) => {
+//information on who has checked out a particular item
+});
+
 
 // Start the server on port 5000
 app.listen(PORT_NUM, () => {
