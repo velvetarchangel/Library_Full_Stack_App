@@ -11,7 +11,7 @@ app.use(bodyparser.json());
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
-  password: "password1!",
+  password: "mysqlpassword",
   database: "library",
 });
 
@@ -23,7 +23,7 @@ const PORT_NUM = 5001;
  * If there is an user with the email password combination the user object is retured
  * back to the front end to be utilized downstream
  */
-app.post("/getUser", async (req, res) => {
+app.get("/getUser", async (req, res) => {
   let body = req.body;
   // run sql query
   var sql_query = `SELECT * FROM library_user WHERE email='${body.email}' AND user_password='${body.password}'`;
@@ -103,7 +103,7 @@ app.post("/addUser", (req, res) => {
         }
       });
 
-      console.log(user);
+      // console.log(user);
       var library_record_query =
         "INSERT INTO library_record (card_no, fines) VALUES (?, ?)";
       var lib_rec = [user.card_no, 0];
@@ -128,97 +128,128 @@ app.get("/testAPI", (req, res) => {
   res.json("testAPI is working");
 });
 
+/**
+ * Add feedback endpoint where user is able to add feedback based on a particular item_id
+ * and provide an optional comment
+ * Request body passes in user_rating, item_id, card_no, comment and the feedback table is updated
+ * if the comment is not null then the comments table is also updated.
+ */
+app.post("/sendFeedback", async (req, res) => {
+  var user_rating = req.body.user_rating;
+  var item_id = req.body.item_id;
+  var card_no = req.body.card_no;
+  var u_comment = req.body.u_comment;
 
-//himika 
-app.post("/sendFeedback", (req, res) => {
- //figure out if reply
+  var all_feedbackIds = [];
+  var getAllFeedback = `SELECT * FROM feedback`;
+  var feedback_query = `INSERT INTO feedback (card_no, feedback_id, user_rating, item_id) VALUES(?, ?, ?, ?)`;
+  db.query(getAllFeedback, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      var maxFeedbackId;
+      if (result.length == 0) maxFeedbackId = 1;
+      else {
+        for (let i = 0; i < result.length; i++) {
+          all_feedbackIds.push(parseInt(result[i]["feedback_id"]));
+        }
+        maxFeedbackId = Math.max(...all_feedbackIds) + 1;
+      }
+
+      var feedbackBody = [card_no, maxFeedbackId, user_rating, item_id];
+      db.query(feedback_query, feedbackBody, function (err) {
+        if (err) {
+          res.status(400);
+          res.send({
+            message: err,
+          });
+        } else {
+          res.status(200);
+          // res.send({ feedbackBody });
+          if (u_comment == "") {
+            res.send({ feedbackBody });
+          }
+        }
+      });
+
+      if (u_comment != "") {
+        var update_comment_query = `INSERT into user_comments (card_no, feedback_id, u_comment, item_id) VALUES (?, ?, ?, ?)`;
+        var commentBody = [card_no, maxFeedbackId, u_comment, item_id];
+
+        db.query(update_comment_query, commentBody, function (err) {
+          if (err) {
+            res.status(400);
+            res.send({
+              message: err,
+            });
+          } else {
+            res.status(200);
+            res.send({ commentBody });
+          }
+        });
+      }
+    }
+  });
 });
 
-//himika 
-app.get("/getFeedback", (req, res) => {
-
-});
+//himika
+app.get("/feedback/:itemId", (req, res) => {});
 
 //next 2 are lower priority
-app.get("/getFines", (req, res) => {
-
-});
+app.get("/getFines", (req, res) => {});
 
 app.post("/payFines", (req, res) => {
-//really simple/dummy
+  //really simple/dummy
 });
 
 //these 2 are similar
 //kelly
-app.post("/signoutItem", (req, res) => {
-
-});
+app.post("/signoutItem", (req, res) => {});
 
 //kelly
-app.post("/placeHold", (req, res) => {
-
-});
+app.post("/placeHold", (req, res) => {});
 
 //kelly
-app.get("/getCheckedOutItems", (req, res) => {
-
-});
+app.get("/getCheckedOutItems", (req, res) => {});
 
 //kelly
-app.get("/getCurrentHolds", (req, res) => {
+app.get("/getCurrentHolds", (req, res) => {});
 
-});
-
-//eric 
-app.put("/returnItems", (req, res) => {
-
-});
-//eric 
-app.post("/userRegistersEvents", (req, res) => {
-
-});
-//eric 
-app.post("/createEvent", (req, res) => {
-
-});
+//eric
+app.put("/returnItems", (req, res) => {});
+//eric
+app.post("/userRegistersEvents", (req, res) => {});
+//eric
+app.post("/createEvent", (req, res) => {});
 
 //eric
 app.put("/updateItemQuantityForBranch", (req, res) => {
-//condition to check if preferred branch has items available, else update for different branch with item 
+  //condition to check if preferred branch has items available, else update for different branch with item
 });
-//eric 
+//eric
 app.put("/addItem", (req, res) => {
-//condition if item exists in db yet 
+  //condition if item exists in db yet
 });
 
 //himika (searching)
-app.get("/searchTitle", (req, res) => {
-
-});
+app.get("/searchTitle", (req, res) => {});
 
 //tbd
-app.get("/searchAuthor", (req, res) => {
+app.get("/searchAuthor", (req, res) => {});
 
-});
+app.get("/searchDirector", (req, res) => {});
 
-app.get("/searchDirector", (req, res) => {
+app.get("/searchActor", (req, res) => {});
 
-});
-
-app.get("/searchActor", (req, res) => {
-
-});
-
-//kelly 
+//kelly
 app.get("/users", (req, res) => {
-//sees all the users and their records/ actual info. json object
+  //sees all the users and their records/ actual info. json object
 });
 
 //kelly
 app.get("/itemRecord", (req, res) => {
-//information on who has checked out a particular item
+  //information on who has checked out a particular item
 });
-
 
 // Start the server on port 5000
 app.listen(PORT_NUM, () => {
