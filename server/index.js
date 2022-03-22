@@ -192,8 +192,35 @@ app.post("/sendFeedback", async (req, res) => {
   });
 });
 
-//himika
-app.get("/feedback/:itemId", (req, res) => {});
+/**
+ * Get feedback endpoint where user is able to get feedback based on a particular item_id
+ * URL param passes item_id and feedback (comment and rating) is returned by card_no
+ */
+app.get("/feedback/:itemId", (req, res) => {
+  // console.log(req.params);
+  var itemFeedback = {};
+  var feedback_query = `SELECT DISTINCT * from feedback as f, user_comments as u
+                        WHERE
+                        (f.item_id = u.item_id AND f.feedback_id = u.feedback_id AND
+                        u.item_id = ${req.params.itemId})`;
+
+  db.query(feedback_query, function (err, result) {
+    if (err) {
+      res.status(500);
+      res.send(err);
+    } else {
+      // console.log(result);
+      for (let i = 0; i < result.length; i++) {
+        var card_no = result[i].card_no;
+        var comment = result[i].u_comment;
+        var user_rating = result[i].user_rating;
+        itemFeedback[card_no] = { comment, user_rating };
+      }
+    }
+    res.status(200);
+    res.send(itemFeedback);
+  });
+});
 
 //next 2 are lower priority
 app.get("/getFines", (req, res) => {});
