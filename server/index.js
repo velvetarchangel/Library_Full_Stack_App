@@ -177,8 +177,78 @@ app.put("/returnItems", (req, res) => {
 app.post("/userRegistersEvents", (req, res) => {
 
 });
-//eric 
+/**
+ * create event endpoint where a librarian is able to add events to the database. 
+ * CURRENT IMPLEMENTATION: The librarian needs to add a unique event ID as they are entering events to the database; 
+ * this is because there can be multiple events with the same name and we need a way to identify these. 
+ */
 app.post("/createEvent", (req, res) => {
+  var all_events = []; 
+  var event_query = `SELECT * FROM lib_events`;
+  db.query(event_query, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        all_events.push(parseInt(result[i]["event_id"]));
+      }
+    }
+    // check if event is unique based on item name
+    if (all_events.includes(req.body.event_id)) {
+      res.send({
+        status: 400,
+        message: "Item already exists in database",
+      });
+    } else {
+      var event_to_add = { //event to add to object
+        event_id: req.body.event_id,
+        event_name: req.body.event_name,
+        event_start_date: req.body.event_start_date,
+        end_date: req.body.end_date,
+        start_time: req.body.start_time,
+        end_time: req.body.end_time,
+      };
+
+      var sql_query =
+        "INSERT INTO lib_events (event_id, event_name, event_start_date, end_date, start_time, end_time) VALUES(?, ?, ?, ?, ?, ?);";
+      var event_arr = [
+        event_to_add.event_id,
+        event_to_add.event_name,
+        event_to_add.event_start_date,
+        event_to_add.end_date,
+        event_to_add.start_time,
+        event_to_add.end_time,
+      ];
+      db.query(sql_query, event_arr, function (err) {
+        if (err) {
+          res.status(400);
+          res.send({
+            message: err,
+          });
+        } else {
+          res.status(200);
+        }
+      });
+      console.log(event_to_add);
+
+      var event_location_query =
+      "INSERT INTO event_location (event_id, e_location) VALUES (?, ?)";
+    var event__location_rec = [event_to_add.event_id, req.body.e_location];
+    db.query(event_location_query, event__location_rec, function (err) {
+      if (err) {
+        res.status(400);
+        res.send({
+          message: err,
+        });
+      } else {
+        res.status(200);
+        res.send({ user });
+      }
+    });
+     
+      
+    }
+  });
 
 });
 
@@ -186,9 +256,115 @@ app.post("/createEvent", (req, res) => {
 app.put("/updateItemQuantityForBranch", (req, res) => {
 //condition to check if preferred branch has items available, else update for different branch with item 
 });
-//eric 
+
+
+/**
+ * add item endpoint where a librarian is able to add items to the database. 
+ * minimal attributes needed (from item superclass): item name, item description, item release date.  
+ * IMPORTANT: each item added will need 2 fields with imdb and isbn values; 1 of these will be null (string type) depending on item type
+ * corresponding item types (book or movie) will also have fields that are specific to their type eg. isbn, imdb, etc.
+ * 
+ * This checks whether an item with the same name is inserted to the database yet, and if not, it will add it to the item database and 
+ * it will also be added to the movie/book database depending on the type of the item. 
+*/
 app.put("/addItem", (req, res) => {
-//condition if item exists in db yet 
+
+  var all_items = []; 
+  var all_item_name = []; 
+  var item_query = `SELECT * FROM item`;
+  db.query(item_query, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        all_items.push(parseInt(result[i]["item_id"]));
+        all_item_name.push(result[i]["item_name"]);
+      }
+    }
+    // check if item is unique based on item name
+    if (all_item_name.includes(req.body.item_name)) {
+      res.send({
+        status: 400,
+        message: "Item already exists in database",
+      });
+    } else {
+      // Generate a item id
+      var max_id = Math.max(...all_items) + 1;
+      var item_to_add = { //item to add object
+        item_name: req.body.item_name,
+        item_desc: req.body.item_desc,
+        release_date: req.body.release_date,
+        item_availability: 1,
+        item_id: max_id,
+      };
+
+      var sql_query =
+        "INSERT INTO item (item_id, release_date, item_desc, item_name, item_availability) VALUES(?, ?, ?, ?, ?);";
+      var item_arr = [
+        item_to_add.item_id,
+        item_to_add.release_date,
+        item_to_add.item_desc,
+        item_to_add.item_name,
+        item_to_add.item_availability,
+      ];
+      db.query(sql_query, item_arr, function (err) {
+        if (err) {
+          res.status(400);
+          res.send({
+            message: err,
+          });
+        } else {
+          res.status(200);
+        }
+      });
+      console.log(item_to_add);
+
+      //if item is a movie
+      if (req.body.isbn == 'null') { 
+        var movies_query =
+        "INSERT INTO movies (item_id, production_company, imdb_id, duration) VALUES (?, ?, ?, ?)";
+        var movie_rec = [
+          item_to_add.item_id, 
+          res.body.production_company,
+          req.body.imdb_id,
+          req.body.duration];
+         
+          db.query(movies_query, movie_rec, function (err) {
+            if (err) {
+              res.status(400);
+              res.send({
+                message: err,
+              });
+            } else {
+              res.status(200);
+              res.send({ item_to_add });
+            }
+          });
+      } 
+      
+      //if item is a book
+      else {
+      var books_query =
+        "INSERT INTO books (item_id, isbn, publisher_name, book_type) VALUES (?, ?, ?, ?)";
+        var book_rec = [
+          item_to_add.item_id, 
+          res.body.isbn,
+          req.body.publisher_name,
+          req.body.book_type];
+      db.query(books_query, book_rec, function (err) {
+        if (err) {
+          res.status(400);
+          res.send({
+            message: err,
+          });
+        } else {
+          res.status(200);
+          res.send({ item_to_add });
+        }
+      });
+      }
+    }
+  });
 });
 
 //himika (searching)
