@@ -242,7 +242,7 @@ app.post("/createEvent", (req, res) => {
         });
       } else {
         res.status(200);
-        res.send({ user });
+        res.send({ event_to_add });
       }
     });
      
