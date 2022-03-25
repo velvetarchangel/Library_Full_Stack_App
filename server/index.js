@@ -564,6 +564,7 @@ app.post("/addItem", (req, res) => {
       }
     }
   });
+}); //added this
 
 
 
