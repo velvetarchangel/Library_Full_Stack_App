@@ -242,7 +242,7 @@ app.get("/getCheckedOutItems", (req, res) => {});
 //kelly
 app.get("/getCurrentHolds", (req, res) => {});
 
-});
+//}); commented out
 
 
 //these next 2 endpoints will be TBD. Need to figure out the proper database implementation. 
