@@ -11,7 +11,7 @@ app.use(bodyparser.json());
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
-  password: "password1!",
+  password: "mysqlpassword",
   database: "library",
 });
 
@@ -23,7 +23,7 @@ const PORT_NUM = 5001;
  * If there is an user with the email password combination the user object is retured
  * back to the front end to be utilized downstream
  */
-app.post("/getUser", async (req, res) => {
+app.get("/getUser", async (req, res) => {
   let body = req.body;
   // run sql query
   var sql_query = `SELECT * FROM library_user WHERE email='${body.email}' AND user_password='${body.password}'`;
@@ -103,7 +103,7 @@ app.post("/addUser", (req, res) => {
         }
       });
 
-      console.log(user);
+      // console.log(user);
       var library_record_query =
         "INSERT INTO library_record (card_no, fines) VALUES (?, ?)";
       var lib_rec = [user.card_no, 0];
@@ -128,44 +128,119 @@ app.get("/testAPI", (req, res) => {
   res.json("testAPI is working");
 });
 
+/**
+ * Add feedback endpoint where user is able to add feedback based on a particular item_id
+ * and provide an optional comment
+ * Request body passes in user_rating, item_id, card_no, comment and the feedback table is updated
+ * if the comment is not null then the comments table is also updated.
+ */
+app.post("/sendFeedback", async (req, res) => {
+  var user_rating = req.body.user_rating;
+  var item_id = req.body.item_id;
+  var card_no = req.body.card_no;
+  var u_comment = req.body.u_comment;
 
-//himika 
-app.post("/sendFeedback", (req, res) => {
- //figure out if reply
+  var all_feedbackIds = [];
+  var getAllFeedback = `SELECT * FROM feedback`;
+  var feedback_query = `INSERT INTO feedback (card_no, feedback_id, user_rating, item_id) VALUES(?, ?, ?, ?)`;
+  db.query(getAllFeedback, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      var maxFeedbackId;
+      if (result.length == 0) maxFeedbackId = 1;
+      else {
+        for (let i = 0; i < result.length; i++) {
+          all_feedbackIds.push(parseInt(result[i]["feedback_id"]));
+        }
+        maxFeedbackId = Math.max(...all_feedbackIds) + 1;
+      }
+
+      var feedbackBody = [card_no, maxFeedbackId, user_rating, item_id];
+      db.query(feedback_query, feedbackBody, function (err) {
+        if (err) {
+          res.status(400);
+          res.send({
+            message: err,
+          });
+        } else {
+          res.status(200);
+          // res.send({ feedbackBody });
+          if (u_comment == "") {
+            res.send({ feedbackBody });
+          }
+        }
+      });
+
+      if (u_comment != "") {
+        var update_comment_query = `INSERT into user_comments (card_no, feedback_id, u_comment, item_id) VALUES (?, ?, ?, ?)`;
+        var commentBody = [card_no, maxFeedbackId, u_comment, item_id];
+
+        db.query(update_comment_query, commentBody, function (err) {
+          if (err) {
+            res.status(400);
+            res.send({
+              message: err,
+            });
+          } else {
+            res.status(200);
+            res.send({ commentBody });
+          }
+        });
+      }
+    }
+  });
 });
 
-//himika 
-app.get("/getFeedback", (req, res) => {
+/**
+ * Get feedback endpoint where user is able to get feedback based on a particular item_id
+ * URL param passes item_id and feedback (comment and rating) is returned by card_no
+ */
+app.get("/feedback/:itemId", (req, res) => {
+  // console.log(req.params);
+  var itemFeedback = {};
+  var feedback_query = `SELECT DISTINCT * from feedback as f, user_comments as u
+                        WHERE
+                        (f.item_id = u.item_id AND f.feedback_id = u.feedback_id AND
+                        u.item_id = ${req.params.itemId})`;
 
+  db.query(feedback_query, function (err, result) {
+    if (err) {
+      res.status(500);
+      res.send(err);
+    } else {
+      // console.log(result);
+      for (let i = 0; i < result.length; i++) {
+        var card_no = result[i].card_no;
+        var comment = result[i].u_comment;
+        var user_rating = result[i].user_rating;
+        itemFeedback[card_no] = { comment, user_rating };
+      }
+    }
+    res.status(200);
+    res.send(itemFeedback);
+  });
 });
 
 //next 2 are lower priority
-app.get("/getFines", (req, res) => {
-
-});
+app.get("/getFines", (req, res) => {});
 
 app.post("/payFines", (req, res) => {
-//really simple/dummy
+  //really simple/dummy
 });
 
 //these 2 are similar
 //kelly
-app.post("/signoutItem", (req, res) => {
-
-});
+app.post("/signoutItem", (req, res) => {});
 
 //kelly
-app.post("/placeHold", (req, res) => {
-
-});
+app.post("/placeHold", (req, res) => {});
 
 //kelly
-app.get("/getCheckedOutItems", (req, res) => {
-
-});
+app.get("/getCheckedOutItems", (req, res) => {});
 
 //kelly
-app.get("/getCurrentHolds", (req, res) => {
+app.get("/getCurrentHolds", (req, res) => {});
 
 });
 
@@ -488,36 +563,28 @@ app.post("/addItem", (req, res) => {
       }
     }
   });
-});
+
+
 
 //himika (searching)
-app.get("/searchTitle", (req, res) => {
-
-});
+app.get("/searchTitle", (req, res) => {});
 
 //tbd
-app.get("/searchAuthor", (req, res) => {
+app.get("/searchAuthor", (req, res) => {});
 
-});
+app.get("/searchDirector", (req, res) => {});
 
-app.get("/searchDirector", (req, res) => {
+app.get("/searchActor", (req, res) => {});
 
-});
-
-app.get("/searchActor", (req, res) => {
-
-});
-
-//kelly 
+//kelly
 app.get("/users", (req, res) => {
-//sees all the users and their records/ actual info. json object
+  //sees all the users and their records/ actual info. json object
 });
 
 //kelly
 app.get("/itemRecord", (req, res) => {
-//information on who has checked out a particular item
+  //information on who has checked out a particular item
 });
-
 
 // Start the server on port 5000
 app.listen(PORT_NUM, () => {

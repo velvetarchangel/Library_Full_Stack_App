@@ -21,7 +21,7 @@ DROP TABLE IF EXISTS author;
 DROP TABLE IF EXISTS writes;
 DROP TABLE IF EXISTS library_user;
 DROP TABLE IF EXISTS librarian;
-DROP TABLE IF EXISTS library_customer;
+-- DROP TABLE IF EXISTS library_customer;
 DROP TABLE IF EXISTS feedback;
 DROP TABLE IF EXISTS signed_out;
 DROP TABLE IF EXISTS coordinates;
@@ -129,14 +129,15 @@ CREATE TABLE library_user (
     first_name VARCHAR(50),
     last_name VARCHAR(50),
     email VARCHAR(50),
-    user_password VARCHAR(50)
+    user_password VARCHAR(50),
+		isLibrarian BOOLEAN
 );
 
-CREATE TABLE library_customer (
-	card_no VARCHAR(36) NOT NULL,-- PRIMARY KEY,
-	CONSTRAINT lc_card_no FOREIGN KEY (card_no)
-		REFERENCES library_user(card_no)
-);
+-- CREATE TABLE library_customer (
+-- 	card_no VARCHAR(36) NOT NULL,-- PRIMARY KEY,
+-- 	CONSTRAINT lc_card_no FOREIGN KEY (card_no)
+-- 		REFERENCES library_user(card_no)
+-- );
 
 CREATE TABLE librarian (
 	card_no VARCHAR(36) NOT NULL,
@@ -268,7 +269,8 @@ CREATE TABLE has_for_branch_and_item (
 	branch_id INT,
     item_id INT,   
     item_quantity INT,
-    UNIQUE KEY(branch_id, item_id),
+    item_barcode INT,
+    UNIQUE KEY(branch_id, item_id, item_barcode),
     
     CONSTRAINT has_branch_id FOREIGN KEY (branch_id)
     REFERENCES branch(branch_id),
@@ -295,38 +297,25 @@ CREATE TABLE places_hold (
 
 -- Real data for the database
 -- card_no: 10 digits
-INSERT INTO library_user (card_no, first_name, last_name, email, user_password)
+INSERT INTO library_user (card_no, first_name, last_name, email, user_password, isLibrarian)
 VALUES
-(1234567890, 'Kawhi', 'Leonard', 'kawhi@hotmail.com', 'abc'),
-(2346271619, 'Leonardo', 'Dicaprio', 'leo@gmail.com', 'abc'),
-(7920625716, 'Margot', 'Robbie', 'margot@outlook.com', 'abc'),
-(8426482051, 'Paul', 'George', 'paulGeorge@hotmail.com', 'abc'),
-(6830547195, 'Lebron', 'James', 'lebron23@gmail.com', 'abc'),
-(3461246421, 'Matthew', 'Tkachuk', 'mmtkachuk@flames.com', 'abc'),
-(1157422742, 'Alice', 'Smith', 'anon@anonymous.com', 'abc'),
-(9646514567, 'Joe', 'Biden', 'pres@USA.com', 'abc'),
-(9934758123, 'Nick', 'Bosa', 'bosa97@niners.com', 'abc'),
-(7234561552, 'Hailee', 'Steinfeld', 'hailee@hotmail.com', 'abc'),
-(7284096754, 'James', 'Johnson', 'jamesjohnson@test.com', 'abc'),
-(7848961666, 'Himika', 'Dastidar', 'test@test.com', 'abc'),
-(8761346354, 'Kelly', 'Osena', 'kelly@test.com', 'abc'),
-(8611038770, 'Eric', 'Tan', 'erictan@test.com', 'abc'),
-(3912281595, 'Sarah', 'Silverman', 'silverman@test.com', 'abc'),
-(2238324761, 'Fake', 'Foo', 'fakefoo@test.com', 'abc'),
-(6306195165, 'Fake', 'Datatype', 'datatype@test.com', 'abc');
-
-INSERT INTO library_customer(card_no)
-VALUES
-(1234567890),
-(2346271619),
-(7920625716),
-(8426482051),
-(6830547195),
-(3461246421),
-(1157422742),
-(9646514567),
-(9934758123),
-(7234561552);
+(1234567890, 'Kawhi', 'Leonard', 'kawhi@hotmail.com', 'abc', 0),
+(2346271619, 'Leonardo', 'Dicaprio', 'leo@gmail.com', 'abc', 0),
+(7920625716, 'Margot', 'Robbie', 'margot@outlook.com', 'abc', 0),
+(8426482051, 'Paul', 'George', 'paulGeorge@hotmail.com', 'abc', 0),
+(6830547195, 'Lebron', 'James', 'lebron23@gmail.com', 'abc', 0),
+(3461246421, 'Matthew', 'Tkachuk', 'mmtkachuk@flames.com', 'abc', 0),
+(1157422742, 'Alice', 'Smith', 'anon@anonymous.com', 'abc', 0),
+(9646514567, 'Joe', 'Biden', 'pres@USA.com', 'abc', 0),
+(9934758123, 'Nick', 'Bosa', 'bosa97@niners.com', 'abc', 0),
+(7234561552, 'Hailee', 'Steinfeld', 'hailee@hotmail.com', 'abc', 0),
+(7284096754, 'James', 'Johnson', 'jamesjohnson@test.com', 'abc', 1),
+(7848961666, 'Himika', 'Dastidar', 'test@test.com', 'abc', 1),
+(8761346354, 'Kelly', 'Osena', 'kelly@test.com', 'abc', 1),
+(8611038770, 'Eric', 'Tan', 'erictan@test.com', 'abc', 1),
+(3912281595, 'Sarah', 'Silverman', 'silverman@test.com', 'abc', 1),
+(2238324761, 'Fake', 'Foo', 'fakefoo@test.com', 'abc', 1),
+(6306195165, 'Fake', 'Datatype', 'datatype@test.com', 'abc', 1);
 
 INSERT INTO librarian (card_no, staff_id, staff_start_date, salary)
 VALUES
@@ -522,3 +511,60 @@ VALUES
 (1242, 'Louise Riley Library'),
 (1243, 'Judith Umbach Library');
 
+
+INSERT INTO has_for_branch_and_item (branch_id, item_id, item_barcode)
+VALUES
+(1234, 1, 0683516687),
+(1234, 1, 0683516686),
+(1234, 1, 0683516688),
+(1235, 1, 1133029791),
+(1235, 1, 1133029792),
+(1235, 1, 1133029793),
+(1236, 1, 210865974),
+(1236, 1, 2130865975),
+(1236, 1, 2130865976),
+(1237, 2, 2111793638),
+(1238, 2, 2111793639),
+(1238, 3, 2126976686),
+(1239, 3, 2126976687),
+(1239, 4, 215123547),
+(1240, 5, 0887611864),
+(1241, 6, 0255725324),
+(1242, 7, 0841637857),
+(1243, 8, 0108948855),
+(1237, 9, 0163971279),
+(1238, 11, 0114406247),
+(1239, 12, 0758177142),
+(1240, 13, 0426113066),
+(1241, 14, 0495393437),
+(1242, 15, 0227217727),
+(1243, 16, 0227247797);
+
+
+INSERT into copy_of_item(item_id, item_barcode)
+VALUES
+(1, 0683516687),
+(1, 0683516686),
+(1, 0683516688),
+(1, 1133029791),
+(1, 1133029792),
+(1, 1133029793),
+(1, 210865974),
+(1, 2130865975),
+(1, 2130865976),
+(2, 2111793638),
+(2, 2111793639),
+(3, 2126976686),
+(3, 2126976687),
+(4, 215123547),
+(5, 0887611864),
+(6, 0255725324),
+(7, 0841637857),
+(8, 0108948855),
+(9, 0163971279),
+(11, 0114406247),
+(12, 0758177142),
+(13, 0426113066),
+(14, 0495393437),
+(15, 0227217727),
+(16, 0227247797);
