@@ -23,8 +23,9 @@ const PORT_NUM = 5001;
  * If there is an user with the email password combination the user object is retured
  * back to the front end to be utilized downstream
  */
-app.get("/getUser", async (req, res) => {
+app.post("/getUser", async (req, res) => {
   let body = req.body;
+  // console.log(body);
   // run sql query
   var sql_query = `SELECT * FROM library_user WHERE email='${body.email}' AND user_password='${body.password}'`;
   db.query(sql_query, function (err, result) {
