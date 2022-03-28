@@ -568,3 +568,10 @@ VALUES
 (14, 0495393437),
 (15, 0227217727),
 (16, 0227247797);
+
+
+-- populate the hosts_event table
+SELECT e.event_id, branch_id as hosts_event FROM 
+	event_location as e, lib_events as l, branch as b 
+  WHERE 
+	(l.event_id = e.event_id AND b.branch_name = e.e_location);
