@@ -12,7 +12,7 @@ app.use(bodyparser.json());
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
-  password: "odd&Oracle68",
+  password: "mysqlpassword",
   database: "library",
 });
 
@@ -554,11 +554,10 @@ app.post("/addItem", (req, res) => {
 }); //added this
 
 //himika (searching)
-app.get("/search?searchType=:searchType&searchTerm=:searchTerm", (req, res) => {
-  var searchType = req.query.searchType;
-  var searchTerm = req.query.searchTerm;
-
-  console.log(searchTerm);
+app.get("/search/:searchType/:searchTerm", (req, res) => {
+  var searchType = req.params.searchType;
+  var searchTerm = req.params.searchTerm;
+  console.log(searchType, searchTerm);
   var bookQuery = `SELECT b.item_id, b.publisher_name, b.isbn, i.release_date, i.item_desc, i.item_name, a.author_name 
                   FROM book as b, item as i, writes as w, author as a WHERE 
                               i.item_id = b.item_id AND w.item_id = i.item_id 
@@ -571,12 +570,32 @@ app.get("/search?searchType=:searchType&searchTerm=:searchTerm", (req, res) => {
                                   OR item_desc like '%${searchTerm}%'
                                   )`;
   if (searchType == "book") {
-    books = [];
     db.query(bookQuery, function (err, result) {
-      if (err) console.log(err);
-      else {
-        // for (let i = 0; i < result.length; i++) {}
-        console.log(result);
+      if (err) {
+        console.log(err);
+        res.send({
+          status: 400,
+          message: "Unable to connect to DB",
+        });
+      } else {
+        var books = [];
+        for (let i = 0; i < result.length; i++) {
+          var book = {
+            item_id: result[i].item_id,
+            publisher_name: result[i].publisher_name,
+            isbn: result[i].isbn,
+            release_date: result[i].release_date,
+            item_desc: result[i].item_desc,
+            item_name: result[i].item_name,
+            author_name: result[i].author_name,
+          };
+          books.push(book);
+          console.log(books);
+        }
+        res.status(200);
+        res.send({
+          books,
+        });
       }
     });
   }
