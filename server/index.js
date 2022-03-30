@@ -569,6 +569,9 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
                                   OR b.isbn like '%${searchTerm}%'
                                   OR item_desc like '%${searchTerm}%'
                                   )`;
+  var movieQuery = ``;
+  var eventQuery = ``;
+
   if (searchType == "book") {
     db.query(bookQuery, function (err, result) {
       if (err) {
@@ -598,6 +601,12 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
         });
       }
     });
+  }
+
+  if (searchType == " movie") {
+  }
+
+  if (searchType == "event") {
   }
 });
 
