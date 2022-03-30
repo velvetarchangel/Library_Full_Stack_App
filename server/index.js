@@ -570,7 +570,19 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
                                   OR item_desc like '%${searchTerm}%'
                                   )`;
   var movieQuery = ``;
-  var eventQuery = ``;
+  var eventQuery = `SELECT DISTINCT h.event_id, event_name, event_start_date, end_date, start_time, end_time, card_no, staff_id, e_location, branch_id
+                    FROM lib_events as l, coordinates as c, event_location as el, hosts_event as h
+                    WHERE h.event_id = l.event_id 
+                      AND c.event_id = el.event_id
+                      AND h.event_id = el.event_id
+                      AND c.event_id = l.event_id
+                      AND (event_name LIKE '%${searchTerm}%' 
+                        OR e_location like '%${searchTerm}%'
+                        OR event_start_date like '%${searchTerm}%'
+                        OR end_date like '%${searchTerm}%'
+                        OR start_time like '%${searchTerm}%'
+                        OR end_time like '%${searchTerm}%'
+                      );`;
 
   if (searchType == "book") {
     db.query(bookQuery, function (err, result) {
@@ -601,12 +613,69 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
         });
       }
     });
-  }
+  } else if (searchType == " movie") {
+     db.query(movieQuery, function (err, result) {
+      if (err) {
+        console.log(err);
+        res.send({
+          status: 400,
+          message: "Unable to connect to DB",
+        });
+      } else {
+        var movies = [];
+        for (let i = 0; i < result.length; i++) {
+          var movie = {
+            // event_id: result[i].event_id,
+            // event_start_date: result[i].event_start_date,
+            // end_date: result[i].end_date,
+            // start_time: result[i].start_time,
+            // end_time: result[i].end_time,
+            // card_no: result[i].card_no,
+            // staff_id: result[i].staff_id,
+            // e_location: result[i].e_location,
+            // branch_id: result[i].branch_id,
+          };
+          movies.push(movie);
+        }
+        res.status(200);
+        res.send({
+          movie,
+        });
+      }
 
-  if (searchType == " movie") {
-  }
-
-  if (searchType == "event") {
+  } else if (searchType == "event") {
+    db.query(eventQuery, function (err, result) {
+      if (err) {
+        console.log(err);
+        res.send({
+          status: 400,
+          message: "Unable to connect to DB",
+        });
+      } else {
+        var events = [];
+        for (let i = 0; i < result.length; i++) {
+          var event = {
+            event_id: result[i].event_id,
+            event_start_date: result[i].event_start_date,
+            end_date: result[i].end_date,
+            start_time: result[i].start_time,
+            end_time: result[i].end_time,
+            card_no: result[i].card_no,
+            staff_id: result[i].staff_id,
+            e_location: result[i].e_location,
+            branch_id: result[i].branch_id,
+          };
+          events.push(event);
+        }
+        res.status(200);
+        res.send({
+          events,
+        });
+      }
+    });
+  } else {
+    res.status(400);
+    res.send({ error: "Invalid search type" });
   }
 });
 
