@@ -614,7 +614,7 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
       }
     });
   } else if (searchType == " movie") {
-     db.query(movieQuery, function (err, result) {
+    db.query(movieQuery, function (err, result) {
       if (err) {
         console.log(err);
         res.send({
@@ -642,7 +642,7 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
           movie,
         });
       }
-
+    });
   } else if (searchType == "event") {
     db.query(eventQuery, function (err, result) {
       if (err) {
@@ -673,9 +673,6 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
         });
       }
     });
-  } else {
-    res.status(400);
-    res.send({ error: "Invalid search type" });
   }
 });
 
