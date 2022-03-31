@@ -13,7 +13,7 @@ npm run start
 Compile frontend
 ```
 cd client-vue/
-npm run start
+npm install
 npm run serve
 ```
 
