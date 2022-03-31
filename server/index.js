@@ -32,18 +32,18 @@ app.post("/getUser", async (req, res) => {
   db.query(sql_query, function (err, result) {
     if (err || result.length == 0) {
       res.send({
-        status: 400,
-        message: "Incorrect email or password",
+      status: 400,
+      message: "Incorrect email or password",
       });
     } else {
       let user = {
         card_no: result[0]["card_no"],
-        first_name: result[0]["first_name"],
-        last_name: result[0]["last_name"],
+	first_name: result[0]["first_name"],
+	last_name: result[0]["last_name"],
       };
       res.send({
-        status: 200,
-        user,
+	status: 200,
+	user,
       });
     }
   });
@@ -244,7 +244,9 @@ app.get("/loanedItems/:card_no", (req, res) => {});
 //kelly
 app.get("/holds/:userId", (req, res) => {});
 
+//kelly
 app.get("/holds/:branchId", (req, res) => {});
+
 //these next 2 endpoints will be TBD. Need to figure out the proper database implementation.
 //eric
 app.put("/returnItems", (req, res) => {
@@ -335,6 +337,7 @@ app.post("/userRegistersEvents", (req, res) => {
     }
   });
 });
+
 
 /**
  * Finds all the events that a user is registered for
@@ -441,6 +444,7 @@ app.post("/createEvent", (req, res) => {
     }
   });
 });
+
 
 /**
  * add item endpoint where a librarian is able to add items to the database.
@@ -677,8 +681,36 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
 });
 
 //kelly
+/**
+ * Fetches basic info such as card_no, email, first and last name of
+ * library customers (users that are not librarian) ***UNLESS LIBRARIANS INCLUDED????
+ *
+ * Inputs:
+ *    none
+ *
+ * Output:
+ *    customers: 2D array of library customers
+ */
 app.get("/users", (req, res) => {
-  //sees all the users and their records/ actual info. json object
+  var customers = {};
+  var user_query = `SELECT * from library_user WHERE isLibrarian='0'`;
+
+  db.query(user_query, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        var card_no = result[i].card_no;
+	var first_name = result[i].first_name;
+	var last_name = result[i].last_name;
+	var email = result[i].email;
+
+	customers[card_no] = { first_name, last_name, email };
+      }
+    }
+    res.status(200);
+    res.send(customers);
+  });
 });
 
 //kelly
