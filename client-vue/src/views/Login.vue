@@ -83,6 +83,7 @@ export default {
       this.validate();
       var user = { email: this.email, password: this.password };
       await getUserByEmailAndPassword(user).then((response) => {
+        //console.log(user);
         if (response.data.status == 200) {
           user = response.data.user; //update the user information
           if (user.isLibrarian === 1) {
