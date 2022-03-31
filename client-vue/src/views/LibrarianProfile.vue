@@ -269,7 +269,9 @@ export default {
       this.showCustTab = false;
     },
     // addItem() {},
-    signOut() {},
+    signOut() {
+      this.$router.push("/");
+    },
     addEvent() {
       this.$refs.modal.show();
     },
