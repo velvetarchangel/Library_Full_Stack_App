@@ -692,25 +692,25 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
  *    customers: 2D array of library customers
  */
 app.get("/users", (req, res) => {
-	var customers = {};
-	var user_query = `SELECT * from library_user WHERE isLibrarian='0'`;
+  var customers = {};
+  var user_query = `SELECT * from library_user WHERE isLibrarian='0'`;
 
-	db.query(user_query, function (err, result) {
-		if (err) {
-			console.log(err);
-		} else {
-			for (let i = 0; i < result.length; i++) {
-				var card_no = result[i].card_no;
-				var first_name = result[i].first_name;
-				var last_name = result[i].last_name;
-				var email = result[i].email;
+  db.query(user_query, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        var card_no = result[i].card_no;
+	var first_name = result[i].first_name;
+	var last_name = result[i].last_name;
+	var email = result[i].email;
 
-				customers[card_no] = { first_name, last_name, email };
-			}
-		}
-		res.status(200);
-		res.send(customers);
-	});
+	customers[card_no] = { first_name, last_name, email };
+      }
+    }
+    res.status(200);
+    res.send(customers);
+  });
 });
 
 //kelly
