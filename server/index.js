@@ -10,10 +10,10 @@ app.use(cors());
 app.use(bodyparser.json());
 
 const db = mysql.createConnection({
-	user: "root",
-	host: "localhost",
-	password: "mysqlpassword",
-	database: "library",
+  user: "root",
+  host: "localhost",
+  password: "mysqlpassword",
+  database: "library",
 });
 
 const PORT_NUM = 5001;
@@ -25,28 +25,28 @@ const PORT_NUM = 5001;
  * back to the front end to be utilized downstream
  */
 app.post("/getUser", async (req, res) => {
-	let body = req.body;
-	// console.log(body);
-	// run sql query
-	var sql_query = `SELECT * FROM library_user WHERE email='${body.email}' AND user_password='${body.password}'`;
-	db.query(sql_query, function (err, result) {
-		if (err || result.length == 0) {
-			res.send({
-				status: 400,
-				message: "Incorrect email or password",
-			});
-		} else {
-			let user = {
-				card_no: result[0]["card_no"],
-				first_name: result[0]["first_name"],
-				last_name: result[0]["last_name"],
-			};
-			res.send({
-				status: 200,
-				user,
-			});
-		}
-	});
+  let body = req.body;
+  // console.log(body);
+  // run sql query
+  var sql_query = `SELECT * FROM library_user WHERE email='${body.email}' AND user_password='${body.password}'`;
+  db.query(sql_query, function (err, result) {
+    if (err || result.length == 0) {
+      res.send({
+      status: 400,
+      message: "Incorrect email or password",
+      });
+    } else {
+      let user = {
+        card_no: result[0]["card_no"],
+	first_name: result[0]["first_name"],
+	last_name: result[0]["last_name"],
+      };
+      res.send({
+	status: 200,
+	user,
+      });
+    }
+  });
 });
 
 /**
