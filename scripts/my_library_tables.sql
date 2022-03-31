@@ -293,8 +293,6 @@ CREATE TABLE places_hold (
 );
 
 
-
-
 -- Real data for the database
 -- card_no: 10 digits
 INSERT INTO library_user (card_no, first_name, last_name, email, user_password, isLibrarian)
@@ -568,3 +566,18 @@ VALUES
 (14, 0495393437),
 (15, 0227217727),
 (16, 0227247797);
+
+INSERT INTO hosts_event(event_id, branch_id)
+VALUES (1234, 1), (1236, 2), (1237, 3), (1240, 4), (1238, 5), (1239, 6), (1241, 7), (1242, 8), (1243, 9);
+
+INSERT INTO coordinates(card_no, staff_id, event_id)
+VALUES
+(2238324761, 666, 1234),
+(3912281595, 555, 1236),
+(6303195165, 777, 1237),
+(7284096754, 111, 1240),
+(8611038770, 444, 1238),
+(8761346354, 333, 1239),
+(8761346354, 333, 1241),
+(8761346354, 333, 1242),
+(8761346354, 333, 1243);
