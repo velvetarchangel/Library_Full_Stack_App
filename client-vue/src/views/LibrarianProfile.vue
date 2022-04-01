@@ -1,58 +1,65 @@
 <template>
   <div class="container" width="80%">
     <event-modal ref="modal"></event-modal>
+    <item-modal ref="itemmodal"></item-modal>
     <v-toolbar color="orange accent-1">
       <v-app-bar-nav-icon class="hidden-sm-and-down"></v-app-bar-nav-icon>
       <v-toolbar-title class="text-h6 mr-6 hidden-sm-and-down">
         {{ name }}
       </v-toolbar-title>
-      <v-autocomplete
-        v-model="model"
-        :items="items"
-        :loading="isLoading"
-        :search-input.sync="search"
-        chips
-        clearable
-        hide-details
-        hide-selected
-        item-text="name"
-        item-value="symbol"
-        label="Search..."
-        solo
-      >
-        <template v-slot:no-data>
-          <v-list-item>
-            <v-list-item-title> Search </v-list-item-title>
-          </v-list-item>
-        </template>
-        <template v-slot:selection="{ attr, on, item, selected }">
-          <v-chip
-            v-bind="attr"
-            :input-value="selected"
-            color="blue-grey"
-            class="white--text"
-            v-on="on"
-          >
-            <v-icon left> mdi-bitcoin </v-icon>
-            <span v-text="item.name"></span>
-          </v-chip>
-        </template>
-        <template v-slot:item="{ item }">
-          <v-list-item-avatar
-            color="indigo"
-            class="text-h5 font-weight-light white--text"
-          >
-            {{ item.name.charAt(0) }}
-          </v-list-item-avatar>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.name"></v-list-item-title>
-            <v-list-item-subtitle v-text="item.symbol"></v-list-item-subtitle>
-          </v-list-item-content>
-          <v-list-item-action>
-            <v-icon>mdi-bitcoin</v-icon>
-          </v-list-item-action>
-        </template>
-      </v-autocomplete>
+      <v-row>
+        <v-text-field
+          v-model="model"
+          :items="items"
+          @keyup.enter.native="search"
+          clearable
+          hide-details
+          hide-selected
+          item-text="name"
+          item-value="symbol"
+          label="Search..."
+          solo
+        >
+          <template v-slot:no-data>
+            <v-list-item>
+              <v-row>
+                <v-col cols="12">
+                  <v-list-item-title> Search </v-list-item-title>
+                </v-col>
+              </v-row>
+            </v-list-item>
+          </template>
+          <template v-slot:selection="{ attr, on, item, selected }">
+            <v-chip
+              v-bind="attr"
+              :input-value="selected"
+              color="blue-grey"
+              class="white--text"
+              v-on="on"
+            >
+              <v-icon left> mdi-bitcoin </v-icon>
+              <span v-text="item.name"></span>
+            </v-chip>
+          </template>
+          <template v-slot:item="{ item }">
+            <v-list-item-avatar
+              color="indigo"
+              class="text-h5 font-weight-light white--text"
+            >
+              {{ item.name.charAt(0) }}
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title v-text="item.name"></v-list-item-title>
+              <v-list-item-subtitle v-text="item.symbol"></v-list-item-subtitle>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-icon>mdi-bitcoin</v-icon>
+            </v-list-item-action>
+          </template>
+        </v-text-field>
+        <v-select :items="['Movie', 'Event', 'Book']"> </v-select>
+        <v-btn>Search</v-btn>
+      </v-row>
       <template v-slot:extension>
         <v-tabs
           v-model="tab"
@@ -61,13 +68,15 @@
           slider-color="blue-grey"
         >
           <v-tab @click="viewCustomerList"> Customers </v-tab>
-
           <v-tab @click="viewEventList"> Events</v-tab>
           <v-btn class="ma-2" color="secondary" @click="signOut">
             Sign Out
           </v-btn>
           <v-btn class="ma-2" color="secondary" @click="addEvent">
             Add Event
+          </v-btn>
+          <v-btn class="ma-2" color="secondary" @click="addItem">
+            Add Item
           </v-btn>
         </v-tabs>
       </template>
@@ -100,8 +109,9 @@
 </template>
 <script>
 import EventModal from "../Components/EventModal.vue";
+import ItemModal from "../Components/ItemModal.vue";
 export default {
-  components: { EventModal },
+  components: { EventModal, ItemModal },
   data() {
     return {
       isLoading: false,
@@ -128,7 +138,7 @@ export default {
       model: null,
       search: null,
       tab: null,
-      showCustTab: false,
+      showCustTab: true,
       showEventTab: false,
       events: [
         {
@@ -258,9 +268,15 @@ export default {
       this.showEventTab = true;
       this.showCustTab = false;
     },
-    signOut() {},
+    // addItem() {},
+    signOut() {
+      this.$router.push("/");
+    },
     addEvent() {
       this.$refs.modal.show();
+    },
+    addItem() {
+      this.$refs.itemmodal.show();
     },
   },
   watch: {
@@ -269,10 +285,10 @@ export default {
       else this.tab = null;
     },
     search() {
+      console.log("Search Initiated");
       // Items have already been loaded
       if (this.items.length > 0) return;
       this.isLoading = true;
-
       // To be fixed to incorporate our own data
       fetch("https://api.coingecko.com/api/v3/coins/list")
         .then((res) => res.clone().json())

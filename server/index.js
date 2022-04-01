@@ -32,18 +32,19 @@ app.post("/getUser", async (req, res) => {
   db.query(sql_query, function (err, result) {
     if (err || result.length == 0) {
       res.send({
-      status: 400,
-      message: "Incorrect email or password",
+        status: 400,
+        message: "Incorrect email or password",
       });
     } else {
       let user = {
         card_no: result[0]["card_no"],
-	first_name: result[0]["first_name"],
-	last_name: result[0]["last_name"],
+        first_name: result[0]["first_name"],
+        last_name: result[0]["last_name"],
+        isLibrarian: result[0]["isLibrarian"],
       };
       res.send({
-	status: 200,
-	user,
+        status: 200,
+        user,
       });
     }
   });
@@ -338,7 +339,6 @@ app.post("/userRegistersEvents", (req, res) => {
   });
 });
 
-
 /**
  * Finds all the events that a user is registered for
  *
@@ -444,7 +444,6 @@ app.post("/createEvent", (req, res) => {
     }
   });
 });
-
 
 /**
  * add item endpoint where a librarian is able to add items to the database.
@@ -691,7 +690,7 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
  * Output:
  *    customers: 2D array of library customers
  */
-app.get("/users", (req, res) => {
+app.get("/users", (_, res) => {
   var customers = {};
   var user_query = `SELECT * from library_user WHERE isLibrarian='0'`;
 
@@ -701,11 +700,11 @@ app.get("/users", (req, res) => {
     } else {
       for (let i = 0; i < result.length; i++) {
         var card_no = result[i].card_no;
-	var first_name = result[i].first_name;
-	var last_name = result[i].last_name;
-	var email = result[i].email;
+        var first_name = result[i].first_name;
+        var last_name = result[i].last_name;
+        var email = result[i].email;
 
-	customers[card_no] = { first_name, last_name, email };
+        customers[card_no] = { first_name, last_name, email };
       }
     }
     res.status(200);

@@ -81,11 +81,16 @@ export default {
 
     async login() {
       this.validate();
-      let user = { email: this.email, password: this.password };
+      var user = { email: this.email, password: this.password };
       await getUserByEmailAndPassword(user).then((response) => {
+        //console.log(user);
         if (response.data.status == 200) {
           user = response.data.user; //update the user information
-          this.$router.push(`profile/${user.card_no}`);
+          if (user.isLibrarian === 1) {
+            this.$router.push(`librarianProfile/${user.card_no}`);
+          } else {
+            this.$router.push(`profile/${user.card_no}`);
+          }
         } else {
           this.errormessage = response.data.message;
           this.resetValidation();
