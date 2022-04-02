@@ -176,7 +176,6 @@ export default {
     async getLoggedInUser(card_no) {
       await getUserByID(card_no).then((response) => {
         if (response.status == 200) {
-          // console.log(response.data);
           this.librarianUser = response.data;
         }
       });

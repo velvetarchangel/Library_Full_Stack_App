@@ -48,6 +48,11 @@ export async function getAllEvents() {
   return response;
 }
 
+/**
+ *
+ * @param {*} userId card_no from the front end
+ * @returns a user object with name and email
+ */
 export async function getUserByID(userId) {
   const response = await axios.get(`${API_URL}/user/${userId}`);
   return response;
