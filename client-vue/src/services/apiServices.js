@@ -39,7 +39,16 @@ export async function getAllLibraryCustomers() {
   return response;
 }
 
+/**
+ *
+ * @returnsan array of events with event id as key
+ */
 export async function getAllEvents() {
   const response = await axios.get(`${API_URL}/events`);
+  return response;
+}
+
+export async function getUserByID(userId) {
+  const response = await axios.get(`${API_URL}/user/${userId}`);
   return response;
 }

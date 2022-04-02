@@ -5,7 +5,7 @@
     <v-toolbar color="orange accent-1">
       <v-app-bar-nav-icon class="hidden-sm-and-down"></v-app-bar-nav-icon>
       <v-toolbar-title class="text-h6 mr-6 hidden-sm-and-down">
-        {{ name }}
+        {{ this.librarianUser.name }}
       </v-toolbar-title>
       <v-row>
         <v-text-field
@@ -110,7 +110,11 @@
 <script>
 import EventModal from "../Components/EventModal.vue";
 import ItemModal from "../Components/ItemModal.vue";
-import { getAllLibraryCustomers, getAllEvents } from "../services/apiServices";
+import {
+  getAllLibraryCustomers,
+  getAllEvents,
+  getUserByID,
+} from "../services/apiServices";
 
 export default {
   components: { EventModal, ItemModal },
@@ -118,7 +122,7 @@ export default {
     return {
       isLoading: false,
       items: [],
-      librarianUser: null,
+      librarianUser: { name: "Himika" },
       customerHeaders: [
         {
           text: "Customer name",
@@ -147,7 +151,7 @@ export default {
       customers: [],
       val: "",
       card_no: this.$route.params.card_no,
-      name: "Himika", // need to make this dynamic
+      //name: "Himika", // need to make this dynamic
     };
   },
 
@@ -169,11 +173,18 @@ export default {
     addItem() {
       this.$refs.itemmodal.show();
     },
+    async getLoggedInUser(card_no) {
+      await getUserByID(card_no).then((response) => {
+        if (response.status == 200) {
+          // console.log(response.data);
+          this.librarianUser = response.data;
+        }
+      });
+    },
     async getCustomers() {
       await getAllLibraryCustomers().then((response) => {
         if (response.status == 200) {
           var users = response.data;
-          console.log(users);
           for (let user in users) {
             var customer = {
               card_no: user,
@@ -206,6 +217,7 @@ export default {
   mounted: function () {
     this.getCustomers();
     this.getEvents();
+    this.getLoggedInUser(this.card_no);
   },
 
   watch: {
