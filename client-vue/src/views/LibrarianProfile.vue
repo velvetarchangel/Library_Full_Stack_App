@@ -44,9 +44,9 @@
           <template v-slot:item="{ item }">
             <v-list-item-avatar
               color="indigo"
-              class="text-h5 font-weight-light white--text"
+              class="text-h5 font-weight-light black--text"
             >
-              {{ item.name.charAt(0) }}
+              {{ this.librarianUser.name.charAt(0) }}
             </v-list-item-avatar>
             <v-list-item-content>
               <v-list-item-title v-text="item.name"></v-list-item-title>
@@ -88,8 +88,10 @@
           v-if="showCustTab"
           :headers="customerHeaders"
           :items="customers"
+          item-key="card_no"
           :sort-by="['card_no', 'email']"
           :sort-desc="[false, true]"
+          @click:row="goToCustPage($event.card_no)"
           multi-sort
         ></v-data-table>
       </v-card>
@@ -99,7 +101,7 @@
           v-if="showEventTab"
           :headers="eventHeaders"
           :items="events"
-          :sort-by="['card_no', 'email']"
+          :sort-by="['event_location', 'start_time']"
           :sort-desc="[false, true]"
           multi-sort
         ></v-data-table>
@@ -122,7 +124,7 @@ export default {
     return {
       isLoading: false,
       items: [],
-      librarianUser: { name: "Himika" },
+      librarianUser: { name: null },
       customerHeaders: [
         {
           text: "Customer name",
@@ -172,6 +174,10 @@ export default {
     },
     addItem() {
       this.$refs.itemmodal.show();
+    },
+    goToCustPage(val) {
+      console.log(val);
+      this.$router.push(`${this.card_no}/${val}`);
     },
     async getLoggedInUser(card_no) {
       await getUserByID(card_no).then((response) => {
