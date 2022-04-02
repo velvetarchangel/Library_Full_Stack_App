@@ -60,10 +60,11 @@ CREATE TABLE movie_genre (
 	imdb_id VARCHAR(20),
 	CONSTRAINT genre_imdb_id FOREIGN KEY (imdb_id) 
 		references movies(imdb_id),
-	genre VARCHAR(20) PRIMARY KEY,
+	genre VARCHAR(20),
     item_id INT,
 	CONSTRAINT genre_item_id FOREIGN KEY (item_id)
-		references item(item_id)
+		references item(item_id),
+	CONSTRAINT pk_movie_genre PRIMARY KEY (imdb_id, genre, item_id)
 );
 
 CREATE TABLE actor (
@@ -85,7 +86,8 @@ CREATE TABLE actor_acts(
 		references movies(imdb_id),
 	item_id INT,
 	CONSTRAINT acts_item_id FOREIGN KEY (item_id)
-		references item(item_id)
+		references item(item_id),
+	CONSTRAINT pk_actor_acts PRIMARY KEY (actor_id,imdb_id,item_id)
 );
 
 CREATE TABLE director_directs(
@@ -97,7 +99,8 @@ CREATE TABLE director_directs(
 		references movies(imdb_id),
 	item_id INT,
 	CONSTRAINT directs_item_id FOREIGN KEY (item_id)
-		references item(item_id)
+		references item(item_id),
+	CONSTRAINT pk_director_directs PRIMARY KEY (director_id,imdb_id,item_id)
 );
 
 CREATE TABLE author (
@@ -121,7 +124,8 @@ CREATE TABLE writes(
 		references book(isbn),
 	item_id INT,
 	CONSTRAINT writes_item_id FOREIGN KEY (item_id)
-		references item(item_id)
+		references item(item_id),
+	CONSTRAINT pk_writes PRIMARY KEY (author_id,isbn,item_id)
 );
 
 CREATE TABLE library_user (
@@ -146,7 +150,7 @@ CREATE TABLE librarian (
 	staff_id INT NOT NULL,
     staff_start_date DATE,
     salary FLOAT,
-    UNIQUE KEY (card_no, staff_id) 
+    CONSTRAINT PK_librarian PRIMARY KEY (card_no, staff_id) 
 );
 
 
@@ -155,7 +159,7 @@ CREATE TABLE feedback (
     CONSTRAINT f_card_no FOREIGN KEY (card_no)
 		REFERENCES library_user(card_no),
 	feedback_id VARCHAR(36) NOT NULL,
-	UNIQUE KEY (feedback_id, card_no),
+	CONSTRAINT pk_feedback PRIMARY KEY (feedback_id, card_no, item_id),
     user_rating INT,
     item_id INT,
     CONSTRAINT f_item_id FOREIGN KEY (item_id)
@@ -173,7 +177,7 @@ CREATE TABLE user_comments (
     item_id INT,
 	CONSTRAINT uc_item_id FOREIGN KEY (item_id)
 		references item(item_id),
-	UNIQUE KEY (card_no, feedback_id, u_comment)
+	CONSTRAINT pk_user_comments PRIMARY KEY (card_no, feedback_id, u_comment, item_id)
 );
 
 CREATE TABLE library_record (
@@ -190,13 +194,12 @@ CREATE TABLE signed_out (
     item_id INT NOT NULL, -- PRIMARY KEY,
     CONSTRAINT so_item_id FOREIGN KEY (item_id)
 		REFERENCES item(item_id),
-	UNIQUE KEY (card_no, item_id),
+	CONSTRAINT pk_signed_out PRIMARY KEY (card_no, item_id),
     checkout_date DATE,
     return_date DATE
 );
 
 
--- Eric's stuff
 
 CREATE TABLE coordinates ( 
 	card_no VARCHAR(36) NOT NULL, -- INT, -- AUTO_INCREMENT,
@@ -209,18 +212,18 @@ CREATE TABLE coordinates (
     -- CONSTRAINT coord_card_no FOREIGN KEY (card_no)
     -- REFERENCES library_user(card_no),
 	
-	FOREIGN KEY (card_no, staff_id) REFERENCES librarian (card_no, staff_id),
+	CONSTRAINT card_staff_FK FOREIGN KEY (card_no, staff_id) REFERENCES librarian (card_no, staff_id),
     
     CONSTRAINT coord_event_id FOREIGN KEY (event_id)
     REFERENCES lib_events(event_id),
 	
-	UNIQUE KEY (card_no, staff_id, event_id)
+	CONSTRAINT PK_coordinates PRIMARY KEY (card_no, staff_id, event_id)
 );
 
 CREATE TABLE hosts_event (
 	event_id INT, -- AUTO_INCREMENT,
     branch_id INT , -- AUTO_INCREMENT,
-    UNIQUE KEY (event_id, branch_id),
+    CONSTRAINT PK_hosts_event PRIMARY KEY (event_id, branch_id),
    
 	CONSTRAINT hosts_event_id FOREIGN KEY (event_id)
     REFERENCES lib_events(event_id),
@@ -232,7 +235,7 @@ CREATE TABLE hosts_event (
 CREATE TABLE registers (
 	event_id INT,
     card_no VARCHAR(36),
-    UNIQUE KEY (event_id, card_no),
+    CONSTRAINT PK_registers PRIMARY KEY (event_id, card_no),
     
 	CONSTRAINT registers_event_id FOREIGN KEY (event_id)
     REFERENCES lib_events(event_id),
@@ -252,8 +255,8 @@ CREATE TABLE lib_events (
 
 CREATE TABLE event_location (
 	event_id INT,
-    e_location VARCHAR(50) PRIMARY KEY,
-    UNIQUE KEY (event_id, e_location),
+    e_location VARCHAR(50),
+    CONSTRAINT PK_event_location PRIMARY KEY (event_id, e_location),
     
     CONSTRAINT event_location_id FOREIGN KEY (event_id)
     REFERENCES lib_events(event_id)
@@ -268,22 +271,25 @@ CREATE TABLE branch (
 CREATE TABLE has_for_branch_and_item (
 	branch_id INT,
     item_id INT,   
-    item_quantity INT,
     item_barcode INT,
-    UNIQUE KEY(branch_id, item_id, item_barcode),
+	item_availability BOOLEAN,
+    CONSTRAINT PK_has_for_bai PRIMARY KEY(branch_id, item_id, item_barcode),
     
     CONSTRAINT has_branch_id FOREIGN KEY (branch_id)
     REFERENCES branch(branch_id),
     
     CONSTRAINT has_item_id FOREIGN KEY (item_id)
-    REFERENCES item(item_id)
+    REFERENCES item(item_id),
+    
+    CONSTRAINT has_item_barcode FOREIGN KEY (item_barcode)
+    REFERENCES copy_of_item(item_barcode)
 );
 
 CREATE TABLE places_hold (
 	card_no VARCHAR(36), -- INT, -- AUTO_INCREMENT, 
     item_id INT , -- AUTO_INCREMENT, 
     hold_position INT,
-    UNIQUE KEY (card_no, item_id),
+    CONSTRAINT pk_places_hold PRIMARY KEY (card_no, item_id),
     
     CONSTRAINT hold_card_number FOREIGN KEY (card_no)
     REFERENCES library_user(card_no),
@@ -499,6 +505,7 @@ VALUES
 INSERT INTO event_location (event_id, e_location)
 VALUES
 (1234, 'Central Library'),
+(1234, 'Fish Creek Library'), -- test value to make sure pks work properly
 (1235, 'ONLINE'),
 (1236, 'Fish Creek Library'),
 (1237, 'Shawnessy Library'),
@@ -510,33 +517,33 @@ VALUES
 (1243, 'Judith Umbach Library');
 
 
-INSERT INTO has_for_branch_and_item (branch_id, item_id, item_barcode)
+INSERT INTO has_for_branch_and_item (branch_id, item_id, item_barcode, item_availability)
 VALUES
-(1234, 1, 0683516687),
-(1234, 1, 0683516686),
-(1234, 1, 0683516688),
-(1235, 1, 1133029791),
-(1235, 1, 1133029792),
-(1235, 1, 1133029793),
-(1236, 1, 210865974),
-(1236, 1, 2130865975),
-(1236, 1, 2130865976),
-(1237, 2, 2111793638),
-(1238, 2, 2111793639),
-(1238, 3, 2126976686),
-(1239, 3, 2126976687),
-(1239, 4, 215123547),
-(1240, 5, 0887611864),
-(1241, 6, 0255725324),
-(1242, 7, 0841637857),
-(1243, 8, 0108948855),
-(1237, 9, 0163971279),
-(1238, 11, 0114406247),
-(1239, 12, 0758177142),
-(1240, 13, 0426113066),
-(1241, 14, 0495393437),
-(1242, 15, 0227217727),
-(1243, 16, 0227247797);
+(1234, 1, 0683516687, TRUE),
+(1234, 1, 0683516686, TRUE),
+(1234, 1, 0683516688, TRUE),
+(1235, 1, 1133029791, TRUE),
+(1235, 1, 1133029792, TRUE),
+(1235, 1, 1133029793, TRUE),
+(1236, 1, 210865974, TRUE),
+(1236, 1, 2130865975, TRUE),
+(1236, 1, 2130865976, TRUE),
+(1237, 2, 2111793638, TRUE),
+(1238, 2, 2111793639, TRUE),
+(1238, 3, 2126976686, TRUE),
+(1239, 3, 2126976687, TRUE),
+(1239, 4, 215123547, TRUE),
+(1240, 5, 0887611864, TRUE),
+(1241, 6, 0255725324, TRUE),
+(1242, 7, 0841637857, TRUE),
+(1243, 8, 0108948855, TRUE),
+(1237, 9, 0163971279, TRUE),
+(1238, 11, 0114406247, TRUE),
+(1239, 12, 0758177142, TRUE),
+(1240, 13, 0426113066, TRUE),
+(1241, 14, 0495393437, TRUE),
+(1242, 15, 0227217727, TRUE),
+(1243, 16, 0227247797, TRUE);
 
 
 INSERT into copy_of_item(item_id, item_barcode)
@@ -568,7 +575,17 @@ VALUES
 (16, 0227247797);
 
 INSERT INTO hosts_event(event_id, branch_id)
-VALUES (1234, 1), (1236, 2), (1237, 3), (1240, 4), (1238, 5), (1239, 6), (1241, 7), (1242, 8), (1243, 9);
+VALUES 
+(1234, 1), 
+(1234, 2), -- test value
+(1236, 2), 
+(1237, 3), 
+(1240, 4), 
+(1238, 5), 
+(1239, 6), 
+(1241, 7), 
+(1242, 8), 
+(1243, 9);
 
 INSERT INTO coordinates(card_no, staff_id, event_id)
 VALUES
