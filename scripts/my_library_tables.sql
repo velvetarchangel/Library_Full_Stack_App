@@ -194,7 +194,11 @@ CREATE TABLE signed_out (
     item_id INT NOT NULL, -- PRIMARY KEY,
     CONSTRAINT so_item_id FOREIGN KEY (item_id)
 		REFERENCES item(item_id),
-	CONSTRAINT pk_signed_out PRIMARY KEY (card_no, item_id),
+	item_barcode INT,
+	CONSTRAINT so_item_barcode FOREIGN KEY (item_barcode)
+    REFERENCES copy_of_item(item_barcode),
+	CONSTRAINT pk_signed_out PRIMARY KEY (card_no, item_id, item_barcode),
+	
     checkout_date DATE,
     return_date DATE
 );
