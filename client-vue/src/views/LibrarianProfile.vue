@@ -110,12 +110,15 @@
 <script>
 import EventModal from "../Components/EventModal.vue";
 import ItemModal from "../Components/ItemModal.vue";
+import { getAllLibraryCustomers, getAllEvents } from "../services/apiServices";
+
 export default {
   components: { EventModal, ItemModal },
   data() {
     return {
       isLoading: false,
       items: [],
+      librarianUser: null,
       customerHeaders: [
         {
           text: "Customer name",
@@ -140,119 +143,8 @@ export default {
       tab: null,
       showCustTab: true,
       showEventTab: false,
-      events: [
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-      ],
-      customers: [
-        {
-          //CHANGE ME TO DYNAMIC DATA
-          card_no: 12234577,
-          name: "Himika Dastidar",
-          email: "abc@123.com",
-        },
-        {
-          card_no: 1231234324,
-          name: "Kelly Osena",
-          email: "kosena@test.com",
-        },
-        {
-          card_no: 12132131,
-          name: "Eric Tan",
-          email: "etan@test.com",
-        },
-        {
-          card_no: 12234577,
-          name: "Himika Dastidar",
-          email: "abc@123.com",
-        },
-        {
-          card_no: 1231234324,
-          name: "Kelly Osena",
-          email: "kosena@test.com",
-        },
-        {
-          card_no: 12132131,
-          name: "Eric Tan",
-          email: "etan@test.com",
-        },
-        {
-          card_no: 12234577,
-          name: "Himika Dastidar",
-          email: "abc@123.com",
-        },
-        {
-          card_no: 1231234324,
-          name: "Kelly Osena",
-          email: "kosena@test.com",
-        },
-        {
-          card_no: 12132131,
-          name: "Eric Tan",
-          email: "etan@test.com",
-        },
-        {
-          card_no: 12234577,
-          name: "Himika Dastidar",
-          email: "abc@123.com",
-        },
-        {
-          card_no: 1231234324,
-          name: "Kelly Osena",
-          email: "kosena@test.com",
-        },
-        {
-          card_no: 12132131,
-          name: "Eric Tan",
-          email: "etan@test.com",
-        },
-      ],
+      events: [],
+      customers: [],
       val: "",
       card_no: this.$route.params.card_no,
       name: "Himika", // need to make this dynamic
@@ -268,7 +160,6 @@ export default {
       this.showEventTab = true;
       this.showCustTab = false;
     },
-    // addItem() {},
     signOut() {
       this.$router.push("/");
     },
@@ -278,7 +169,45 @@ export default {
     addItem() {
       this.$refs.itemmodal.show();
     },
+    async getCustomers() {
+      await getAllLibraryCustomers().then((response) => {
+        if (response.status == 200) {
+          var users = response.data;
+          console.log(users);
+          for (let user in users) {
+            var customer = {
+              card_no: user,
+              name: users[user]["first_name"] + " " + users[user]["last_name"],
+              email: users[user]["email"],
+            };
+            this.customers.push(customer);
+          }
+        }
+      });
+    },
+    async getEvents() {
+      await getAllEvents().then((response) => {
+        if (response.status == 200) {
+          let curr_events = response.data;
+          for (let e in curr_events) {
+            var event = {
+              event_name: curr_events[e]["event_name"],
+              e_location: curr_events[e]["event_location"],
+              time: curr_events[e]["event_time"].substring(0, 10),
+              e_coordinator: curr_events[e]["staff_id"],
+            };
+            this.events.push(event);
+          }
+        }
+      });
+    },
   },
+  //Functions that are triggered when page is loaded
+  mounted: function () {
+    this.getCustomers();
+    this.getEvents();
+  },
+
   watch: {
     model(val) {
       if (val != null) this.tab = 0;
