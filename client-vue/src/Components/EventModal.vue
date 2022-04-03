@@ -2,11 +2,6 @@
   <div v-if="showModal">
     <v-row id="modal" justify="center">
       <v-dialog v-model="showModal" persistent max-width="600px">
-        <!-- <template v-slot:activator="{ on, attrs }">
-          <v-btn color="primary" dark v-bind="attrs" v-on="on">
-            Open Dialog
-          </v-btn>
-        </template> -->
         <v-card>
           <v-card-title>
             <span class="text-h5">Event Details</span>
@@ -15,58 +10,65 @@
             <v-container>
               <v-row>
                 <v-col cols="12" sm="6" md="4">
-                  <v-text-field
-                    label="Legal first name*"
-                    required
-                  ></v-text-field>
+                  <v-text-field label="Event Name*" required></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-autocomplete
+                    :items="[
+                      'Central Library',
+                      'Fish Creek Library',
+                      'Shawnessy Library',
+                      'Seton Library',
+                      'Bowness Library',
+                      'Nose Hill Library',
+                      'Crowfoot Library',
+                      'Louise Riley Library',
+                      'Judith Umbach Library',
+                      'Virtual',
+                    ]"
+                    label="Location"
+                    multiple
+                  ></v-autocomplete>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
-                    label="Legal middle name"
+                    label="Coordinator Name"
                     hint="example of helper text only on focus"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
-                    label="Legal last name*"
-                    hint="example of persistent helper text"
-                    persistent-hint
-                    required
+                    type="date"
+                    label="Start Date"
+                    hint="example of helper text only on focus"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12">
-                  <v-text-field label="Email*" required></v-text-field>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                    type="date"
+                    label="End Date"
+                    hint="example of helper text only on focus"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                    type="time"
+                    label="Start Time"
+                    hint="example of helper text only on focus"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                    type="time"
+                    label="End Time"
+                    hint="example of helper text only on focus"
+                  ></v-text-field>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
-                    label="Password*"
-                    type="password"
+                    label=" Coorinator Email*"
                     required
                   ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-select
-                    :items="['0-17', '18-29', '30-54', '54+']"
-                    label="Age*"
-                    required
-                  ></v-select>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-autocomplete
-                    :items="[
-                      'Skiing',
-                      'Ice hockey',
-                      'Soccer',
-                      'Basketball',
-                      'Hockey',
-                      'Reading',
-                      'Writing',
-                      'Coding',
-                      'Basejump',
-                    ]"
-                    label="Interests"
-                    multiple
-                  ></v-autocomplete>
                 </v-col>
               </v-row>
             </v-container>
