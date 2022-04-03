@@ -29,3 +29,31 @@ export async function getUserByEmailAndPassword(user) {
   const response = await axios.post(`${API_URL}/getUser`, user);
   return response;
 }
+
+/**
+ *
+ * @returns an array of library customers
+ */
+export async function getAllLibraryCustomers() {
+  const response = await axios.get(`${API_URL}/users`);
+  return response;
+}
+
+/**
+ *
+ * @returnsan array of events with event id as key
+ */
+export async function getAllEvents() {
+  const response = await axios.get(`${API_URL}/events`);
+  return response;
+}
+
+/**
+ *
+ * @param {*} userId card_no from the front end
+ * @returns a user object with name and email
+ */
+export async function getUserByID(userId) {
+  const response = await axios.get(`${API_URL}/user/${userId}`);
+  return response;
+}

@@ -712,6 +712,54 @@ app.get("/users", (_, res) => {
   });
 });
 
+/**
+ * End point to get unique events.
+ * @returns JSON object with a list of events keyed by event id
+ */
+app.get("/events", (_, res) => {
+  var events = {};
+  var event_query = `SELECT DISTINCT h.event_id, event_name, event_start_date, end_date, start_time, end_time, card_no, staff_id, e_location, branch_id
+  FROM lib_events as l, coordinates as c, event_location as el, hosts_event as h
+  WHERE h.event_id = l.event_id 
+	AND c.event_id = el.event_id
+  AND h.event_id = el.event_id
+  AND c.event_id = l.event_id`;
+  db.query(event_query, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        var event_name = result[i].event_name;
+        var event_time = result[i].event_start_date;
+        var event_location = result[i].e_location;
+        var staff_id = result[i].staff_id;
+        var event_id = result[i].event_id;
+
+        events[event_id] = { event_name, event_time, event_location, staff_id };
+      }
+    }
+    res.status(200);
+    res.send(events);
+  });
+});
+
+app.get("/user/:userId", (req, res) => {
+  var userId = req.params.userId;
+  var userQuery = `SELECT * FROM library_user WHERE card_no = ${userId}`;
+  db.query(userQuery, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      var user = {
+        name: result[0].first_name + " " + result[0].last_name,
+        email: result[0].email,
+      };
+      res.status(200);
+      res.send(user);
+    }
+  });
+});
+
 //kelly
 app.get("/itemRecord/:itemId", (req, res) => {
   //information on who has checked out a particular item
