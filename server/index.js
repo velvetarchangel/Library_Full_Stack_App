@@ -11,7 +11,7 @@ app.use(bodyparser.json());
 const db = mysql.createConnection({
 	user: "root",
 	host: "localhost",
-	password: "mysqlpassword",
+	password: "odd&Oracle68",
 	database: "library",
 });
 
@@ -231,52 +231,41 @@ app.post("/payFines", (req, res) => {
 });
 
 //kelly
-// !!!!IF ITEM HAS TO BE SIGNED OUT FROM SPECIFIC BRANCH, THEN INSTEAD OF ITEM_ID,
-//     IT SHOULD BE THE ITEM BARCODE AS THE IDENTIFIER IN THE SIGNED_OUT TABLE
-//     SO THAT IT CAN BE REFERENCED BACK TO HAS_FOR_BRANCH_AND_ITEMS?????????????
-// !!!!MAYBE ITEM_QUANTITY IN HAS_FOR_BRANCH_AND_ITEMS SHOULD BE A BOOLEAN 'isAvailable'
-//     BECAUSE QUANTITY FOR A SPECIFIC ITEM WITH BARCODE = 1
 /**
- * CURRENTLY: Checks if item input exists in branch input. If item exists, item is checked out
- * with user's card_no, today's date, and a return date being inserted into the signed_out table
- * in database. Otherwise, item is unavailable and signed_out table is not modified.
+ * Checks if item input exists in branch. If item exists, item is checked out
+ * with item_id, user's card_no, item barcode, today's date, and a return date being
+ * inserted into the signed_out table in database. Otherwise, item is unavailable and
+ * signed_out table is not modified.
  *
  * Input:
  *    card_no: card number of user
  *    item_id: id of item
  *    branch_id: id of branch
  *
+ * Output:
+ * 		item_id: id of item
+ *		card_no: card number of user
+ *		item_barcode: barcode of item
+ *		checkout_date: "today"'s date
+ *		return_date: 31 days from "today"
+ *
  */
 app.post("/signout/:itemId/:branchId", (req, res) => {
-	// LATER: add branch_id and items availability in implementation
-	//var unavailable_items = [];
 	var item_copies_in_branch = [];
 	var items_query = `SELECT * from has_for_branch_and_item 
-                      WHERE branch_id=${req.body.branch_id} 
-                      AND item_id=${req.body.item_id}`;
-	/*var items_query = `SELECT * from has_for_branch_and_item 
                       WHERE branch_id = ${req.params.branchId} 
-                      AND item_id = ${req.params.itemId} AND isAvailable='1')`;
-	*/
+                      AND item_id = ${req.params.itemId} AND item_availability='1'`;
+
 	db.query(items_query, function (err, result) {
 		if (err) {
 			console.log(err);
-			/*res.status(400);
-			res.send({
-				message: err,
-			});
-*/
 		} else {
 			for (let i = 0; i < result.length; i++) {
-				//unavailable_items.push(parseInt(result[i]["item_id"]));
 				item_copies_in_branch.push(parseInt(result[i]["item_barcode"]));
 			}
 		}
 
-		//res.send(item_copies_in_branch);
-
 		// If there are no copy of item available in branch
-		//if (unavailable_items.includes(req.body.item_id)) {
 		if (!item_copies_in_branch.length) {
 			res.send({
 				status: 400,
@@ -290,91 +279,43 @@ app.post("/signout/:itemId/:branchId", (req, res) => {
 			duedate.setDate(today.getDate() + 31);
 
 			var item_to_signout = {
-				item_id: req.body.item_id,
+				item_id: req.params.itemId,
 				card_no: req.body.card_no,
+				item_barcode: item_copies_in_branch[0].toString(),
 				checkout_date: today,
 				return_date: duedate,
 			};
 
-			var sql_query =
-				"INSERT INTO signed_out (item_id, card_no, checkout_date, return_date) VALUES(?, ?, ?, ?)";
+			var sql_query = `INSERT INTO signed_out (item_id, card_no, item_barcode, checkout_date, return_date) VALUES(?, ?, ?, ?, ?)`;
 			var item_to_insert = [
 				item_to_signout.item_id,
 				item_to_signout.card_no,
+				item_to_signout.item_barcode,
 				item_to_signout.checkout_date,
 				item_to_signout.return_date,
 			];
 			db.query(sql_query, item_to_insert, function (err) {
 				if (err) {
-					//console.log(err);
 					res.status(400);
 					res.send({
 						message: err,
 					});
 				} else {
-					res.status(200);
 					res.send({ item_to_insert });
 				}
 			});
-		}
-	});
-});
 
-//kelly
-app.post("/hold/:itemId/:card_no", (req, res) => {
-	var maxPosition;
-	var hold_positions = [];
-	var user_pos = [];
-	var items_query = `SELECT DISTINCT * from places_hold WHERE card_no=${req.params.card_no} AND item_id=${req.params.itemId}`;
-
-	db.query(items_query, function (err, result) {
-		if (err) {
-			console.log(err);
-		} else {
-			for (let i = 0; i < result.length; i++) {
-				user_pos.push(parseInt(result[i]["card_no"]));
-				hold_positions.push(parseInt(result[i]["hold_position"]));
-			}
-		}
-
-		// If user has item on hold already
-		if (user_pos.length) {
-			res.send({
-				status: 400,
-				message: "You already have this item on hold",
-			});
-		} else {
-			if (hold_positions.length) {
-				// If user does not have item on hold and there are holds for the item in database
-				// Get highest hold position for the item
-				maxPosition = Math.max(...hold_positions) + 1;
-			} else {
-				// If no holds for item
-				maxPosition = 1;
-			}
-
-			var hold_record = {
-				card_no: req.params.card_no,
-				item_id: req.params.itemId,
-				hold_position: maxPosition,
-			};
-
-			var sql_query =
-				"INSERT INTO places_hold (card_no, item_id, hold_position) VALUES(?, ?, ?)";
-			var item_to_hold = [
-				hold_record.card_no,
-				hold_record.item_id,
-				hold_record.hold_position,
-			];
-			db.query(sql_query, item_to_hold, function (err) {
+			// Update item availability in has_for_branch_and_item
+			var barcode = item_copies_in_branch[0].toString();
+			var sql_update = `UPDATE has_for_branch_and_item SET item_availability='0' WHERE item_barcode=${barcode}`;
+			db.query(sql_update, function (err) {
 				if (err) {
 					res.status(400);
 					res.send({
-						message: err,
+						message: item_copies_in_branch[0],
 					});
 				} else {
 					res.status(200);
-					res.send({ item_to_hold });
 				}
 			});
 		}
@@ -383,35 +324,147 @@ app.post("/hold/:itemId/:card_no", (req, res) => {
 
 //kelly
 /**
- * Gets all signed out items by a user
+ * Checks multiple things: (1) if copies of item exist in library, (2) if user has already put
+ * a copy of the item on hold, and (3) if there already exists hold/s for the item in database.
+ * If user does not have item put on hold yet, they may put item on hold with a card_no, item_id,
+ * and a return hold position being inserted into the places_hold table in database. Otherwise,
+ * user may not put item on hold again and places_hold table is not modified. Similarly, item
+ * cannot be put on hold if no copies exist in database.
+ *
+ * Input:
+ *    card_no: card number of user
+ *    item_id: id of item
+ *
+ * Output:
+ * 		card_no: card number of user
+ *		item_id: id of item
+ *		hold_position: user's place in waiting list for holds, generated for user
+ *
+ */
+app.post("/hold/:itemId/:card_no", (req, res) => {
+	var maxPosition;
+	var hold_positions = [];
+	var user_pos = [];
+	var copies_in_branches = [];
+	var item_copy_query = `SELECT * from has_for_branch_and_item WHERE item_id = ${req.params.itemId}`;
+	var items_query = `SELECT DISTINCT * from places_hold WHERE card_no=${req.params.card_no} AND item_id=${req.params.itemId}`;
+	var holds_query = `SELECT * from places_hold WHERE item_id=${req.params.itemId}`;
+
+	db.query(item_copy_query, function (err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			for (let i = 0; i < result.length; i++) {
+				copies_in_branches.push(parseInt(result[i]["item_barcode"]));
+			}
+		}
+
+		// If there are no copies of item in any branch
+		if (!copies_in_branches.length) {
+			res.send({
+				status: 400,
+				message: "Item is currently unavailable",
+			});
+		} else {
+			db.query(items_query, function (err, result) {
+				if (err) {
+					console.log(err);
+				} else {
+					for (let i = 0; i < result.length; i++) {
+						user_pos.push(parseInt(result[i]["card_no"]));
+					}
+				}
+
+				// If user has item on hold already
+				if (user_pos.length) {
+					res.send({
+						status: 400,
+						message: "You already have this item on hold",
+					});
+				} else {
+					// If there exists copies of item in database and user does not have item on hold
+					db.query(holds_query, function (err, result) {
+						if (err) {
+							console.log(err);
+						} else {
+							for (let i = 0; i < result.length; i++) {
+								hold_positions.push(parseInt(result[i]["hold_position"]));
+							}
+						}
+
+						if (hold_positions.length) {
+							// If there are holds for the item in database
+							// Get highest hold position for the item
+							maxPosition = (Math.max(...hold_positions) + 1).toString();
+						} else {
+							// If no holds for item
+							maxPosition = "1";
+						}
+
+						var hold_record = {
+							card_no: req.params.card_no,
+							item_id: req.params.itemId,
+							hold_position: maxPosition,
+						};
+
+						var sql_query =
+							"INSERT INTO places_hold (card_no, item_id, hold_position) VALUES(?, ?, ?)";
+						var item_to_hold = [
+							hold_record.card_no,
+							hold_record.item_id,
+							hold_record.hold_position,
+						];
+						db.query(sql_query, item_to_hold, function (err) {
+							if (err) {
+								res.status(400);
+								res.send({
+									message: err,
+								});
+							} else {
+								res.status(200);
+								res.send({ item_to_hold });
+							}
+						});
+					});
+				}
+			});
+		}
+	});
+});
+
+//kelly
+/**
+ * Gets all current signed out items by a user
  *
  * Input:
  *    card_no: card number of user
  *
  * Output:
  *    loaned_items: array of item_id
+ * 			item_name,
+ * 			item_desc,
+ *			item_barcode,
+ *			checkout_date,
+ *			return_date
  */
 app.get("/loanedItems/:card_no", (req, res) => {
 	var loaned_items = {};
 	var signedout_query = `SELECT DISTINCT * from signed_out as s, item as i
-                        WHERE
-                        (s.item_id = i.item_id AND
+                        WHERE (s.item_id = i.item_id AND
                         s.card_no = ${req.params.card_no})`;
 
 	db.query(signedout_query, function (err, result) {
 		if (err) {
 			console.log(err);
 		} else {
-			// console.log(result);
 			for (let i = 0; i < result.length; i++) {
 				var item_id = result[i].item_id;
 				var item_name = result[i].item_name;
 				var item_desc = result[i].item_desc;
-				var item_barcode;
+				var item_barcode = result[i].item_barcode;
 				var checkout_date = result[i].checkout_date;
 				var return_date = result[i].return_date;
 
-				//loaned_items[item_id] = { item_name, item_desc };
 				loaned_items[item_id] = {
 					item_name,
 					item_desc,
@@ -421,14 +474,21 @@ app.get("/loanedItems/:card_no", (req, res) => {
 				};
 			}
 		}
-		res.status(200);
-		res.send(loaned_items);
+		if (!loaned_items.length) {
+			res.status(200);
+			res.send({
+				message: "User has no items checked out",
+			});
+		} else {
+			res.status(200);
+			res.send(loaned_items);
+		}
 	});
 });
 
 //kelly
 /**
- * Gets all items put on hold by a user
+ * Gets all items currently put on hold by a user
  *
  * Input:
  *    card_no: card number of user
@@ -447,6 +507,14 @@ app.get("/holds/:card_no", (req, res) => {
 			for (let i = 0; i < result.length; i++) {
 				items_on_hold.push(parseInt(result[i]["item_id"]));
 			}
+		}
+		if (!items_on_hold.length) {
+			res.status(200);
+			res.send({
+				message: "User has no items put on hold",
+			});
+		} else {
+			res.status(200);
 			res.send({ items_on_hold });
 		}
 	});
@@ -771,13 +839,9 @@ app.get("/searchDirector", (req, res) => {});
 app.get("/searchActor", (req, res) => {});
 
 //kelly
-//sees all the users and their records/ actual info. json object
-// ^ about that, i was thinking this gets all attribs of a user and
-// when a user info is clicked THEN it directs to the full
-// record of the user ???? like a /getUserRecord? - kelly
 /**
  * Fetches basic info such as card_no, email, first and last name of
- * library customers (users that are not librarian) ***UNLESS LIBRARIANS INCLUDED????
+ * library customers (users that are not librarian)
  *
  * Inputs:
  *    none
@@ -809,36 +873,47 @@ app.get("/users", (req, res) => {
 
 //kelly
 //information on who has checked out a particular item
-// LATER: think about using barcode of item instead of id !!!!!!
 /**
- * Gets the user who has
+ * Gets user(s) who has item checked out
  *
  * Input:
  *    itemId: item_id of item checked out a particular item
  *
  * Output:
- *    user: card_no of user that has the item signed out
+ *    users:
+ * 			card_no of user,
+ * 			barcode of item signed out,
+ * 			return date of item
  */
 app.get("/itemRecord/:itemId", (req, res) => {
-	var user;
+	var users = [];
 	var signedout_query = `SELECT * from signed_out WHERE item_id = ${req.params.itemId})`;
 
 	db.query(signedout_query, function (err, result) {
 		if (err) {
 			console.log(err);
 		} else {
-			// console.log(result);
 			for (let i = 0; i < result.length; i++) {
-				user = result[i].card_no;
+				var card_no = result[i].card_no;
+				var item_barcode = result[i].item_barcode;
+				var return_date = result[i].return_date;
+
+				users = { card_no, item_barcode, return_date };
 			}
 		}
-		res.status(200);
-		res.send(user);
+		if (!users.length) {
+			res.status(200);
+			res.send({
+				message: "Item not signed out by any user",
+			});
+		} else {
+			res.status(200);
+			res.send(users);
+		}
 	});
 });
 
 //Kelly
-// SHOULD I SHOW ALL ITEM ATTRIBS ON THIS PAGE CUS ITEM DESCRIPTIONS ARE PRETTY SHORT ANYWAY????
 /**
  * Gets all items in database
  *
@@ -848,7 +923,7 @@ app.get("/itemRecord/:itemId", (req, res) => {
  * Output:
  *    all_items: array of json object of library items
  */
-app.get("/items", (req, res) => {
+app.get("/items", (_, res) => {
 	var all_items = {};
 	var item_query = `SELECT * from item`;
 
@@ -859,9 +934,12 @@ app.get("/items", (req, res) => {
 			for (let i = 0; i < result.length; i++) {
 				var item_id = result[i].item_id;
 				var item_name = result[i].item_name;
-				var release_date = result[i].release_date;
+				var release_date = result[i].release_date.toDateString(); //mysql date format
 				var item_desc = result[i].item_desc;
 				var item_availability = result[i].item_availability;
+
+				// Take day of week out of date string
+				release_date = release_date.split(" ").slice(1).join(" ");
 
 				all_items[item_id] = {
 					item_name,
