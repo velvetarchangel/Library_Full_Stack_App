@@ -12,7 +12,7 @@ app.use(bodyparser.json());
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
-  password: "mysqlpassword",
+  password: "password1!",
   database: "library",
 });
 
@@ -339,6 +339,8 @@ app.post("/userRegistersEvents", (req, res) => {
   });
 });
 
+
+//update this so it sends all the event info, not just the name of the event
 /**
  * Finds all the events that a user is registered for
  *
@@ -372,27 +374,45 @@ app.get("/getUserRegisteredEvents", (req, res) => {
  * CURRENT IMPLEMENTATION: The librarian needs to add a unique event ID as they are entering events to the database;
  * this is because there can be multiple events with the same name and we need a way to identify these.
  */
+
+//add query for coordinates info
 app.post("/createEvent", (req, res) => {
   var all_events = [];
+  var all_event_id = [];
+
   var event_query = `SELECT * FROM lib_events`;
   db.query(event_query, function (err, result) {
     if (err) {
       console.log(err);
     } else {
       for (let i = 0; i < result.length; i++) {
-        all_events.push(parseInt(result[i]["event_id"]));
+        all_event_id.push(parseInt(result[i]["event_id"]));
       }
     }
+  });
+
+  var event_query = `SELECT * FROM lib_events NATURAL JOIN event_location WHERE event_name='${req.body.event_name}' AND event_start_date='${req.body.event_start_date}' 
+  AND end_date='${req.body.end_date}' AND start_time='${req.body.start_time}' AND end_time='${req.body.end_time}' AND e_location='${req.body.e_location}' `;
+  db.query(event_query, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        all_events.push(result[i]["event_name"]); //change to ???
+        all_event_id.push(parseInt(result[i]["event_id"]));
+      }
+    }
+
     // check if event is unique based on item name
-    if (all_events.includes(req.body.event_id)) {
+    if (all_events.includes(req.body.event_name)) {
       res.send({
         status: 400,
-        message: "Item already exists in database",
+        message: "Event already exists in database",
       });
     } else {
       var event_to_add = {
         //event to add to object
-        event_id: req.body.event_id,
+        event_id: Math.max(...all_event_id) + 1,  
         event_name: req.body.event_name,
         event_start_date: req.body.event_start_date,
         end_date: req.body.end_date,
@@ -455,9 +475,10 @@ app.post("/createEvent", (req, res) => {
  * it will also be added to the movie/book database depending on the type of the item. May be modified to check whether a complete matching
  * record is in DB via SQL.
  */
+//make sure to send 1 of book or movie isbn/imdb as null depending on item type during front-end connection
 app.post("/addItem", (req, res) => {
-  var all_items = [];
-  var all_item_name = [];
+  var all_items = []; //for creating new item ids
+  var all_item_name = []; //for checking if item exists in db yet
   var item_query = `SELECT * FROM item`;
   db.query(item_query, function (err, result) {
     if (err) {
@@ -474,8 +495,151 @@ app.post("/addItem", (req, res) => {
         status: 400,
         message: "Item already exists in database",
       });
-    } else {
+    } 
+    else {
       // Generate a item id
+      var max_id = Math.max(...all_items) + 1;
+      var item_to_add = {
+        //item to add object
+        item_name: req.body.item_name,
+        item_desc: req.body.item_desc,
+        release_date: req.body.release_date,
+        item_availability: 1, //bool
+        item_id: max_id,
+      };
+
+      var sql_query =
+        "INSERT INTO item (item_id, release_date, item_desc, item_name, item_availability) VALUES(?, ?, ?, ?, ?);";
+      var item_arr = [
+        item_to_add.item_id,
+        item_to_add.release_date,
+        item_to_add.item_desc,
+        item_to_add.item_name,
+        item_to_add.item_availability,
+      ];
+      db.query(sql_query, item_arr, function (err) {
+        if (err) {
+          res.status(400);
+          res.send({
+            message: err,
+          });
+        } else {
+          res.status(200);
+        }
+      });
+      console.log(item_to_add);
+
+      //if item is a movie
+      if (req.body.isbn == "null") {
+        var movies_query =
+          "INSERT INTO movies (item_id, production_company, imdb_id, duration) VALUES (?, ?, ?, ?)";
+        var movie_rec = [
+          item_to_add.item_id,
+          req.body.production_company,
+          req.body.imdb_id,
+          req.body.duration,
+        ];
+        db.query(movies_query, movie_rec, function (err) {
+          if (err) {
+            res.status(400);
+            res.send({
+              message: err,
+            });
+          } else {
+            res.status(200);
+           // res.send({ item_to_add });
+          }
+        });
+      }
+
+      //if item is a book
+      else {
+        var books_query =
+          "INSERT INTO book (item_id, isbn, publisher_name, book_type) VALUES (?, ?, ?, ?)";
+        var book_rec = [
+          item_to_add.item_id,
+          req.body.isbn,
+          req.body.publisher_name,
+          req.body.book_type,
+        ];
+        db.query(books_query, book_rec, function (err) {
+          if (err) {
+            res.status(400);
+            res.send({
+              message: err,
+            });
+          } else {
+            res.status(200);
+           // res.send({ item_to_add });
+          }
+        });
+      }
+
+      //add a copy of the item
+      var copy_barcodes = []; //finding the max barcode to create
+      var max_barcode;
+      var event_query = `SELECT * FROM copy_of_item`;
+      db.query(event_query, function (err, result) {
+      if (err) {
+        console.log(err);
+      } else {
+        //var max_barcode;
+          for (let i = 0; i < result.length; i++) {
+            console.log(result[i]["item_barcode"]);
+          copy_barcodes.push(parseInt(result[i]["item_barcode"]));
+       }
+
+      max_barcode = Math.max(...copy_barcodes) + 1; 
+      console.log("max barcode " + max_barcode);
+      
+      var copy_item_query = "INSERT INTO copy_of_item (item_barcode, item_id) VALUES (?,?)";
+     
+      var copy_item_rec = [
+        max_barcode,
+        item_to_add.item_id
+      ];
+      db.query(copy_item_query, copy_item_rec, function (err) {
+        if (err) {
+          res.status(400);
+          res.send({
+            message: err,
+          });
+        } else {
+          res.status(200);
+          res.send({item_to_add, copy_item_rec });
+        }
+      });
+    
+      }
+      });
+    }
+  });
+}); //added this
+
+
+
+
+app.post("/addItemCopy", (req, res) => {
+  var all_items = [];
+  var all_item_copy_bc = [];
+  var item_query = `SELECT * FROM item`;
+  db.query(item_query, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        all_items.push(parseInt(result[i]["item_id"]));
+        all_item_copy_bc.push(parseInt(result[i]["item_barcode"]));
+      }
+    }
+    // check if item is unique based on item name
+    if (!all_item_name.includes(req.body.item_name)) {
+      res.send({
+        status: 400,
+        message: "Item not in database. Cannot create copy",
+      });
+    } else {
+      // Generate a barcode id
       var max_id = Math.max(...all_items) + 1;
       var item_to_add = {
         //item to add object
@@ -555,6 +719,10 @@ app.post("/addItem", (req, res) => {
     }
   });
 }); //added this
+
+
+
+
 
 //himika (searching)
 app.get("/search/:searchType/:searchTerm", (req, res) => {
