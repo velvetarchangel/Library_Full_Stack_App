@@ -190,11 +190,12 @@ export default {
       await getAllLibraryCustomers().then((response) => {
         if (response.status == 200) {
           var users = response.data;
-          for (let user in users) {
+          console.log(users);
+          for (let i = 0; i < users.length; i++) {
             var customer = {
-              card_no: user,
-              name: users[user]["first_name"] + " " + users[user]["last_name"],
-              email: users[user]["email"],
+              card_no: users[i].card_no,
+              name: users[i]["first_name"] + " " + users[i]["last_name"],
+              email: users[i]["email"],
             };
             this.customers.push(customer);
           }
