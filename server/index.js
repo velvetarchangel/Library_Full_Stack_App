@@ -462,13 +462,18 @@ app.get("/loanedItems/:card_no", (req, res) => {
 			for (let i = 0; i < result.length; i++) {
 				var item_id = result[i].item_id;
 				var item_name = result[i].item_name;
+				var release_date = result[i].release_date.toDateString(); //mysql date format
 				var item_desc = result[i].item_desc;
 				var item_barcode = result[i].item_barcode.toString();
 				var checkout_date = result[i].checkout_date;
 				var return_date = result[i].return_date;
 
+				// Take day of week out of date string
+				release_date = release_date.split(" ").slice(1).join(" ");
+
 				loaned_items[item_id] = {
 					item_name,
+					release_date,
 					item_desc,
 					item_barcode,
 					checkout_date,
@@ -508,11 +513,16 @@ app.get("/holds/:card_no", (req, res) => {
 			for (let i = 0; i < result.length; i++) {
 				var item_id = result[i].item_id;
 				var item_name = result[i].item_name;
+				var release_date = result[i].release_date.toDateString(); //mysql date format
 				var item_desc = result[i].item_desc;
 				var hold_position = result[i].hold_position.toString();
 
+				// Take day of week out of date string
+				release_date = release_date.split(" ").slice(1).join(" ");
+
 				items_on_hold[item_id] = {
 					item_name,
+					release_date,
 					item_desc,
 					hold_position,
 				};
