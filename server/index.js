@@ -442,7 +442,7 @@ app.post("/hold/:itemId/:card_no", (req, res) => {
  *    card_no: card number of user
  *
  * Output:
- *    loaned_items: array of item_id
+ *    loaned_items: item_id objects with values:
  * 			item_name,
  * 			item_desc,
  *			item_barcode,
@@ -462,13 +462,18 @@ app.get("/loanedItems/:card_no", (req, res) => {
 			for (let i = 0; i < result.length; i++) {
 				var item_id = result[i].item_id;
 				var item_name = result[i].item_name;
+				var release_date = result[i].release_date.toDateString(); //mysql date format
 				var item_desc = result[i].item_desc;
 				var item_barcode = result[i].item_barcode.toString();
 				var checkout_date = result[i].checkout_date;
 				var return_date = result[i].return_date;
 
+				// Take day of week out of date string
+				release_date = release_date.split(" ").slice(1).join(" ");
+
 				loaned_items[item_id] = {
 					item_name,
+					release_date,
 					item_desc,
 					item_barcode,
 					checkout_date,
@@ -489,29 +494,42 @@ app.get("/loanedItems/:card_no", (req, res) => {
  *    card_no: card number of user
  *
  * Output:
- *    checkedout_item: array of item_id
+ *    items_on_hold: item_id objects with values:
+ * 			item_name,
+ * 			item_desc,
+ * 			hold_position,
+ *
  */
 app.get("/holds/:card_no", (req, res) => {
-	var items_on_hold = [];
-	var holds_query = `SELECT * FROM places_hold WHERE card_no='${req.params.card_no}'`;
+	var items_on_hold = {};
+	var holds_query = `SELECT DISTINCT * FROM places_hold as p, item as i 
+										WHERE (p.item_id = i.item_id AND 
+										p.card_no=${req.params.card_no})`;
 
 	db.query(holds_query, function (err, result) {
 		if (err) {
 			console.log(err);
 		} else {
 			for (let i = 0; i < result.length; i++) {
-				items_on_hold.push(parseInt(result[i]["item_id"]));
+				var item_id = result[i].item_id;
+				var item_name = result[i].item_name;
+				var release_date = result[i].release_date.toDateString(); //mysql date format
+				var item_desc = result[i].item_desc;
+				var hold_position = result[i].hold_position.toString();
+
+				// Take day of week out of date string
+				release_date = release_date.split(" ").slice(1).join(" ");
+
+				items_on_hold[item_id] = {
+					item_name,
+					release_date,
+					item_desc,
+					hold_position,
+				};
 			}
 		}
-		if (!items_on_hold.length) {
-			res.status(200);
-			res.send({
-				message: "User has no items put on hold",
-			});
-		} else {
-			res.status(200);
-			res.send({ items_on_hold });
-		}
+		res.status(200);
+		res.send(items_on_hold);
 	});
 });
 
@@ -1022,7 +1040,7 @@ app.get("/events", (_, res) => {
  *    itemId: item_id of item checked out a particular item
  *
  * Output:
- *    users:
+ *    users: objects with values:
  * 			card_no of user,
  * 			barcode of item signed out,
  * 			return date of item
@@ -1056,7 +1074,12 @@ app.get("/itemRecord/:itemId", (req, res) => {
  *    none
  *
  * Output:
- *    all_items: array of json object of library items
+ *    all_items: item_id objects with values:
+ * 			item_name,
+ * 			release_date,
+ * 			item_desc,
+ * 			item_availability
+ *
  */
 app.get("/items", (_, res) => {
 	var all_items = {};
