@@ -303,7 +303,7 @@ app.post("/signout/:itemId/:branchId", (req, res) => {
 						message: err,
 					});
 				} else {
-					res.send({ item_to_insert });
+					res.send([item_to_signout]);
 				}
 			});
 
@@ -442,7 +442,8 @@ app.post("/hold/:itemId/:card_no", (req, res) => {
  *    card_no: card number of user
  *
  * Output:
- *    loaned_items: item_id objects with values:
+ *    loaned_items: array of objects with values:
+ * 			item_id,
  * 			item_name,
  * 			item_desc,
  *			item_barcode,
@@ -450,7 +451,7 @@ app.post("/hold/:itemId/:card_no", (req, res) => {
  *			return_date
  */
 app.get("/loanedItems/:card_no", (req, res) => {
-	var loaned_items = {};
+	var loaned_items = [];
 	var signedout_query = `SELECT DISTINCT * from signed_out as s, item as i
                         WHERE (s.item_id = i.item_id AND
                         s.card_no = ${req.params.card_no})`;
@@ -471,7 +472,8 @@ app.get("/loanedItems/:card_no", (req, res) => {
 				// Take day of week out of date string
 				release_date = release_date.split(" ").slice(1).join(" ");
 
-				loaned_items[item_id] = {
+				var item = {
+					item_id,
 					item_name,
 					release_date,
 					item_desc,
@@ -479,6 +481,7 @@ app.get("/loanedItems/:card_no", (req, res) => {
 					checkout_date,
 					return_date,
 				};
+				loaned_items.push(item);
 			}
 		}
 		res.status(200);
@@ -494,14 +497,15 @@ app.get("/loanedItems/:card_no", (req, res) => {
  *    card_no: card number of user
  *
  * Output:
- *    items_on_hold: item_id objects with values:
+ *    items_on_hold: array of objects with values:
+ * 			item_id,
  * 			item_name,
  * 			item_desc,
  * 			hold_position,
  *
  */
 app.get("/holds/:card_no", (req, res) => {
-	var items_on_hold = {};
+	var items_on_hold = [];
 	var holds_query = `SELECT DISTINCT * FROM places_hold as p, item as i 
 										WHERE (p.item_id = i.item_id AND 
 										p.card_no=${req.params.card_no})`;
@@ -520,12 +524,14 @@ app.get("/holds/:card_no", (req, res) => {
 				// Take day of week out of date string
 				release_date = release_date.split(" ").slice(1).join(" ");
 
-				items_on_hold[item_id] = {
+				var item = {
+					item_id,
 					item_name,
 					release_date,
 					item_desc,
 					hold_position,
 				};
+				items_on_hold.push(item);
 			}
 		}
 		res.status(200);
@@ -976,10 +982,10 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
  *    none
  *
  * Output:
- *    customers: objects of library customer
+ *    customers: array of objects of library customers
  */
 app.get("/users", (_, res) => {
-	var customers = {};
+	var customers = [];
 	var user_query = `SELECT * from library_user WHERE isLibrarian='0'`;
 
 	db.query(user_query, function (err, result) {
@@ -992,7 +998,8 @@ app.get("/users", (_, res) => {
 				var last_name = result[i].last_name;
 				var email = result[i].email;
 
-				customers[card_no] = { first_name, last_name, email };
+				var object = { card_no, first_name, last_name, email };
+				customers.push(object);
 			}
 		}
 		res.status(200);
@@ -1040,13 +1047,13 @@ app.get("/events", (_, res) => {
  *    itemId: item_id of item checked out a particular item
  *
  * Output:
- *    users: objects with values:
+ *    all_users: array of objects with values:
  * 			card_no of user,
  * 			barcode of item signed out,
  * 			return date of item
  */
 app.get("/itemRecord/:itemId", (req, res) => {
-	var user = {};
+	var all_users = [];
 	var signedout_query = `SELECT * from signed_out WHERE item_id = ${req.params.itemId}`;
 
 	db.query(signedout_query, function (err, result) {
@@ -1058,11 +1065,12 @@ app.get("/itemRecord/:itemId", (req, res) => {
 				var item_barcode = result[i].item_barcode;
 				var return_date = result[i].return_date;
 
-				user = { card_no, item_barcode, return_date };
+				var user = { card_no, item_barcode, return_date };
+				all_users.push(user);
 			}
 		}
 		res.status(200);
-		res.send(user);
+		res.send(all_users);
 	});
 });
 
@@ -1074,7 +1082,8 @@ app.get("/itemRecord/:itemId", (req, res) => {
  *    none
  *
  * Output:
- *    all_items: item_id objects with values:
+ *    all_items: array of item objects with values:
+ * 			item_id,
  * 			item_name,
  * 			release_date,
  * 			item_desc,
@@ -1082,7 +1091,7 @@ app.get("/itemRecord/:itemId", (req, res) => {
  *
  */
 app.get("/items", (_, res) => {
-	var all_items = {};
+	var all_items = [];
 	var item_query = `SELECT * from item`;
 
 	db.query(item_query, function (err, result) {
@@ -1099,12 +1108,14 @@ app.get("/items", (_, res) => {
 				// Take day of week out of date string
 				release_date = release_date.split(" ").slice(1).join(" ");
 
-				all_items[item_id] = {
+				var item = {
+					item_id,
 					item_name,
 					release_date,
 					item_desc,
 					item_availability,
 				};
+				all_items.push(item);
 			}
 		}
 		res.status(200);
