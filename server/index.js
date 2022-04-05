@@ -984,7 +984,7 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
  *    customers: objects of library customer
  */
 app.get("/users", (_, res) => {
-  var customers = {};
+  var customers = [];
   var user_query = `SELECT * from library_user WHERE isLibrarian='0'`;
 
   db.query(user_query, function (err, result) {
@@ -997,7 +997,8 @@ app.get("/users", (_, res) => {
         var last_name = result[i].last_name;
         var email = result[i].email;
 
-        customers[card_no] = { first_name, last_name, email };
+        var object = { card_no, first_name, last_name, email };
+        customers.push(object);
       }
     }
     res.status(200);
