@@ -57,3 +57,22 @@ export async function getUserByID(userId) {
   const response = await axios.get(`${API_URL}/user/${userId}`);
   return response;
 }
+
+/**
+ *
+ * @param {*} userId
+ * @returns
+ */
+export async function getUserLoanedItems(userId) {
+  const response = await axios.get(`${API_URL}/loanedItems/${userId}`);
+  return response;
+}
+/**
+ *
+ * @param {*} userId
+ * @returns
+ */
+export async function getUserHoldItems(userId) {
+  const response = await axios.get(`${API_URL}/holds/${userId}`);
+  return response;
+}
