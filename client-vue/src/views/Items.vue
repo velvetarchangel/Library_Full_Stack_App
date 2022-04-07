@@ -16,9 +16,14 @@
 							<div v-if="item.show === true">
 								<v-card-title>{{ item.item_name }}</v-card-title>
 							</div>
-							<v-card-subtitle
-								>{{ item.item_type }}, {{ item.release_date }}</v-card-subtitle
-							>
+							<div v-if="tab === 'items'">
+								<div class="grey--text ms-4">
+									{{ item.item_type }}, {{ item.release_date }}
+								</div>
+							</div>
+							<div v-else>
+								<div class="grey--text ms-4">{{ item.release_date }}</div>
+							</div>
 
 							<v-card-actions>
 								<v-btn
