@@ -89,7 +89,7 @@ body {
 }
 
 header {
-	height: 65px;
+	height: 108px;
 	box-shadow: 2px 2px 5px rgb(206, 183, 171);
 	background-color: rgb(245, 148, 78);
 	text-align: right;
