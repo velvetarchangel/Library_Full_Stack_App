@@ -76,3 +76,11 @@ export async function getUserHoldItems(userId) {
   const response = await axios.get(`${API_URL}/holds/${userId}`);
   return response;
 }
+
+export async function getSearchResults(searchType, searchTerm) {
+  const response = await axios.get(
+    `${API_URL}/search/${searchType}/${searchTerm}`
+  );
+  console.log(searchType, searchTerm);
+  return response;
+}
