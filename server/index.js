@@ -258,70 +258,70 @@ app.post("/signout/:itemId/:branchId", (req, res) => {
                       WHERE branch_id = ${req.params.branchId} 
                       AND item_id = ${req.params.itemId} AND item_availability='1'`;
 
-  db.query(items_query, function (err, result) {
-    if (err) {
-      console.log(err);
-    } else {
-      for (let i = 0; i < result.length; i++) {
-        item_copies_in_branch.push(parseInt(result[i]["item_barcode"]));
-      }
-    }
+	db.query(items_query, function (err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			for (let i = 0; i < result.length; i++) {
+				item_copies_in_branch.push(parseInt(result[i]["item_barcode"]));
+			}
+		}
 
-    // If there are no copy of item available in branch
-    if (!item_copies_in_branch.length) {
-      res.send({
-        status: 400,
-        message: "Item is currently unavailable to signout",
-      });
-    } else {
-      let today = new Date();
+		// If there are no copy of item available in branch
+		if (!item_copies_in_branch.length) {
+			res.send({
+				status: 400,
+				message: "Item is currently unavailable to signout",
+			});
+		} else {
+			let today = new Date();
 
-      // Set a return_date
-      var duedate = new Date();
-      duedate.setDate(today.getDate() + 31);
+			// Set a return_date
+			var duedate = new Date();
+			duedate.setDate(today.getDate() + 31);
 
-      var item_to_signout = {
-        item_id: req.params.itemId,
-        card_no: req.body.card_no,
-        item_barcode: item_copies_in_branch[0].toString(),
-        checkout_date: today,
-        return_date: duedate,
-      };
+			var item_to_signout = {
+				item_id: req.params.itemId,
+				card_no: req.body.card_no,
+				item_barcode: item_copies_in_branch[0].toString(),
+				checkout_date: today,
+				return_date: duedate,
+			};
 
-      var sql_query = `INSERT INTO signed_out (item_id, card_no, item_barcode, checkout_date, return_date) VALUES(?, ?, ?, ?, ?)`;
-      var item_to_insert = [
-        item_to_signout.item_id,
-        item_to_signout.card_no,
-        item_to_signout.item_barcode,
-        item_to_signout.checkout_date,
-        item_to_signout.return_date,
-      ];
-      db.query(sql_query, item_to_insert, function (err) {
-        if (err) {
-          res.status(400);
-          res.send({
-            message: err,
-          });
-        } else {
-          res.send({ item_to_insert });
-        }
-      });
+			var sql_query = `INSERT INTO signed_out (item_id, card_no, item_barcode, checkout_date, return_date) VALUES(?, ?, ?, ?, ?)`;
+			var item_to_insert = [
+				item_to_signout.item_id,
+				item_to_signout.card_no,
+				item_to_signout.item_barcode,
+				item_to_signout.checkout_date,
+				item_to_signout.return_date,
+			];
+			db.query(sql_query, item_to_insert, function (err) {
+				if (err) {
+					res.status(400);
+					res.send({
+						message: err,
+					});
+				} else {
+					res.send([item_to_signout]);
+				}
+			});
 
-      // Update item availability in has_for_branch_and_item
-      var barcode = item_copies_in_branch[0].toString();
-      var sql_update = `UPDATE has_for_branch_and_item SET item_availability='0' WHERE item_barcode=${barcode}`;
-      db.query(sql_update, function (err) {
-        if (err) {
-          res.status(400);
-          res.send({
-            message: item_copies_in_branch[0],
-          });
-        } else {
-          res.status(200);
-        }
-      });
-    }
-  });
+			// Update item availability in has_for_branch_and_item
+			var barcode = item_copies_in_branch[0].toString();
+			var sql_update = `UPDATE has_for_branch_and_item SET item_availability='0' WHERE item_barcode=${barcode}`;
+			db.query(sql_update, function (err) {
+				if (err) {
+					res.status(400);
+					res.send({
+						message: item_copies_in_branch[0],
+					});
+				} else {
+					res.status(200);
+				}
+			});
+		}
+	});
 });
 
 //kelly
@@ -442,7 +442,8 @@ app.post("/hold/:itemId/:card_no", (req, res) => {
  *    card_no: card number of user
  *
  * Output:
- *    loaned_items: item_id objects with values:
+ *    loaned_items: array of objects with values:
+ * 			item_id,
  * 			item_name,
  * 			item_desc,
  *			item_barcode,
@@ -450,42 +451,42 @@ app.post("/hold/:itemId/:card_no", (req, res) => {
  *			return_date
  */
 app.get("/loanedItems/:card_no", (req, res) => {
-  var loaned_items = [];
-  var signedout_query = `SELECT DISTINCT * from signed_out as s, item as i
+	var loaned_items = [];
+	var signedout_query = `SELECT DISTINCT * from signed_out as s, item as i
                         WHERE (s.item_id = i.item_id AND
                         s.card_no = ${req.params.card_no})`;
 
-  db.query(signedout_query, function (err, result) {
-    if (err) {
-      console.log(err);
-    } else {
-      for (let i = 0; i < result.length; i++) {
-        var item_id = result[i].item_id;
-        var item_name = result[i].item_name;
-        var release_date = result[i].release_date.toDateString(); //mysql date format
-        var item_desc = result[i].item_desc;
-        var item_barcode = result[i].item_barcode.toString();
-        var checkout_date = result[i].checkout_date;
-        var return_date = result[i].return_date;
+	db.query(signedout_query, function (err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			for (let i = 0; i < result.length; i++) {
+				var item_id = result[i].item_id;
+				var item_name = result[i].item_name;
+				var release_date = result[i].release_date.toDateString(); //mysql date format
+				var item_desc = result[i].item_desc;
+				var item_barcode = result[i].item_barcode.toString();
+				var checkout_date = result[i].checkout_date;
+				var return_date = result[i].return_date;
 
-        // Take day of week out of date string
-        release_date = release_date.split(" ").slice(1).join(" ");
+				// Take day of week out of date string
+				release_date = release_date.split(" ").slice(1).join(" ");
 
-        var item = {
-          item_id,
-          item_name,
-          release_date,
-          item_desc,
-          item_barcode,
-          checkout_date,
-          return_date,
-        };
-        loaned_items.push(item);
-      }
-    }
-    res.status(200);
-    res.send(loaned_items);
-  });
+				var item = {
+					item_id,
+					item_name,
+					release_date,
+					item_desc,
+					item_barcode,
+					checkout_date,
+					return_date,
+				};
+				loaned_items.push(item);
+			}
+		}
+		res.status(200);
+		res.send(loaned_items);
+	});
 });
 
 //kelly
@@ -496,45 +497,46 @@ app.get("/loanedItems/:card_no", (req, res) => {
  *    card_no: card number of user
  *
  * Output:
- *    items_on_hold: item_id objects with values:
+ *    items_on_hold: array of objects with values:
+ * 			item_id,
  * 			item_name,
  * 			item_desc,
  * 			hold_position,
  *
  */
 app.get("/holds/:card_no", (req, res) => {
-  var items_on_hold = [];
-  var holds_query = `SELECT DISTINCT * FROM places_hold as p, item as i 
+	var items_on_hold = [];
+	var holds_query = `SELECT DISTINCT * FROM places_hold as p, item as i 
 										WHERE (p.item_id = i.item_id AND 
 										p.card_no=${req.params.card_no})`;
 
-  db.query(holds_query, function (err, result) {
-    if (err) {
-      console.log(err);
-    } else {
-      for (let i = 0; i < result.length; i++) {
-        var item_id = result[i].item_id;
-        var item_name = result[i].item_name;
-        var release_date = result[i].release_date.toDateString(); //mysql date format
-        var item_desc = result[i].item_desc;
-        var hold_position = result[i].hold_position.toString();
+	db.query(holds_query, function (err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			for (let i = 0; i < result.length; i++) {
+				var item_id = result[i].item_id;
+				var item_name = result[i].item_name;
+				var release_date = result[i].release_date.toDateString(); //mysql date format
+				var item_desc = result[i].item_desc;
+				var hold_position = result[i].hold_position.toString();
 
-        // Take day of week out of date string
-        release_date = release_date.split(" ").slice(1).join(" ");
+				// Take day of week out of date string
+				release_date = release_date.split(" ").slice(1).join(" ");
 
-        var item = {
-          item_id,
-          item_name,
-          release_date,
-          item_desc,
-          hold_position,
-        };
-        items_on_hold.push(item);
-      }
-    }
-    res.status(200);
-    res.send(items_on_hold);
-  });
+				var item = {
+					item_id,
+					item_name,
+					release_date,
+					item_desc,
+					hold_position,
+				};
+				items_on_hold.push(item);
+			}
+		}
+		res.status(200);
+		res.send(items_on_hold);
+	});
 });
 
 //kelly -- questions
@@ -981,7 +983,7 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
  *    none
  *
  * Output:
- *    customers: objects of library customer
+ *    customers: array of objects of library customers
  */
 app.get("/users", (_, res) => {
   var customers = [];
@@ -1046,30 +1048,31 @@ app.get("/events", (_, res) => {
  *    itemId: item_id of item checked out a particular item
  *
  * Output:
- *    users: objects with values:
+ *    all_users: array of objects with values:
  * 			card_no of user,
  * 			barcode of item signed out,
  * 			return date of item
  */
 app.get("/itemRecord/:itemId", (req, res) => {
-  var user = {};
-  var signedout_query = `SELECT * from signed_out WHERE item_id = ${req.params.itemId}`;
+	var all_users = [];
+	var signedout_query = `SELECT * from signed_out WHERE item_id = ${req.params.itemId}`;
 
-  db.query(signedout_query, function (err, result) {
-    if (err) {
-      console.log(err);
-    } else {
-      for (let i = 0; i < result.length; i++) {
-        var card_no = result[i].card_no;
-        var item_barcode = result[i].item_barcode;
-        var return_date = result[i].return_date;
+	db.query(signedout_query, function (err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			for (let i = 0; i < result.length; i++) {
+				var card_no = result[i].card_no;
+				var item_barcode = result[i].item_barcode;
+				var return_date = result[i].return_date;
 
-        user = { card_no, item_barcode, return_date };
-      }
-    }
-    res.status(200);
-    res.send(user);
-  });
+				var user = { card_no, item_barcode, return_date };
+				all_users.push(user);
+			}
+		}
+		res.status(200);
+		res.send(all_users);
+	});
 });
 
 //Kelly
@@ -1080,7 +1083,8 @@ app.get("/itemRecord/:itemId", (req, res) => {
  *    none
  *
  * Output:
- *    all_items: item_id objects with values:
+ *    all_items: array of item objects with values:
+ * 			item_id,
  * 			item_name,
  * 			release_date,
  * 			item_desc,
@@ -1088,34 +1092,36 @@ app.get("/itemRecord/:itemId", (req, res) => {
  *
  */
 app.get("/items", (_, res) => {
-  var all_items = {};
-  var item_query = `SELECT * from item`;
+	var all_items = [];
+	var item_query = `SELECT * from item`;
 
-  db.query(item_query, function (err, result) {
-    if (err) {
-      console.log(err);
-    } else {
-      for (let i = 0; i < result.length; i++) {
-        var item_id = result[i].item_id;
-        var item_name = result[i].item_name;
-        var release_date = result[i].release_date.toDateString(); //mysql date format
-        var item_desc = result[i].item_desc;
-        var item_availability = result[i].item_availability;
+	db.query(item_query, function (err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			for (let i = 0; i < result.length; i++) {
+				var item_id = result[i].item_id;
+				var item_name = result[i].item_name;
+				var release_date = result[i].release_date.toDateString(); //mysql date format
+				var item_desc = result[i].item_desc;
+				var item_availability = result[i].item_availability;
 
-        // Take day of week out of date string
-        release_date = release_date.split(" ").slice(1).join(" ");
+				// Take day of week out of date string
+				release_date = release_date.split(" ").slice(1).join(" ");
 
-        all_items[item_id] = {
-          item_name,
-          release_date,
-          item_desc,
-          item_availability,
-        };
-      }
-    }
-    res.status(200);
-    res.send(all_items);
-  });
+				var item = {
+					item_id,
+					item_name,
+					release_date,
+					item_desc,
+					item_availability,
+				};
+				all_items.push(item);
+			}
+		}
+		res.status(200);
+		res.send(all_items);
+	});
 });
 
 app.get("/user/:userId", (req, res) => {
