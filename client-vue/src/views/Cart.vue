@@ -3,8 +3,8 @@
 		<h1>Your Cart</h1>
 		<div class="items">
 			<div v-for="(item, index) in cart" :key="index">
-				<h3>{{ item.name }}</h3>
-				<img :src="item.image" />
+				<h3>{{ item.item_name }}</h3>
+				<!--<img :src="item.image" />-->
 				<div>
 					<v-btn color="error" class="mr-4" @click="removeFromCart(item)">
 						Remove from cart

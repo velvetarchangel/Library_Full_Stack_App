@@ -1,25 +1,29 @@
 <template>
 	<div>
 		<header>
-			<!--<div v-if="cart.length == 0">0 IN CART</div>-->
 			{{ cart.length }} ITEMS IN CART
+			<v-btn class="ma-2" color="secondary" @click="signOut"> Sign Out </v-btn>
 			<div v-if="page === 'userprofile'">
-				<v-btn color="error" class="mr-4" @click="goToItems()"
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToItems()"
 					>Browse Items</v-btn
 				>
-				<v-btn color="error" class="mr-4" @click="goToCart()">View Cart</v-btn>
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToCart()"
+					>View Cart</v-btn
+				>
 			</div>
 			<div v-if="page === 'cart'">
-				<v-btn color="error" class="mr-4" @click="goToItems()"
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToItems()"
 					>Browse Items</v-btn
 				>
-				<v-btn color="error" class="mr-4" @click="goToProfile()"
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToProfile()"
 					>Back To Profile</v-btn
 				>
 			</div>
 			<div v-if="page === 'items'">
-				<v-btn color="error" class="mr-4" @click="goToCart()">View Cart</v-btn>
-				<v-btn color="error" class="mr-4" @click="goToProfile()"
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToCart()"
+					>View Cart</v-btn
+				>
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToProfile()"
 					>Back To Profile</v-btn
 				>
 			</div>
@@ -47,6 +51,7 @@ export default {
 			card_no: this.$route.params.card_no,
 			page: "userprofile",
 			cart: [],
+			errormessage: "",
 		};
 	},
 	methods: {
@@ -66,6 +71,9 @@ export default {
 		goToProfile() {
 			this.page = "userprofile";
 		},
+		signOut() {
+			this.$router.push("/");
+		},
 	},
 	components: { Items, Cart },
 };
@@ -81,9 +89,9 @@ body {
 }
 
 header {
-	height: 60px;
-	box-shadow: 2px 2px 5px rgb(206, 174, 171);
-	background-color: rgb(245, 101, 57);
+	height: 108px;
+	box-shadow: 2px 2px 5px rgb(206, 183, 171);
+	background-color: rgb(245, 148, 78);
 	text-align: right;
 	font-size: 20px;
 	padding-top: 20px;
