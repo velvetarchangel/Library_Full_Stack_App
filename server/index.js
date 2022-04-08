@@ -1045,6 +1045,7 @@ app.post("/addItem", (req, res) => {
   });
 }); //added this
 
+<<<<<<< HEAD
 app.post("/addItemCopy", (req, res) => {
   var all_item_name = []; //for checking if item exists in db yet
   var item_query = `SELECT * FROM item`;
@@ -1138,6 +1139,15 @@ app.post("/addItemCopy", (req, res) => {
 });
 
 //himika (searching)
+=======
+/**
+ *Search endpoint where a librarian is able to search for books, events or movies
+ based on keywords. Currently this feature works for a single word only. There is 
+ no chaining of queries.
+ @param searchType: Selects category such as books, movies, events
+ @param searchTerm: contains the query string
+ */
+>>>>>>> Search implementation in progress
 app.get("/search/:searchType/:searchTerm", (req, res) => {
   var searchType = req.params.searchType;
   var searchTerm = req.params.searchTerm;
@@ -1150,7 +1160,11 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
                                   OR item_name LIKE '%${searchTerm}%' 
                                   OR publisher_name like '%${searchTerm}%'
                                   OR author_name like '%${searchTerm}%'
+<<<<<<< HEAD
                                   OR b.isbn like '%${searchTerm}%'
+=======
+                                  OR b.isbn like '%%'
+>>>>>>> Search implementation in progress
                                   )`;
   var movieQuery = ``;
   var eventQuery = `SELECT DISTINCT h.event_id, event_name, event_start_date, end_date, start_time, end_time, card_no, staff_id, e_location, branch_id
@@ -1420,6 +1434,7 @@ app.get("/availableItems", (_, res) => {
  */
 app.get("/items", (_, res) => {
   var all_items = [];
+<<<<<<< HEAD
   var movies = [];
   var books = [];
   var item_query = `SELECT * from item`;
@@ -1445,6 +1460,9 @@ app.get("/items", (_, res) => {
       }
     }
   });
+=======
+  var item_query = `SELECT * from item`;
+>>>>>>> Search implementation in progress
 
   db.query(item_query, function (err, result) {
     if (err) {
@@ -1456,24 +1474,33 @@ app.get("/items", (_, res) => {
         var release_date = result[i].release_date.toDateString(); //mysql date format
         var item_desc = result[i].item_desc;
         var item_availability = result[i].item_availability;
+<<<<<<< HEAD
         var item_type;
+=======
+>>>>>>> Search implementation in progress
 
         // Take day of week out of date string
         release_date = release_date.split(" ").slice(1).join(" ");
 
+<<<<<<< HEAD
         if (movies.includes(item_id)) {
           item_type = "Movie";
         } else if (books.includes(item_id)) {
           item_type = "Book";
         }
 
+=======
+>>>>>>> Search implementation in progress
         var item = {
           item_id,
           item_name,
           release_date,
           item_desc,
           item_availability,
+<<<<<<< HEAD
           item_type,
+=======
+>>>>>>> Search implementation in progress
         };
         all_items.push(item);
       }

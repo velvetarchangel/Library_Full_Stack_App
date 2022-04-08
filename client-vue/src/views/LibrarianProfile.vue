@@ -151,6 +151,9 @@
           </v-card>
         </v-container>
       </v-container>
+      <v-card v-if="searchResults.length === 0" class="mx-auto">
+        No results to display</v-card
+      >
     </v-container>
   </div>
 </template>
@@ -224,6 +227,11 @@ export default {
       this.showEventTab = false;
       this.showCustTab = false;
     },
+    viewSearchResults() {
+      this.showSearchResult = true;
+      this.showEventTab = false;
+      this.showCustTab = false;
+    },
     signOut() {
       this.$router.push("/");
     },
@@ -234,6 +242,7 @@ export default {
       this.$refs.itemmodal.show();
     },
     goToCustPage(val) {
+      //console.log(val);
       this.$router.push(`${this.card_no}/${val}`);
     },
     async getLoggedInUser(card_no) {
@@ -325,7 +334,6 @@ export default {
           }
         }
       );
-      // Now add in the search endpoint
     },
   },
   //Functions that are triggered when page is loaded
@@ -342,6 +350,13 @@ export default {
     },
     mselect(val) {
       if (val != null) this.searchCategory = val;
+      //console.log(val);
+      if (val != null) this.searchTerm = val;
+      console.log(this.searchTerm);
+    },
+    mselect(val) {
+      if (val != null) this.searchCategory = val;
+      console.log(this.searchCategory);
     },
   },
 };
