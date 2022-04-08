@@ -11,7 +11,6 @@
         <v-text-field
           v-model="model"
           :items="items"
-          @keyup.enter.native="search"
           clearable
           hide-details
           hide-selected
@@ -57,27 +56,33 @@
             </v-list-item-action>
           </template>
         </v-text-field>
-        <v-select :items="['Movie', 'Event', 'Book']"> </v-select>
-        <v-btn>Search</v-btn>
+        <v-select :items="options" v-model="mselect"> </v-select>
+        <v-btn class="ma-2" color="secondary" @click="search">Search</v-btn>
       </v-row>
       <template v-slot:extension>
         <v-tabs
-          v-model="tab"
           :hide-slider="!model"
           color="blue-grey"
           slider-color="blue-grey"
         >
           <v-tab @click="viewCustomerList"> Customers </v-tab>
           <v-tab @click="viewEventList"> Events</v-tab>
-          <v-btn class="ma-2" color="secondary" @click="signOut">
-            Sign Out
-          </v-btn>
-          <v-btn class="ma-2" color="secondary" @click="addEvent">
-            Add Event
-          </v-btn>
-          <v-btn class="ma-2" color="secondary" @click="addItem">
-            Add Item
-          </v-btn>
+          <v-tab @click="viewSearchResults">Search Results</v-tab>
+          <v-tab
+            ><v-btn class="ma-2" color="secondary" @click="addEvent">
+              Add Event
+            </v-btn></v-tab
+          >
+          <v-tab>
+            <v-btn class="ma-2" color="secondary" @click="addItem">
+              Add Item
+            </v-btn>
+          </v-tab>
+          <v-tab
+            ><v-btn class="ma-2" color="secondary" @click="signOut"
+              >Sign Out</v-btn
+            ></v-tab
+          >
         </v-tabs>
       </template>
     </v-toolbar>
@@ -106,6 +111,9 @@
           multi-sort
         ></v-data-table>
       </v-card>
+      <v-card v-if="searchResults.length === 0" class="mx-auto">
+        No results to display</v-card
+      >
     </v-container>
   </div>
 </template>
@@ -116,6 +124,7 @@ import {
   getAllLibraryCustomers,
   getAllEvents,
   getUserByID,
+  getSearchResults,
 } from "../services/apiServices";
 
 export default {
@@ -144,16 +153,19 @@ export default {
         { text: "Event Time", value: "time" },
         { text: "Event coordinator", value: "e_coordinator" },
       ],
+      searchResults: [],
+      options: ["Movies", "Books", "Events"],
       model: null,
-      search: null,
-      tab: null,
+      mselect: null,
+      searchTerm: null,
+      searchCategory: null,
       showCustTab: true,
       showEventTab: false,
+      showSearchResult: false,
       events: [],
       customers: [],
       val: "",
       card_no: this.$route.params.card_no,
-      //name: "Himika", // need to make this dynamic
     };
   },
 
@@ -166,6 +178,11 @@ export default {
       this.showEventTab = true;
       this.showCustTab = false;
     },
+    viewSearchResults() {
+      this.showSearchResult = true;
+      this.showEventTab = false;
+      this.showCustTab = false;
+    },
     signOut() {
       this.$router.push("/");
     },
@@ -176,7 +193,7 @@ export default {
       this.$refs.itemmodal.show();
     },
     goToCustPage(val) {
-      console.log(val);
+      //console.log(val);
       this.$router.push(`${this.card_no}/${val}`);
     },
     async getLoggedInUser(card_no) {
@@ -190,7 +207,6 @@ export default {
       await getAllLibraryCustomers().then((response) => {
         if (response.status == 200) {
           var users = response.data;
-          console.log(users);
           for (let i = 0; i < users.length; i++) {
             var customer = {
               card_no: users[i].card_no,
@@ -218,6 +234,21 @@ export default {
         }
       });
     },
+    async search() {
+      console.log("Search Initiated");
+      console.log(
+        "Search term " +
+          this.searchTerm +
+          " for category " +
+          this.searchCategory
+      );
+      await getSearchResults(this.searchCategory, this.searchTerm).then(
+        (response) => {
+          console.log(response.data);
+        }
+      );
+      // Now add in the search endpoint
+    },
   },
   //Functions that are triggered when page is loaded
   mounted: function () {
@@ -228,24 +259,13 @@ export default {
 
   watch: {
     model(val) {
-      if (val != null) this.tab = 0;
-      else this.tab = null;
+      //console.log(val);
+      if (val != null) this.searchTerm = val;
+      console.log(this.searchTerm);
     },
-    search() {
-      console.log("Search Initiated");
-      // Items have already been loaded
-      if (this.items.length > 0) return;
-      this.isLoading = true;
-      // To be fixed to incorporate our own data
-      fetch("https://api.coingecko.com/api/v3/coins/list")
-        .then((res) => res.clone().json())
-        .then((res) => {
-          this.items = res;
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => (this.isLoading = false));
+    mselect(val) {
+      if (val != null) this.searchCategory = val;
+      console.log(this.searchCategory);
     },
   },
 };
@@ -255,5 +275,9 @@ export default {
   /* position: absolute; */
   height: 80%;
   top: 5%;
+}
+
+.v-btn__content {
+  color: white !important;
 }
 </style>
