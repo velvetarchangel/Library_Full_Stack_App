@@ -691,7 +691,7 @@ app.get("/getUserRegisteredEvents", (req, res) => {
     } else {
       //console.log(result);
       for (let i = 0; i < result.length; i++) {
-        registered_events.push(parseInt(result[i]["event_id"]));
+        registered_events.push(result[i]);
       }
       res.send({ registered_events });
     }
