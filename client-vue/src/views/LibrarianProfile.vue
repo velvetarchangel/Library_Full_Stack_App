@@ -5,7 +5,7 @@
     <v-toolbar color="orange accent-1">
       <v-app-bar-nav-icon class="hidden-sm-and-down"></v-app-bar-nav-icon>
       <v-toolbar-title class="text-h6 mr-6 hidden-sm-and-down">
-        {{ name }}
+        {{ this.librarianUser.name }}
       </v-toolbar-title>
       <v-row>
         <v-text-field
@@ -44,9 +44,9 @@
           <template v-slot:item="{ item }">
             <v-list-item-avatar
               color="indigo"
-              class="text-h5 font-weight-light white--text"
+              class="text-h5 font-weight-light black--text"
             >
-              {{ item.name.charAt(0) }}
+              {{ this.librarianUser.name.charAt(0) }}
             </v-list-item-avatar>
             <v-list-item-content>
               <v-list-item-title v-text="item.name"></v-list-item-title>
@@ -88,8 +88,10 @@
           v-if="showCustTab"
           :headers="customerHeaders"
           :items="customers"
+          item-key="card_no"
           :sort-by="['card_no', 'email']"
           :sort-desc="[false, true]"
+          @click:row="goToCustPage($event.card_no)"
           multi-sort
         ></v-data-table>
       </v-card>
@@ -99,7 +101,7 @@
           v-if="showEventTab"
           :headers="eventHeaders"
           :items="events"
-          :sort-by="['card_no', 'email']"
+          :sort-by="['event_location', 'start_time']"
           :sort-desc="[false, true]"
           multi-sort
         ></v-data-table>
@@ -110,12 +112,19 @@
 <script>
 import EventModal from "../Components/EventModal.vue";
 import ItemModal from "../Components/ItemModal.vue";
+import {
+  getAllLibraryCustomers,
+  getAllEvents,
+  getUserByID,
+} from "../services/apiServices";
+
 export default {
   components: { EventModal, ItemModal },
   data() {
     return {
       isLoading: false,
       items: [],
+      librarianUser: { name: null },
       customerHeaders: [
         {
           text: "Customer name",
@@ -140,122 +149,11 @@ export default {
       tab: null,
       showCustTab: true,
       showEventTab: false,
-      events: [
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-        {
-          event_name: "Read together",
-          e_location: "Louise Riley Library Room 5",
-          time: "2022-03-24",
-          e_coordinator: "Michelle Obama",
-        },
-      ],
-      customers: [
-        {
-          //CHANGE ME TO DYNAMIC DATA
-          card_no: 12234577,
-          name: "Himika Dastidar",
-          email: "abc@123.com",
-        },
-        {
-          card_no: 1231234324,
-          name: "Kelly Osena",
-          email: "kosena@test.com",
-        },
-        {
-          card_no: 12132131,
-          name: "Eric Tan",
-          email: "etan@test.com",
-        },
-        {
-          card_no: 12234577,
-          name: "Himika Dastidar",
-          email: "abc@123.com",
-        },
-        {
-          card_no: 1231234324,
-          name: "Kelly Osena",
-          email: "kosena@test.com",
-        },
-        {
-          card_no: 12132131,
-          name: "Eric Tan",
-          email: "etan@test.com",
-        },
-        {
-          card_no: 12234577,
-          name: "Himika Dastidar",
-          email: "abc@123.com",
-        },
-        {
-          card_no: 1231234324,
-          name: "Kelly Osena",
-          email: "kosena@test.com",
-        },
-        {
-          card_no: 12132131,
-          name: "Eric Tan",
-          email: "etan@test.com",
-        },
-        {
-          card_no: 12234577,
-          name: "Himika Dastidar",
-          email: "abc@123.com",
-        },
-        {
-          card_no: 1231234324,
-          name: "Kelly Osena",
-          email: "kosena@test.com",
-        },
-        {
-          card_no: 12132131,
-          name: "Eric Tan",
-          email: "etan@test.com",
-        },
-      ],
+      events: [],
+      customers: [],
       val: "",
       card_no: this.$route.params.card_no,
-      name: "Himika", // need to make this dynamic
+      //name: "Himika", // need to make this dynamic
     };
   },
 
@@ -268,7 +166,6 @@ export default {
       this.showEventTab = true;
       this.showCustTab = false;
     },
-    // addItem() {},
     signOut() {
       this.$router.push("/");
     },
@@ -278,7 +175,57 @@ export default {
     addItem() {
       this.$refs.itemmodal.show();
     },
+    goToCustPage(val) {
+      console.log(val);
+      this.$router.push(`${this.card_no}/${val}`);
+    },
+    async getLoggedInUser(card_no) {
+      await getUserByID(card_no).then((response) => {
+        if (response.status == 200) {
+          this.librarianUser = response.data;
+        }
+      });
+    },
+    async getCustomers() {
+      await getAllLibraryCustomers().then((response) => {
+        if (response.status == 200) {
+          var users = response.data;
+          console.log(users);
+          for (let i = 0; i < users.length; i++) {
+            var customer = {
+              card_no: users[i].card_no,
+              name: users[i]["first_name"] + " " + users[i]["last_name"],
+              email: users[i]["email"],
+            };
+            this.customers.push(customer);
+          }
+        }
+      });
+    },
+    async getEvents() {
+      await getAllEvents().then((response) => {
+        if (response.status == 200) {
+          let curr_events = response.data;
+          for (let e in curr_events) {
+            var event = {
+              event_name: curr_events[e]["event_name"],
+              e_location: curr_events[e]["event_location"],
+              time: curr_events[e]["event_time"].substring(0, 10),
+              e_coordinator: curr_events[e]["staff_id"],
+            };
+            this.events.push(event);
+          }
+        }
+      });
+    },
   },
+  //Functions that are triggered when page is loaded
+  mounted: function () {
+    this.getCustomers();
+    this.getEvents();
+    this.getLoggedInUser(this.card_no);
+  },
+
   watch: {
     model(val) {
       if (val != null) this.tab = 0;

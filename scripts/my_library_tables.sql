@@ -416,13 +416,13 @@ INSERT INTO item (item_id, release_date, item_desc, item_name, item_availability
 VALUES 
 (11, '1972-01-01', 'The aging patriarch of an organized crime dynasty in postwar New York City transfers control of his clandestine empire to his reluctant youngest son.', 'The Godfather', TRUE),
 (12, '2008-01-01', 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.', 'The Dark Knight', TRUE),
-(13, '1974-01-01', 'The early life and career of Vito Corleone in 1920s New York City is portrayed, while his son, Michael, expands and tightens his grip on the family crime syndicate.', 'The Godfather: Part II', TRUE),
+(13, '1974-01-01', 'The early life and career of Vito Corleone in 1920s New York City is portrayed, while his son, Michael, expands and tightens his grip on the family crime syndicate.', 'The Godfather: Part II', FALSE),
 (14, '1957-01-01', 'The jury in a New York City murder trial is frustrated by a single member whose skeptical caution forces them to more carefully consider the evidence before jumping to a hasty verdict.', '12 Angry Men', TRUE),
-(15, '1994-01-01', 'In German-occupied Poland during World War II, industrialist Oskar Schindler gradually becomes concerned for his Jewish workforce after witnessing their persecution by the Nazis.', 'Schindlers List', TRUE ),
-(16, '2003-01-01', 'Gandalf and Aragorn lead the World of Men against Saurons army to draw his gaze from Frodo and Sam as they approach Mount Doom with the One Ring.', 'The Lord of the Rings: The Return of the King', TRUE),
-(17, '1996-01-01', 'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.', 'Pulp Fiction', TRUE),
-(18, '2001-01-01', 'A meek Hobbit from the Shire and eight companions set out on a journey to destroy the powerful One Ring and save Middle-earth from the Dark Lord Sauron.', 'The Lord of the Rings: The Fellowship of the Ring', TRUE),
-(19, '1966-01-01', 'A bounty hunting scam joins two men in an uneasy alliance against a third in a race to find a fortune in gold buried in a remote cemetery.', 'The Good, the Bad and the Ugly', TRUE),
+(15, '1994-01-01', 'In German-occupied Poland during World War II, industrialist Oskar Schindler gradually becomes concerned for his Jewish workforce after witnessing their persecution by the Nazis.', 'Schindlers List', FALSE ),
+(16, '2003-01-01', 'Gandalf and Aragorn lead the World of Men against Saurons army to draw his gaze from Frodo and Sam as they approach Mount Doom with the One Ring.', 'The Lord of the Rings: The Return of the King', FALSE),
+(17, '1996-01-01', 'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.', 'Pulp Fiction', FALSE),
+(18, '2001-01-01', 'A meek Hobbit from the Shire and eight companions set out on a journey to destroy the powerful One Ring and save Middle-earth from the Dark Lord Sauron.', 'The Lord of the Rings: The Fellowship of the Ring', FALSE),
+(19, '1966-01-01', 'A bounty hunting scam joins two men in an uneasy alliance against a third in a race to find a fortune in gold buried in a remote cemetery.', 'The Good, the Bad and the Ugly', FALSE),
 (20, '1994-01-01', 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.', 'The Shawshank Redemption', TRUE), 
 (1, '2001-01-01', "In a small town in Canada, Clara Callan reluctantly takes leave of her sister, 
 				Nora, who is bound for New York. Its a time when the growing threat of fascism in
@@ -458,7 +458,7 @@ VALUES
 				  There's practical advice on how to choose and prepare the major vegetarian ingredients, 
 				  followed by 50 original, stylish recipes, all photographed by Philip Webb.",
 				  "New Vegetarian: Bold and Beautiful Recipes for Every Occasion",
-				  1
+				  0
 				  ),
 (7, '2004-01-01', "Wild animus is a search for the primordial, a test of human foundations and a journey to the breaking point.",
 				"Wild Animus",
@@ -471,12 +471,12 @@ VALUES
 (9, '2000-01-01', "Using a quantum time machine, a group of young historians is sent back to the year 1357 to rescue their 
 				  trapped project leader.",
 				  "Timeline",
-				  1),
+				  0),
 (10, '2003-01-01', "Five American expatriates living in Budapest in the early 1990s seek to establish themselves and make 
 				   their fortunes in a city still haunted by the tragedies of its Communist past. A first novel. Reader's
 				   Guide included. Reprint. 100,000 first printing.",
 				   "Prague : A Novel",
-					1);
+					0);
 
 INSERT INTO branch(branch_id, branch_name, branch_address)
 VALUES
@@ -548,6 +548,32 @@ VALUES
 (1241, 14, 10022, TRUE),
 (1242, 15, 10023, TRUE),
 (1243, 16, 10024, TRUE);
+-- changed values here
+(1234, 1, 0683516687, FALSE),
+(1234, 1, 0683516686, TRUE),
+(1234, 1, 0683516688, FALSE),
+(1235, 1, 1133029791, TRUE),
+(1235, 1, 1133029792, FALSE),
+(1235, 1, 1133029793, TRUE),
+(1236, 1, 210865974, TRUE),
+(1236, 1, 2130865975, TRUE),
+(1236, 1, 2130865976, TRUE),
+(1237, 2, 2111793638, TRUE),
+(1238, 2, 2111793639, TRUE),
+(1238, 3, 2126976686, TRUE),
+(1239, 3, 2126976687, FALSE),
+(1239, 4, 215123547, TRUE),
+(1240, 5, 0887611864, TRUE),
+(1241, 6, 0255725324, FALSE),
+(1242, 7, 0841637857, TRUE),
+(1243, 8, 0108948855, TRUE),
+(1237, 9, 0163971279, FALSE),
+(1238, 11, 0114406247, TRUE),
+(1239, 12, 0758177142, TRUE),
+(1240, 13, 0426113066, FALSE),
+(1241, 14, 0495393437, TRUE),
+(1242, 15, 0227217727, FALSE),
+(1243, 16, 0227247797, FALSE);
 
 
 INSERT into copy_of_item(item_id, item_barcode)
@@ -603,6 +629,28 @@ VALUES
 (8761346354, 333, 1242),
 (8761346354, 333, 1243);
 
+
+INSERT INTO places_hold(card_no, item_id, hold_position)
+VALUES
+(1234567890, 9, 1),
+(1234567890, 13, 2),
+(2346271619, 9, 2),
+(2346271619, 13, 1),
+(6830547195, 6, 1),
+(1157422742, 16, 1),
+(7234561552, 16, 2),
+(7234561552, 15, 1),
+(7920625716, 15, 2);
+
 INSERT INTO signed_out(card_no, item_id, item_barcode, checkout_date, return_date)
 VALUES
-(2346271619, 21, 10025, '2020-01-21', '2020-02-21' );
+(9646514567, 9, 163971279, '2022-04-03', '2022-05-04'),
+(8426482051, 13, 426113066, '2022-03-24', '2022-04-24'),
+(7920625716, 6, 255725324, '2022-04-04', '2022-05-05'),
+(7234561552, 3, 2126976687, '2022-04-03', '2022-05-04'),
+(6830547195, 16, 227247797, '2022-03-20', '2022-04-20'),
+(3461246421, 15, 227217727, '2022-03-19', '2022-04-19'),
+(9646514567, 1, 683516687, '2022-04-04', '2022-05-05'),
+(8426482051, 1, 683516688, '2022-04-04', '2022-05-05'),
+(7920625716, 1, 1133029792, '2022-04-04', '2022-05-05');
+
