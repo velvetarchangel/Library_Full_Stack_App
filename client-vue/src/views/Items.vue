@@ -158,7 +158,7 @@ export default {
 						}
 					}
 				}
-				console.log(this.items);
+				//console.log(this.items);
 				//this.hasBeenVisited = true;
 				//this.itemsPageInitialized = true;
 			}
