@@ -9,7 +9,7 @@
 			<v-container class="my-5">
 				<v-layout row wrap>
 					<v-flex xs12 sm6 md4 lg3 v-for="(item, index) in array" :key="index">
-						<v-card back class="text-xs-center ma-1" max-width="380">
+						<v-card class="text-xs-center ma-1" max-width="380">
 							<div v-if="item.show === false">
 								<v-card-title>{{ item.short_name }}</v-card-title>
 							</div>
@@ -77,13 +77,14 @@
 import { getAllItems, getAvailableItems } from "../services/apiServices";
 export default {
 	name: "Items",
+	//This is where item data properties will be
+	props: ["cart", "items", "books", "movies", "availableItems"],
 	data() {
 		return {
-			//This is where item data properties will be
-			items: [],
-			books: [],
-			movies: [],
-			availableItems: [],
+			//items: [],
+			//books: [],
+			//movies: [],
+			//availableItems: [],
 			value: false,
 			tab: "items",
 			array: this.items,
@@ -91,66 +92,76 @@ export default {
 	},
 	methods: {
 		async getItems() {
-			await getAllItems().then((response) => {
-				if (response.status == 200) {
-					var objects = response.data;
-					for (let obj in objects) {
-						var title = objects[obj]["item_name"];
-						var short_title = "";
-						if (title.length > 21) {
-							for (let i = 0; i < 21; i++) {
-								short_title = short_title + title[i];
+			if (!this.cart.length) {
+				//console.log("oops i did it again");
+				await getAllItems().then((response) => {
+					if (response.status == 200) {
+						var objects = response.data;
+
+						// Shorten long titles
+						for (let obj in objects) {
+							var title = objects[obj]["item_name"];
+							var short_title = "";
+							if (title.length > 21) {
+								for (let i = 0; i < 21; i++) {
+									short_title = short_title + title[i];
+								}
+								short_title = short_title + "...";
+							} else {
+								short_title = title;
 							}
-							short_title = short_title + "...";
-						} else {
-							short_title = title;
+
+							var item = {
+								show: false,
+								copies: 0,
+								copies_in_cart: 0,
+								//barcodes: [],
+								item_type: objects[obj]["item_type"],
+								item_id: objects[obj]["item_id"],
+								short_name: short_title,
+								item_name: title,
+								release_date: objects[obj]["release_date"],
+								item_desc: objects[obj]["item_desc"],
+								item_availability: objects[obj]["item_availability"],
+							};
+							if (objects[obj]["item_type"] == "Book") {
+								this.books.push(item);
+								this.items.push(item);
+							} else if (objects[obj]["item_type"] == "Movie") {
+								this.movies.push(item);
+								this.items.push(item);
+							}
 						}
+					}
+				});
 
-						var item = {
-							show: false,
-							copies: 0,
-							item_type: objects[obj]["item_type"],
-							item_id: objects[obj]["item_id"],
-							short_name: short_title,
-							item_name: title,
-							release_date: objects[obj]["release_date"],
-							item_desc: objects[obj]["item_desc"],
-							item_availability: objects[obj]["item_availability"],
-						};
-						if (objects[obj]["item_type"] == "Book") {
-							this.books.push(item);
-							this.items.push(item);
-						} else if (objects[obj]["item_type"] == "Movie") {
-							this.movies.push(item);
-							this.items.push(item);
+				await getAvailableItems().then((response) => {
+					if (response.status == 200) {
+						var objects = response.data;
+						for (let obj in objects) {
+							var item = {
+								item_id: objects[obj]["item_id"],
+								item_barcode: objects[obj]["item_barcode"],
+								item_availability: objects[obj]["item_availability"],
+								branch_id: objects[obj]["branch_id"],
+							};
+							this.availableItems.push(item);
+						}
+					}
+				});
+
+				for (let i = 0; i < this.items.length; i++) {
+					for (let j = 0; j < this.availableItems.length; j++) {
+						if (this.items[i].item_id == this.availableItems[j].item_id) {
+							this.items[i].copies += 1;
+							//this.items[i].barcode.push(this.availableItems[j].item_barcode);
 						}
 					}
 				}
-			});
-
-			await getAvailableItems().then((response) => {
-				if (response.status == 200) {
-					var objects = response.data;
-					for (let obj in objects) {
-						var item = {
-							item_id: objects[obj]["item_id"],
-							item_barcode: objects[obj]["item_barcode"],
-							item_availability: objects[obj]["item_availability"],
-							branch_id: objects[obj]["branch_id"],
-						};
-						this.availableItems.push(item);
-					}
-				}
-			});
-
-			for (let i = 0; i < this.items.length; i++) {
-				for (let j = 0; j < this.availableItems.length; j++) {
-					if (this.items[i].item_id == this.availableItems[j].item_id) {
-						this.items[i].copies += 1;
-					}
-				}
+				console.log(this.items);
+				//this.hasBeenVisited = true;
+				//this.itemsPageInitialized = true;
 			}
-			console.log(this.items);
 		},
 		goToTab(string) {
 			if (string === "items") {
@@ -169,15 +180,22 @@ export default {
 		},
 		addToCart(item) {
 			this.$emit("addToCart", item);
+			item.copies -= 1;
+			item.copies_in_cart += 1;
+			//console.log("items says:" + item.copies_in_cart);
 			this.value = true;
 			window.setInterval(() => {
 				this.value = false;
 			}, 3000);
-			item.copies -= 1;
 		},
 		placeHold() {},
+		/*		log() {
+			console.log(this.cart_count);
+		},
+*/
 	},
 	mounted: function () {
+		//this.log();
 		this.getItems();
 		this.goToTab("items");
 	},

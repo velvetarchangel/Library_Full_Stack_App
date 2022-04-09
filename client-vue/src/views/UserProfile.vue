@@ -1,30 +1,32 @@
 <template>
 	<div>
 		<header>
-			{{ cart.length }} ITEMS IN CART
-			<v-btn class="ma-2" color="secondary" @click="signOut"> Sign Out </v-btn>
+			{{ this.cart_count }} ITEMS IN CART
+			<v-btn class="ma-2" color="secondary" @click="signOut"
+				>Sign Out<v-icon small right>mdi-logout</v-icon></v-btn
+			>
 			<div v-if="page === 'userprofile'">
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToItems()"
-					>Browse Items</v-btn
+					><v-icon small left>mdi-bookshelf</v-icon>Items</v-btn
 				>
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToCart()"
-					>View Cart</v-btn
+					><v-icon small left>mdi-cart</v-icon>View Cart</v-btn
 				>
 			</div>
 			<div v-if="page === 'cart'">
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToItems()"
-					>Browse Items</v-btn
+					><v-icon small left>mdi-bookshelf</v-icon>Browse Items</v-btn
 				>
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToProfile()"
-					>Back To Profile</v-btn
+					><v-icon small left>mdi-account</v-icon>Back To Profile</v-btn
 				>
 			</div>
 			<div v-if="page === 'items'">
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToCart()"
-					>View Cart</v-btn
+					><v-icon small left>mdi-cart</v-icon>View Cart</v-btn
 				>
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToProfile()"
-					>Back To Profile</v-btn
+					><v-icon small left>mdi-account</v-icon>Back To Profile</v-btn
 				>
 			</div>
 		</header>
@@ -32,10 +34,21 @@
 			User profile for user {{ this.card_no }}
 		</div>
 		<div v-if="page === 'cart'">
-			<Cart @removeFromCart="removeFromCart($event)" :cart="cart" />
+			<Cart
+				@removeFromCart="removeFromCart($event)"
+				@submitQty="submitQty($event)"
+				:cart="cart"
+			/>
 		</div>
 		<div v-if="page === 'items'">
-			<Items @addToCart="addToCart" />
+			<Items
+				@addToCart="addToCart"
+				:cart="cart"
+				:items="items"
+				:books="books"
+				:movies="movies"
+				:availableItems="availableItems"
+			/>
 		</div>
 	</div>
 </template>
@@ -50,17 +63,43 @@ export default {
 		return {
 			card_no: this.$route.params.card_no,
 			page: "userprofile",
-			cart: [],
-			errormessage: "",
+			cart: [], //contains unique values with copies_in_cart attrib
+			cart_count: 0, //actual number of items in cart != this.cart.length
+			items: [],
+			books: [],
+			movies: [],
+			availableItems: [],
 		};
 	},
 	methods: {
 		addToCart(item) {
-			this.cart.push(item);
-			console.log(this.cart);
+			//console.log("from item:" + item.copies);
+			var ids = [];
+			for (let i = 0; i < this.cart.length; i++) {
+				ids.push(this.cart[i].item_id);
+			}
+			if (!ids.includes(item.item_id)) {
+				this.cart.push(item);
+			}
+			this.cart_count += 1;
+			//console.log(this.cart);
 		},
 		removeFromCart(item) {
+			//console.log(item.copies + " + " + item.copies_in_cart);
+			item.copies += item.copies_in_cart;
+			//console.log(" = " + item.copies);
+			this.cart_count -= item.copies_in_cart;
+			item.copies_in_cart = 0;
 			this.cart.splice(this.cart.indexOf(item), 1);
+			if (!this.cart.length) {
+				this.items = [];
+				this.books = [];
+				this.movies = [];
+				this.availableItems = [];
+			}
+		},
+		submitQty(diff) {
+			this.cart_count -= diff;
 		},
 		goToCart() {
 			this.page = "cart";
@@ -74,6 +113,13 @@ export default {
 		signOut() {
 			this.$router.push("/");
 		},
+		/*		log() {
+			console.log(this.cart_count);
+		},
+	},
+	mounted: function () {
+		this.log();
+*/
 	},
 	components: { Items, Cart },
 };
@@ -90,7 +136,6 @@ body {
 
 header {
 	height: 108px;
-	box-shadow: 2px 2px 5px rgb(206, 183, 171);
 	background-color: rgb(245, 148, 78);
 	text-align: right;
 	font-size: 20px;
