@@ -504,7 +504,16 @@ app.post("/createEvent", (req, res) => {
           });
         } else {
           res.status(200);
-          res.send({ event_to_add, event_location_to_add });
+          var addedEventInfo = [
+          event_to_add.event_id,
+          event_to_add.event_name,
+          event_to_add.event_start_date,
+          event_to_add.end_date,
+          event_to_add.start_time,
+          event_to_add.end_time,
+          event_location_to_add.e_location,
+        ];
+          res.send( addedEventInfo );
         }
       });
     }
@@ -670,7 +679,7 @@ app.post("/addItem", (req, res) => {
               });
             } else {
               res.status(200);  
-              res.send({item_to_add, copy_item_rec,branch_item_copy_rec  });
+              res.send([item_to_add, {copy_item_rec},{branch_item_copy_rec}  ]);
             } 
             });
 
@@ -763,7 +772,7 @@ app.post("/addItemCopy", (req, res) => {
               });
             } else {
               res.status(200);  
-              res.send({copy_item_rec,branch_item_copy_rec  });
+              res.send([ {copy_item_rec}, {branch_item_copy_rec} ]);
             } 
             });
 
