@@ -248,42 +248,70 @@ app.get("/holds/:userId", (req, res) => {});
 //kelly
 app.get("/holds/:branchId", (req, res) => {});
 
-//these next 2 endpoints will be TBD. Need to figure out the proper database implementation.
-//eric
-app.put("/returnItems", (req, res) => {
-  //remove item from the user record
-  //increment the count for returned item
-  /**
-   * ENDPOINT URL: localhost:5001/returnItems
+ /**
+   * ENDPOINT URL: localhost:5001/returnItem
    *
    * Method: put
    *
    * Description: The library user is able to return an item back to the branch. The item will be removed from the
-   * users record, and the available quantity for that item will be incremented.
+   * users record, and that item copy will be marked as available.
    *
-   * Input: card_no, item_id, item_barcode
+   * Input: card_no, item_barcode
    *
-   * Output: item_quantity++, item_availability = true (if only 1 copy)
+   * Output: item copy removed from user record, item_availability = true for that copy
    */
+app.put("/returnItem", (req, res) => {
+  //finding the copy of item being returned from the checked out items
+  var checked_out_copy = [];
+  var return_query = `SELECT * FROM signed_out WHERE item_barcode='${req.body.item_barcode}' AND card_no='${req.body.card_no}'`;
+  db.query(return_query, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        checked_out_copy.push(parseInt(result[i]["item_barcode"]));
+      }
+    }
+
+    // check if item copy is checked out by the user registered
+    if (!checked_out_copy.includes(req.body.item_barcode)) {
+      res.send({
+        status: 400,
+        message: "The user does not have this item signed out",
+      });
+    } else {
+      //removing the checked out item
+      var sql_query = `DELETE FROM signed_out WHERE item_barcode='${req.body.item_barcode}' AND card_no='${req.body.card_no}'`;
+      db.query(sql_query,  function (err) {
+        if (err) {
+          res.status(400);
+          res.send({
+            message: err,
+          });
+        } else {
+          res.status(200);
+          console.log(req.body.item_barcode + "has been deleted from user " + req.body_card_no);
+        }
+      });
+      //update the availability of the item to available
+      var update_query = `UPDATE has_for_branch_and_item SET item_availability = 1 WHERE item_barcode='${req.body.item_barcode}'`;
+      db.query(update_query,  function (err) {
+        if (err) {
+          res.status(400);
+          res.send({
+            message: err,
+          });
+        } else {
+          res.status(200);
+          console.log("added item " + req.body.item_barcode + " back in stock");
+          res.send("added item " + req.body.item_barcode + " back in stock");
+        }
+      });
+    }
+  });
+
 });
 
-//eric
-//this endpoint may be removed and merged into signout items/place holds/ return items; seems redundant
-app.put("/updateItemQuantityForBranch", (req, res) => {
-  //condition to check if preferred branch has items available, else update for different branch with item
-  /**
-   * ENDPOINT URL: localhost:5001/updateItemQuantityForBranch
-   *
-   * Method: put
-   *
-   * Description: Depending on the task, if user returns an item, increment the item_quantity. If user signs out
-   * an item, decrement the item quantity.
-   *
-   * Input: card_no, item_id, item_barcode
-   *
-   * Output: item_quantity (increment or decrement), item_availability (true or false depending on quantity remaining)
-   */
-});
 
 /**
  * User registers for an event. If the user hasn't been registered for that event yet, they will be allowed
@@ -331,7 +359,7 @@ app.post("/userRegistersEvents", (req, res) => {
           });
         } else {
           res.status(200);
-          res.send({ event_to_register });
+          res.send( event_arr );
         }
       });
       console.log(event_to_register);
@@ -350,18 +378,36 @@ app.post("/userRegistersEvents", (req, res) => {
  * Output:
  * array containing the event_id(s) that the user is registered for
  */
+//TODO: add more event info here
 app.get("/getUserRegisteredEvents", (req, res) => {
   //add to the registers table.
   var registered_events = [];
-  var event_query = `SELECT * FROM registers WHERE card_no='${req.body.card_no}'`;
+  var event_query = `SELECT * FROM registers NATURAL JOIN lib_events WHERE card_no='${req.body.card_no}'`; //natural join with events?
   db.query(event_query, function (err, result) {
     if (err) {
       console.log(err);
     } else {
       for (let i = 0; i < result.length; i++) {
-        registered_events.push(parseInt(result[i]["event_id"]));
+        registered_events.push(result[i]); //push actual event information here. need to join with the lib_events table
       }
-      res.send({ registered_events });
+      res.send( registered_events );
+    }
+  });
+});
+
+//ERIC: create an endpoint to find all users registered for each event. 
+app.get("/getEventsParticipants", (req, res) => {
+  //add to the registers table.
+  var registered_events = [];
+  var event_query = `SELECT card_no FROM registers WHERE event_id='${req.body.event_id}'`; //natural join with events?
+  db.query(event_query, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        registered_events.push(result[i]); //push actual event information here
+      }
+      res.send(registered_events );
     }
   });
 });
@@ -528,7 +574,6 @@ app.post("/addItem", (req, res) => {
         }
       });
       console.log(item_to_add);
-
       //if item is a movie
       if (req.body.isbn == "null") {
         var movies_query =
@@ -574,7 +619,6 @@ app.post("/addItem", (req, res) => {
           }
         });
       }
-
       //add a copy of the item
       var copy_barcodes = []; //finding the max barcode to create
       var max_barcode;
@@ -585,7 +629,7 @@ app.post("/addItem", (req, res) => {
       } else {
         //var max_barcode;
           for (let i = 0; i < result.length; i++) {
-            console.log(result[i]["item_barcode"]);
+            //console.log(result[i]["item_barcode"]);
           copy_barcodes.push(parseInt(result[i]["item_barcode"]));
        }
 
@@ -606,8 +650,31 @@ app.post("/addItem", (req, res) => {
           });
         } else {
           res.status(200);
-          res.send({item_to_add, copy_item_rec });
-        }
+          //res.send({item_to_add, copy_item_rec });
+
+
+          //add copy to has for branch and items
+          var branch_item_copy_query = "INSERT INTO has_for_branch_and_item (branch_id, item_id, item_barcode, item_availability) VALUES (?,?, ?, ?)";
+          var branch_item_copy_rec = [
+            1, //library location; can change this, but default is central library
+            item_to_add.item_id,
+            max_barcode,
+            1, //item is initially available
+          ];
+          
+          db.query(branch_item_copy_query, branch_item_copy_rec, function (err) {
+            if (err) {
+              res.status(400);
+              res.send({
+                message: err,
+              });
+            } else {
+              res.status(200);  
+              res.send({item_to_add, copy_item_rec,branch_item_copy_rec  });
+            } 
+            });
+
+        } //semicolon for else 
       });
     
       }
@@ -617,49 +684,60 @@ app.post("/addItem", (req, res) => {
 }); //added this
 
 
-
-
 app.post("/addItemCopy", (req, res) => {
-  var all_items = [];
-  var all_item_copy_bc = [];
+  var all_item_name = []; //for checking if item exists in db yet
   var item_query = `SELECT * FROM item`;
   db.query(item_query, function (err, result) {
     if (err) {
       console.log(err);
     } else {
       for (let i = 0; i < result.length; i++) {
-        all_items.push(parseInt(result[i]["item_id"]));
-        all_item_copy_bc.push(parseInt(result[i]["item_barcode"]));
+        all_item_name.push(result[i]["item_name"]);
       }
     }
-    // check if item is unique based on item name
+    // check if item exists in db based on item name
     if (!all_item_name.includes(req.body.item_name)) {
       res.send({
         status: 400,
-        message: "Item not in database. Cannot create copy",
+        message: "Item does not exist in database",
       });
-    } else {
-      // Generate a barcode id
-      var max_id = Math.max(...all_items) + 1;
-      var item_to_add = {
-        //item to add object
-        item_name: req.body.item_name,
-        item_desc: req.body.item_desc,
-        release_date: req.body.release_date,
-        item_availability: 1,
-        item_id: max_id,
-      };
+    } 
+    else {
+      var item_copy_id
+      var item_id_query = `SELECT item_id FROM item WHERE item_name='${req.body.item_name}'`;
+      db.query(item_id_query, function (err, result) {
+        if (err) {
+          console.log(err);
+        } else {
+          //res.status(200);
+          item_copy_id = result[0]["item_id"];
+        }
+      });
 
-      var sql_query =
-        "INSERT INTO item (item_id, release_date, item_desc, item_name, item_availability) VALUES(?, ?, ?, ?, ?);";
-      var item_arr = [
-        item_to_add.item_id,
-        item_to_add.release_date,
-        item_to_add.item_desc,
-        item_to_add.item_name,
-        item_to_add.item_availability,
+      //add a copy of the item
+      var copy_barcodes = []; //finding the max barcode to create
+      var max_barcode;
+      var event_query = `SELECT * FROM copy_of_item`;
+      db.query(event_query, function (err, result) {
+      if (err) {
+        console.log(err);
+      } else {
+        //var max_barcode;
+          for (let i = 0; i < result.length; i++) {
+            //console.log(result[i]["item_barcode"]);
+          copy_barcodes.push(parseInt(result[i]["item_barcode"]));
+       }
+
+      max_barcode = Math.max(...copy_barcodes) + 1; 
+      console.log("max barcode " + max_barcode);
+      
+      var copy_item_query = "INSERT INTO copy_of_item (item_barcode, item_id) VALUES (?,?)";
+     
+      var copy_item_rec = [
+        max_barcode,
+        item_copy_id
       ];
-      db.query(sql_query, item_arr, function (err) {
+      db.query(copy_item_query, copy_item_rec, function (err) {
         if (err) {
           res.status(400);
           res.send({
@@ -667,59 +745,41 @@ app.post("/addItemCopy", (req, res) => {
           });
         } else {
           res.status(200);
+         // res.send({copy_item_rec });
+         
+          //add copy to has for branch and items
+          var branch_item_copy_query = "INSERT INTO has_for_branch_and_item (branch_id, item_id, item_barcode, item_availability) VALUES (?,?, ?, ?)";
+          var branch_item_copy_rec = [
+            1, //library location; can change this, but default is central library. replace with req.body.branch_id and add 2nd input
+            item_copy_id,
+            max_barcode,
+            1, //item is initially available
+          ];
+          db.query(branch_item_copy_query, branch_item_copy_rec, function (err) {
+            if (err) {
+              res.status(400);
+              res.send({
+                message: err,
+              });
+            } else {
+              res.status(200);  
+              res.send({copy_item_rec,branch_item_copy_rec  });
+            } 
+            });
+
+
         }
       });
-      console.log(item_to_add);
-
-      //if item is a movie
-      if (req.body.isbn == "null") {
-        var movies_query =
-          "INSERT INTO movies (item_id, production_company, imdb_id, duration) VALUES (?, ?, ?, ?)";
-        var movie_rec = [
-          item_to_add.item_id,
-          req.body.production_company,
-          req.body.imdb_id,
-          req.body.duration,
-        ];
-        db.query(movies_query, movie_rec, function (err) {
-          if (err) {
-            res.status(400);
-            res.send({
-              message: err,
-            });
-          } else {
-            res.status(200);
-            res.send({ item_to_add });
-          }
-        });
+    
       }
-
-      //if item is a book
-      else {
-        var books_query =
-          "INSERT INTO book (item_id, isbn, publisher_name, book_type) VALUES (?, ?, ?, ?)";
-        var book_rec = [
-          item_to_add.item_id,
-          req.body.isbn,
-          req.body.publisher_name,
-          req.body.book_type,
-        ];
-        db.query(books_query, book_rec, function (err) {
-          if (err) {
-            res.status(400);
-            res.send({
-              message: err,
-            });
-          } else {
-            res.status(200);
-            res.send({ item_to_add });
-          }
-        });
-      }
+      });
     }
   });
-}); //added this
+}); 
 
+
+
+   
 
 
 

@@ -602,3 +602,7 @@ VALUES
 (8761346354, 333, 1241),
 (8761346354, 333, 1242),
 (8761346354, 333, 1243);
+
+INSERT INTO signed_out(card_no, item_id, item_barcode, checkout_date, return_date)
+VALUES
+(2346271619, 21, 10025, '2020-01-21', '2020-02-21' );
