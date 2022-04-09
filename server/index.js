@@ -1150,7 +1150,7 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
                                   OR item_name LIKE '%${searchTerm}%' 
                                   OR publisher_name like '%${searchTerm}%'
                                   OR author_name like '%${searchTerm}%'
-                                  OR b.isbn like '%%'
+                                  OR b.isbn like '%${searchTerm}%'
                                   )`;
   var movieQuery = ``;
   var eventQuery = `SELECT DISTINCT h.event_id, event_name, event_start_date, end_date, start_time, end_time, card_no, staff_id, e_location, branch_id
