@@ -861,7 +861,7 @@ app.post("/addItem", (req, res) => {
 app.get("/search/:searchType/:searchTerm", (req, res) => {
   var searchType = req.params.searchType;
   var searchTerm = req.params.searchTerm;
-  console.log(searchType, searchTerm);
+  //console.log(searchType, searchTerm);
   var bookQuery = `SELECT b.item_id, b.publisher_name, b.isbn, i.release_date, i.item_desc, i.item_name, a.author_name 
                   FROM book as b, item as i, writes as w, author as a WHERE 
                               i.item_id = b.item_id AND w.item_id = i.item_id 
@@ -959,6 +959,7 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
         for (let i = 0; i < result.length; i++) {
           var event = {
             event_id: result[i].event_id,
+            event_name: result[i].event_name,
             event_start_date: result[i].event_start_date,
             end_date: result[i].end_date,
             start_time: result[i].start_time,
