@@ -111,9 +111,46 @@
           multi-sort
         ></v-data-table>
       </v-card>
-      <v-card v-if="searchResults.length === 0" class="mx-auto">
+      <v-card
+        v-if="searchResults.length === 0 && showSearchResult"
+        class="mx-auto"
+      >
         No results to display</v-card
       >
+      <v-container
+        v-if="searchResults.length != 0 && showSearchResult"
+        fluid
+        grid-list-xl
+      >
+        <v-container v-if="searchCategory === 'Books'">
+          <v-card v-for="(result, index) in searchResults" :key="index">
+            <v-card-title> Title: {{ result.item_name }} </v-card-title>
+            <v-card-subtitle>
+              <b>Author name:</b> {{ result.author_name }}</v-card-subtitle
+            >
+            <v-divider class="mx-4"></v-divider>
+            <v-card-text
+              ><b>Release Date:</b> {{ result.release_date }}</v-card-text
+            >
+            <v-card-text><b>ISBN:</b> {{ result.isbn }}</v-card-text>
+            <v-card-text>{{ result.item_desc }} </v-card-text>
+          </v-card>
+        </v-container>
+        <v-container v-if="searchCategory === 'Events'">
+          <v-card v-for="(result, index) in searchResults" :key="index">
+            <v-card-title> Event Name: {{ result.event_name }} </v-card-title>
+            <v-card-subtitle>
+              <b>Coordinator:</b> {{ result.author_name }}</v-card-subtitle
+            >
+            <v-divider class="mx-4"></v-divider>
+            <v-card-text><b>Location:</b> {{ result.e_location }}</v-card-text>
+            <v-card-text
+              ><b>Start Date:</b> {{ result.event_start_date }}</v-card-text
+            >
+            <v-card-text><b>End Date: </b>{{ result.end_date }} </v-card-text>
+          </v-card>
+        </v-container>
+      </v-container>
     </v-container>
   </div>
 </template>
@@ -173,10 +210,12 @@ export default {
     viewCustomerList() {
       this.showCustTab = true;
       this.showEventTab = false;
+      this.showSearchResult = false;
     },
     viewEventList() {
       this.showEventTab = true;
       this.showCustTab = false;
+      this.showSearchResult = false;
     },
     viewSearchResults() {
       this.showSearchResult = true;
@@ -244,7 +283,30 @@ export default {
       );
       await getSearchResults(this.searchCategory, this.searchTerm).then(
         (response) => {
-          console.log(response.data);
+          //console.log(response.data.books);
+          //console.log(this.searchCategory + "......searchCategory");
+          if (this.searchCategory === "Books") {
+            var books = response.data.books;
+            //console.log(books);
+            for (let i = 0; i < books.length; i++) {
+              var book = {
+                item_name: books[i].item_name,
+                author_name: books[i].author_name,
+                isbn: books[i].isbn,
+                item_desc: books[i].item_desc,
+                item_id: books[i].item_id,
+                publisher_name: books[i].publisher_name,
+                release_date: books[i].release_date,
+              };
+              this.searchResults.push(book);
+            }
+          }
+          if (this.searchTerm == "Movies") {
+            this.searchResults = response.data.movies;
+          }
+          if (this.searchTerm == "Events") {
+            this.searchResults = response.data.events;
+          }
         }
       );
       // Now add in the search endpoint
@@ -259,13 +321,10 @@ export default {
 
   watch: {
     model(val) {
-      //console.log(val);
       if (val != null) this.searchTerm = val;
-      console.log(this.searchTerm);
     },
     mselect(val) {
       if (val != null) this.searchCategory = val;
-      console.log(this.searchCategory);
     },
   },
 };
