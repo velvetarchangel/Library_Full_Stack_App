@@ -488,7 +488,8 @@ VALUES
 (6, 'Nose Hill Library', '1530 Northmount Dr NW, Calgary, AB T2L 0G6'),
 (7, 'Crowfoot Library', '8665 Nose Hill Dr NW, Calgary, AB T3G 5T3'),
 (8, 'Louise Riley Library', '1904 14 Ave NW, Calgary, AB T2N 1M5'),
-(9, 'Judith Umbach Library', '6617 Centre St N, Calgary, AB T2K 4Y5');
+(9, 'Judith Umbach Library', '6617 Centre St N, Calgary, AB T2K 4Y5'),
+(10, 'ONLINE', 'ONLINE'); -- for events only
 
 
 INSERT INTO lib_events (event_id, event_name, event_start_date, end_date, start_time, end_time)
@@ -509,7 +510,6 @@ VALUES
 INSERT INTO event_location (event_id, e_location)
 VALUES
 (1234, 'Central Library'),
-(1234, 'Fish Creek Library'), -- test value to make sure pks work properly
 (1235, 'ONLINE'),
 (1236, 'Fish Creek Library'),
 (1237, 'Shawnessy Library'),
@@ -523,6 +523,32 @@ VALUES
 
 INSERT INTO has_for_branch_and_item (branch_id, item_id, item_barcode, item_availability)
 VALUES
+(1234, 1, 10000, TRUE),
+(1234, 1, 10001, TRUE),
+(1234, 1, 10002, TRUE),
+(1235, 1, 10003, TRUE),
+(1235, 1, 10004, TRUE),
+(1235, 1, 10005, TRUE),
+(1236, 1, 10006, TRUE),
+(1236, 1, 10007, TRUE),
+(1236, 1, 10008, TRUE),
+(1237, 2, 10009, TRUE),
+(1238, 2, 10010, TRUE),
+(1238, 3, 10011, TRUE),
+(1239, 3, 10012, TRUE),
+(1239, 4, 10013, TRUE),
+(1240, 5, 10014, TRUE),
+(1241, 6, 10015, TRUE),
+(1242, 7, 10016, TRUE),
+(1243, 8, 10017, TRUE),
+(1237, 9, 10018, TRUE),
+(1238, 11, 10019, TRUE),
+(1239, 12, 10020, TRUE),
+(1240, 13, 10021, TRUE),
+(1241, 14, 10022, TRUE),
+(1242, 15, 10023, TRUE),
+(1243, 16, 10024, TRUE),
+-- changed values here
 (1234, 1, 0683516687, FALSE),
 (1234, 1, 0683516686, TRUE),
 (1234, 1, 0683516688, FALSE),
@@ -552,36 +578,36 @@ VALUES
 
 INSERT into copy_of_item(item_id, item_barcode)
 VALUES
-(1, 0683516687),
-(1, 0683516686),
-(1, 0683516688),
-(1, 1133029791),
-(1, 1133029792),
-(1, 1133029793),
-(1, 210865974),
-(1, 2130865975),
-(1, 2130865976),
-(2, 2111793638),
-(2, 2111793639),
-(3, 2126976686),
-(3, 2126976687),
-(4, 215123547),
-(5, 0887611864),
-(6, 0255725324),
-(7, 0841637857),
-(8, 0108948855),
-(9, 0163971279),
-(11, 0114406247),
-(12, 0758177142),
-(13, 0426113066),
-(14, 0495393437),
-(15, 0227217727),
-(16, 0227247797);
+(1, 10000),
+(1, 10001),
+(1, 10002),
+(1, 10003),
+(1, 10004),
+(1, 10005),
+(1, 10006),
+(1, 10007),
+(1, 10008),
+(2, 10009),
+(2, 10010),
+(3, 10011),
+(3, 10012),
+(4, 10013),
+(5, 10014),
+(6, 10015),
+(7, 10016),
+(8, 10017),
+(9, 10018),
+(11, 10019),
+(12, 10020),
+(13, 10021),
+(14, 10022),
+(15, 10023),
+(16, 10024);
 
 INSERT INTO hosts_event(event_id, branch_id)
 VALUES 
 (1234, 1), 
-(1234, 2), -- test value
+(1235, 10),
 (1236, 2), 
 (1237, 3), 
 (1240, 4), 
@@ -594,6 +620,7 @@ VALUES
 INSERT INTO coordinates(card_no, staff_id, event_id)
 VALUES
 (2238324761, 666, 1234),
+(2238324761, 666, 1235),
 (3912281595, 555, 1236),
 (6303195165, 777, 1237),
 (7284096754, 111, 1240),
@@ -602,6 +629,7 @@ VALUES
 (8761346354, 333, 1241),
 (8761346354, 333, 1242),
 (8761346354, 333, 1243);
+
 
 INSERT INTO places_hold(card_no, item_id, hold_position)
 VALUES
@@ -627,3 +655,8 @@ VALUES
 (8426482051, 1, 683516688, '2022-04-04', '2022-05-05'),
 (7920625716, 1, 1133029792, '2022-04-04', '2022-05-05');
 
+INSERT INTO registers (event_id, card_no)
+VALUES
+(1234,7920625716),
+(1235,7920625716),
+(1234, 2346271619);
