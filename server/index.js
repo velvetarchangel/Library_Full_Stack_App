@@ -1054,7 +1054,7 @@ app.post("/addItemCopy", (req, res) => {
           //add copy to has for branch and items
           var branch_item_copy_query = "INSERT INTO has_for_branch_and_item (branch_id, item_id, item_barcode, item_availability) VALUES (?,?, ?, ?)";
           var branch_item_copy_rec = [
-            1, //library location; can change this, but default is central library. replace with req.body.branch_id and add 2nd input
+            req.body.branch_id, //library location; can change this, but default is central library. replace with req.body.branch_id and add 2nd input
             item_copy_id,
             max_barcode,
             1, //item is initially available
