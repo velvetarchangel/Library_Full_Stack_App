@@ -414,16 +414,16 @@ VALUES
 
 INSERT INTO item (item_id, release_date, item_desc, item_name, item_availability) 
 VALUES 
-(11, '1972-01-01', 'The aging patriarch of an organized crime dynasty in postwar New York City transfers control of his clandestine empire to his reluctant youngest son.', 'The Godfather', TRUE),
-(12, '2008-01-01', 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.', 'The Dark Knight', TRUE),
-(13, '1974-01-01', 'The early life and career of Vito Corleone in 1920s New York City is portrayed, while his son, Michael, expands and tightens his grip on the family crime syndicate.', 'The Godfather: Part II', FALSE),
-(14, '1957-01-01', 'The jury in a New York City murder trial is frustrated by a single member whose skeptical caution forces them to more carefully consider the evidence before jumping to a hasty verdict.', '12 Angry Men', TRUE),
-(15, '1994-01-01', 'In German-occupied Poland during World War II, industrialist Oskar Schindler gradually becomes concerned for his Jewish workforce after witnessing their persecution by the Nazis.', 'Schindlers List', FALSE ),
-(16, '2003-01-01', 'Gandalf and Aragorn lead the World of Men against Saurons army to draw his gaze from Frodo and Sam as they approach Mount Doom with the One Ring.', 'The Lord of the Rings: The Return of the King', FALSE),
-(17, '1996-01-01', 'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.', 'Pulp Fiction', FALSE),
-(18, '2001-01-01', 'A meek Hobbit from the Shire and eight companions set out on a journey to destroy the powerful One Ring and save Middle-earth from the Dark Lord Sauron.', 'The Lord of the Rings: The Fellowship of the Ring', FALSE),
-(19, '1966-01-01', 'A bounty hunting scam joins two men in an uneasy alliance against a third in a race to find a fortune in gold buried in a remote cemetery.', 'The Good, the Bad and the Ugly', FALSE),
-(20, '1994-01-01', 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.', 'The Shawshank Redemption', TRUE), 
+(11, '1972-01-01', 'The aging patriarch of an organized crime dynasty in postwar New York City transfers control of his clandestine empire to his reluctant youngest son.', 'The Godfather', 1),
+(12, '2008-01-01', 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.', 'The Dark Knight', 1),
+(13, '1974-01-01', 'The early life and career of Vito Corleone in 1920s New York City is portrayed, while his son, Michael, expands and tightens his grip on the family crime syndicate.', 'The Godfather: Part II', 1),
+(14, '1957-01-01', 'The jury in a New York City murder trial is frustrated by a single member whose skeptical caution forces them to more carefully consider the evidence before jumping to a hasty verdict.', '12 Angry Men', 1),
+(15, '1994-01-01', 'In German-occupied Poland during World War II, industrialist Oskar Schindler gradually becomes concerned for his Jewish workforce after witnessing their persecution by the Nazis.', 'Schindlers List', 0 ),
+(16, '2003-01-01', 'Gandalf and Aragorn lead the World of Men against Saurons army to draw his gaze from Frodo and Sam as they approach Mount Doom with the One Ring.', 'The Lord of the Rings: The Return of the King', 0),
+(17, '1996-01-01', 'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.', 'Pulp Fiction', 1),
+(18, '2001-01-01', 'A meek Hobbit from the Shire and eight companions set out on a journey to destroy the powerful One Ring and save Middle-earth from the Dark Lord Sauron.', 'The Lord of the Rings: The Fellowship of the Ring', 1),
+(19, '1966-01-01', 'A bounty hunting scam joins two men in an uneasy alliance against a third in a race to find a fortune in gold buried in a remote cemetery.', 'The Good, the Bad and the Ugly', 1),
+(20, '1994-01-01', 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.', 'The Shawshank Redemption', 1), 
 (1, '2001-01-01', "In a small town in Canada, Clara Callan reluctantly takes leave of her sister, 
 				Nora, who is bound for New York. Its a time when the growing threat of fascism in
 				Europe is a constant worry, and people escape from reality through radio and the 
@@ -447,7 +447,7 @@ VALUES
 (4, '1994-01-01', "Staring unflinchingly into the abyss of slavery, this novel transforms history
 				 into a story as powerful as Exodus and as intimate as a lulaby.",
 				 "Beloved",
-				 1
+				 0
 				 ),
 (5, '1999-01-01', "The staff of The Onion presents a satirical collection of mock headlines and news stories,
 				 including an account of the Pentagon's development of an A-bomb-resistant desk for 
@@ -476,7 +476,7 @@ VALUES
 				   their fortunes in a city still haunted by the tragedies of its Communist past. A first novel. Reader's
 				   Guide included. Reprint. 100,000 first printing.",
 				   "Prague : A Novel",
-					0);
+					1);
 
 INSERT INTO branch(branch_id, branch_name, branch_address)
 VALUES
@@ -488,7 +488,8 @@ VALUES
 (6, 'Nose Hill Library', '1530 Northmount Dr NW, Calgary, AB T2L 0G6'),
 (7, 'Crowfoot Library', '8665 Nose Hill Dr NW, Calgary, AB T3G 5T3'),
 (8, 'Louise Riley Library', '1904 14 Ave NW, Calgary, AB T2N 1M5'),
-(9, 'Judith Umbach Library', '6617 Centre St N, Calgary, AB T2K 4Y5');
+(9, 'Judith Umbach Library', '6617 Centre St N, Calgary, AB T2K 4Y5'),
+(10, 'ONLINE', 'ONLINE'); -- for events only
 
 
 INSERT INTO lib_events (event_id, event_name, event_start_date, end_date, start_time, end_time)
@@ -509,7 +510,6 @@ VALUES
 INSERT INTO event_location (event_id, e_location)
 VALUES
 (1234, 'Central Library'),
-(1234, 'Fish Creek Library'), -- test value to make sure pks work properly
 (1235, 'ONLINE'),
 (1236, 'Fish Creek Library'),
 (1237, 'Shawnessy Library'),
@@ -536,18 +536,44 @@ VALUES
 (8, 2, 2111793639, TRUE),
 (8, 3, 2126976686, TRUE),
 (9, 3, 2126976687, FALSE),
-(9, 4, 215123547, TRUE),
+(9, 4, 215123547, FALSE),
 (1, 5, 0887611864, TRUE),
 (1, 6, 0255725324, FALSE),
 (2, 7, 0841637857, TRUE),
 (3, 8, 0108948855, TRUE),
 (7, 9, 0163971279, FALSE),
 (8, 11, 0114406247, TRUE),
-(9, 12, 0758177142, TRUE),
+(9, 12, 0758177142, FALSE),
 (2, 13, 0426113066, FALSE),
 (1, 14, 0495393437, TRUE),
 (2, 15, 0227217727, FALSE),
-(3, 16, 0227247797, FALSE);
+(3, 16, 0227247797, FALSE),
+(10, 17, 10000, TRUE),
+(1, 18, 10001, TRUE),
+(1, 19, 10002, TRUE),
+(2, 20, 10003, TRUE),
+(2, 8, 10004, FALSE),
+(3, 9, 10005, FALSE),
+(3, 10, 10006, TRUE),
+(4, 11, 10007, TRUE),
+(4, 12, 10008, TRUE),
+(5, 2, 10009, TRUE),
+(5, 2, 10010, TRUE),
+(6, 3, 10011, TRUE),
+(6, 3, 10012, TRUE),
+(7, 4, 10013, FALSE),
+(7, 5, 10014, TRUE),
+(8, 6, 10015, FALSE),
+(8, 7, 10016, TRUE),
+(9, 8, 10017, TRUE),
+(9, 9, 10018, FALSE),
+(10, 11, 10019, TRUE),
+(10, 12, 10020, TRUE),
+(10, 13, 10021, TRUE),
+(1, 14, 10022, TRUE),
+(2, 15, 10023, FALSE),
+(3, 16, 10024, FALSE);
+
 
 
 INSERT into copy_of_item(item_id, item_barcode)
@@ -576,12 +602,37 @@ VALUES
 (13, 0426113066),
 (14, 0495393437),
 (15, 0227217727),
-(16, 0227247797);
+(16, 0227247797),
+(17, 10000),
+(18, 10001),
+(19, 10002),
+(20, 10003),
+(8, 10004),
+(9, 10005),
+(10, 10006),
+(11, 10007),
+(12, 10008),
+(2, 10009),
+(2, 10010),
+(3, 10011),
+(3, 10012),
+(4, 10013),
+(5, 10014),
+(6, 10015),
+(7, 10016),
+(8, 10017),
+(9, 10018),
+(11, 10019),
+(12, 10020),
+(13, 10021),
+(14, 10022),
+(15, 10023),
+(16, 10024);
 
 INSERT INTO hosts_event(event_id, branch_id)
 VALUES 
 (1234, 1), 
-(1234, 2), -- test value
+(1235, 10),
 (1236, 2), 
 (1237, 3), 
 (1240, 4), 
@@ -594,6 +645,7 @@ VALUES
 INSERT INTO coordinates(card_no, staff_id, event_id)
 VALUES
 (2238324761, 666, 1234),
+(2238324761, 666, 1235),
 (3912281595, 555, 1236),
 (6303195165, 777, 1237),
 (7284096754, 111, 1240),
@@ -602,6 +654,7 @@ VALUES
 (8761346354, 333, 1241),
 (8761346354, 333, 1242),
 (8761346354, 333, 1243);
+
 
 INSERT INTO places_hold(card_no, item_id, hold_position)
 VALUES
@@ -627,3 +680,8 @@ VALUES
 (8426482051, 1, 683516688, '2022-04-04', '2022-05-05'),
 (7920625716, 1, 1133029792, '2022-04-04', '2022-05-05');
 
+INSERT INTO registers (event_id, card_no)
+VALUES
+(1234,7920625716),
+(1235,7920625716),
+(1234, 2346271619);
