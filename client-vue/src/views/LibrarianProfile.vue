@@ -145,7 +145,7 @@
             <v-divider class="mx-4"></v-divider>
             <v-card-text><b>Location:</b> {{ result.e_location }}</v-card-text>
             <v-card-text
-              ><b>Start Date:</b> {{ result.event_start_date }}</v-card-text
+              ><b>Start Date:</b> {{ result.start_date }}</v-card-text
             >
             <v-card-text><b>End Date: </b>{{ result.end_date }} </v-card-text>
           </v-card>
@@ -162,6 +162,7 @@ import {
   getAllEvents,
   getUserByID,
   getSearchResults,
+  getStaffInformation,
 } from "../services/apiServices";
 
 export default {
@@ -203,6 +204,7 @@ export default {
       customers: [],
       val: "",
       card_no: this.$route.params.card_no,
+      staff_map: [],
     };
   },
 
@@ -232,13 +234,21 @@ export default {
       this.$refs.itemmodal.show();
     },
     goToCustPage(val) {
-      //console.log(val);
       this.$router.push(`${this.card_no}/${val}`);
     },
     async getLoggedInUser(card_no) {
       await getUserByID(card_no).then((response) => {
         if (response.status == 200) {
           this.librarianUser = response.data;
+        }
+      });
+    },
+    async getStaffInformation() {
+      await getStaffInformation().then((response) => {
+        if (response.status == 200) {
+          for (let i = 0; i < response.data.length; i++) {
+            this.staff_map.push(response.data[i]);
+          }
         }
       });
     },
@@ -257,6 +267,15 @@ export default {
         }
       });
     },
+    getStaffName(staffId) {
+      var name;
+      for (let i = 0; i < this.staff_map.length; i++) {
+        if (this.staff_map[i].staff_id == staffId) {
+          name = this.staff_map[i].name;
+        }
+      }
+      return name;
+    },
     async getEvents() {
       await getAllEvents().then((response) => {
         if (response.status == 200) {
@@ -274,20 +293,10 @@ export default {
       });
     },
     async search() {
-      console.log("Search Initiated");
-      console.log(
-        "Search term " +
-          this.searchTerm +
-          " for category " +
-          this.searchCategory
-      );
       await getSearchResults(this.searchCategory, this.searchTerm).then(
         (response) => {
-          //console.log(response.data.books);
-          //console.log(this.searchCategory + "......searchCategory");
           if (this.searchCategory === "Books") {
             var books = response.data.books;
-            //console.log(books);
             for (let i = 0; i < books.length; i++) {
               var book = {
                 item_name: books[i].item_name,
@@ -300,12 +309,19 @@ export default {
               };
               this.searchResults.push(book);
             }
-          }
-          if (this.searchTerm == "Movies") {
+          } else if (this.searchCategory == "Movies") {
             this.searchResults = response.data.movies;
-          }
-          if (this.searchTerm == "Events") {
-            this.searchResults = response.data.events;
+          } else if (this.searchCategory == "Events") {
+            var events = response.data.events;
+            for (let i = 0; i < events.length; i++) {
+              var event = {
+                event_name: events[i].event_name,
+                e_location: events[i].e_location,
+                start_date: events[i].event_start_date,
+                end_date: events[i].end_date,
+              };
+              this.searchResults.push(event);
+            }
           }
         }
       );
@@ -317,6 +333,7 @@ export default {
     this.getCustomers();
     this.getEvents();
     this.getLoggedInUser(this.card_no);
+    this.getStaffInformation();
   },
 
   watch: {
