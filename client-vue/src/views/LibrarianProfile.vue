@@ -227,11 +227,6 @@ export default {
       this.showEventTab = false;
       this.showCustTab = false;
     },
-    viewSearchResults() {
-      this.showSearchResult = true;
-      this.showEventTab = false;
-      this.showCustTab = false;
-    },
     signOut() {
       this.$router.push("/");
     },
@@ -355,12 +350,6 @@ export default {
   watch: {
     model(val) {
       if (val != null) this.searchTerm = val;
-    },
-    mselect(val) {
-      if (val != null) this.searchCategory = val;
-      //console.log(val);
-      if (val != null) this.searchTerm = val;
-      console.log(this.searchTerm);
     },
     mselect(val) {
       if (val != null) this.searchCategory = val;
