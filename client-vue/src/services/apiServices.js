@@ -115,6 +115,5 @@ export async function getSearchResults(searchType, searchTerm) {
  */
 export async function getStaffInformation() {
   const response = await axios.get(`${API_URL}/staff/`);
-  console.log(searchType, searchTerm);
   return response;
 }

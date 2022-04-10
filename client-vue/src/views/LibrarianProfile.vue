@@ -122,7 +122,7 @@
         fluid
         grid-list-xl
       >
-        <v-container v-if="searchCategory === 'Books'">
+        <v-container v-if="searchCategory === 'Books' && showSearchResult">
           <v-card v-for="(result, index) in searchResults" :key="index">
             <v-card-title> Title: {{ result.item_name }} </v-card-title>
             <v-card-subtitle>
@@ -136,7 +136,7 @@
             <v-card-text>{{ result.item_desc }} </v-card-text>
           </v-card>
         </v-container>
-        <v-container v-if="searchCategory === 'Events'">
+        <v-container v-if="searchCategory === 'Events' && showSearchResult">
           <v-card v-for="(result, index) in searchResults" :key="index">
             <v-card-title> Event Name: {{ result.event_name }} </v-card-title>
             <v-card-subtitle>
@@ -151,9 +151,6 @@
           </v-card>
         </v-container>
       </v-container>
-      <v-card v-if="searchResults.length === 0" class="mx-auto">
-        No results to display</v-card
-      >
     </v-container>
   </div>
 </template>
