@@ -95,10 +95,25 @@ export async function getUserHoldItems(userId) {
   return response;
 }
 
+/**
+ *
+ * @param {*} searchType
+ * @param {*} searchTerm
+ * @returns
+ */
 export async function getSearchResults(searchType, searchTerm) {
   const response = await axios.get(
     `${API_URL}/search/${searchType}/${searchTerm}`
   );
-  console.log(searchType, searchTerm);
+  return response;
+}
+
+/**
+ *
+ * @param {*} staffId
+ * @returns
+ */
+export async function getStaffInformation() {
+  const response = await axios.get(`${API_URL}/staff/`);
   return response;
 }
