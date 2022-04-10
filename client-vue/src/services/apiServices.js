@@ -117,3 +117,16 @@ export async function getStaffInformation() {
   const response = await axios.get(`${API_URL}/staff/`);
   return response;
 }
+
+/**
+ *
+ * @param {*} card_no
+ * @returns
+ */
+export async function getRegisteredEvent(card_no) {
+  console.log(card_no);
+  const response = await axios.get(
+    `${API_URL}/getUserRegisteredEvents/${card_no}`
+  );
+  return response;
+}
