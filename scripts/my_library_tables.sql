@@ -488,7 +488,8 @@ VALUES
 (6, 'Nose Hill Library', '1530 Northmount Dr NW, Calgary, AB T2L 0G6'),
 (7, 'Crowfoot Library', '8665 Nose Hill Dr NW, Calgary, AB T3G 5T3'),
 (8, 'Louise Riley Library', '1904 14 Ave NW, Calgary, AB T2N 1M5'),
-(9, 'Judith Umbach Library', '6617 Centre St N, Calgary, AB T2K 4Y5');
+(9, 'Judith Umbach Library', '6617 Centre St N, Calgary, AB T2K 4Y5'),
+(10, 'ONLINE', 'ONLINE'); -- for events only
 
 
 INSERT INTO lib_events (event_id, event_name, event_start_date, end_date, start_time, end_time)
@@ -509,7 +510,6 @@ VALUES
 INSERT INTO event_location (event_id, e_location)
 VALUES
 (1234, 'Central Library'),
-(1234, 'Fish Creek Library'), -- test value to make sure pks work properly
 (1235, 'ONLINE'),
 (1236, 'Fish Creek Library'),
 (1237, 'Shawnessy Library'),
@@ -607,7 +607,7 @@ VALUES
 INSERT INTO hosts_event(event_id, branch_id)
 VALUES 
 (1234, 1), 
-(1234, 2), -- test value
+(1235, 10),
 (1236, 2), 
 (1237, 3), 
 (1240, 4), 
@@ -620,6 +620,7 @@ VALUES
 INSERT INTO coordinates(card_no, staff_id, event_id)
 VALUES
 (2238324761, 666, 1234),
+(2238324761, 666, 1235),
 (3912281595, 555, 1236),
 (6303195165, 777, 1237),
 (7284096754, 111, 1240),
