@@ -319,6 +319,33 @@ app.post("/signout/:itemId/:branchId", (req, res) => {
 				} else {
 					res.status(200);
 				}
+
+				var result_copy_in_branch = [];
+				var result_query = `SELECT * from has_for_branch_and_item 
+														WHERE item_id = ${req.params.itemId} 
+																	AND item_availability='1'`;
+				db.query(result_query, function (err, result) {
+					if (err) {
+						console.log(err);
+					} else {
+						for (let i = 0; i < result.length; i++) {
+							item_copies_in_branch.push(parseInt(result[i]["item_barcode"]));
+						}
+					}
+
+					if (!result_copy_in_branch.length) {
+						var item_update = `UPDATE item SET item_availability='0' WHERE item_id=${req.params.itemId}`;
+						db.query(item_update, function (err) {
+							if (err) {
+								console.log(err);
+							} else {
+								res.status(200);
+							}
+						});
+					} else {
+						res.status(200);
+					}
+				});
 			});
 		}
 	});

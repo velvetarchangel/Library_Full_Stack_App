@@ -96,16 +96,16 @@
 								:disabled="!this.cart.length"
 								color="red"
 								hide-details
-								@click="notInBranch = !notInBranch"
+								@click="inBranch = !inBranch"
 							></v-checkbox>
 							<v-select
 								class="mt-2"
 								v-model="branch"
 								outlined
 								:items="this.branches"
-								label="Select a branch"
-								:disabled="notInBranch == false"
-								hint="*Required"
+								label="*Select a branch"
+								:disabled="inBranch == false"
+								hint="Required"
 							></v-select>
 						</v-col>
 						<div class="text-center">
@@ -113,7 +113,7 @@
 								rounded
 								color="amber lighten-1"
 								:disabled="
-									!this.cart.length || (this.notInBranch && this.branch == 0)
+									!this.cart.length || (this.inBranch && this.branch == 0)
 								"
 								@click="checkout()"
 							>
@@ -122,19 +122,47 @@
 						</div>
 					</v-container>
 				</v-card-text>
+				<v-alert
+					:value="this.checkoutSuccess"
+					class="mx-auto text-center"
+					transition="fade-transition"
+					color="green"
+					outlined
+					prominent
+					type="success"
+					width="400"
+					>Success! Thank you! Navigate to your profile to check your borrowed
+					items.</v-alert
+				>
+				<v-alert
+					:value="this.hasFail"
+					class="mx-auto text-center"
+					transition="fade-transition"
+					border="right"
+					colored-border
+					type="error"
+					elevation="2"
+				>
+					Sorry, we were unable to checkout the following items as they are now
+					unavailable: {{ this.failCheckouts }}
+				</v-alert>
 			</v-card>
 		</div>
 	</div>
 </template>
 
 <script>
+import { createSignedOutObject } from "../services/apiServices";
 export default {
-	props: ["cart", "cart_count"],
+	props: ["cart", "cart_count", "availableItems", "card_no"],
 	data() {
 		return {
-			notInBranch: false,
+			inBranch: false,
 			branches: [1234, 1235, 1236],
 			branch: 0,
+			checkoutSuccess: false,
+			failCheckouts: [],
+			hasFail: false,
 		};
 	},
 	methods: {
@@ -152,7 +180,56 @@ export default {
 
 			//console.log("cart says:" + item.copies);
 		},
-		checkout() {},
+		async checkout() {
+			for (let i = 0; i < this.cart.length; i++) {
+				let item = this.cart[i];
+				console.log(item);
+				for (let j = 0; j < item.copies_in_cart; j++) {
+					let user = {
+						card_no: this.card_no,
+					};
+					var branchId;
+					var branchlist = [];
+					// If user does not have a branch preference
+					for (let k = 0; k < this.availableItems.length; k++) {
+						// get random branch
+						if (this.availableItems[k].item_id == item.item_id) {
+							branchlist.push(this.availableItems[k].branch_id);
+						}
+					}
+					console.log("branchlist: " + branchlist + ", copy#: " + j);
+					// If user prefer to checkout from a specific branch
+					if (this.inBranch) {
+						branchId = this.branch;
+					} else {
+						branchId = branchlist[j];
+					}
+
+					await createSignedOutObject(user, item.item_id, branchId).then(
+						(response) => {
+							if (response.status == 200) {
+								var object = response.data;
+								if (object.status == 400) {
+									console.log(response.data.message);
+									this.failCheckouts.push(item.item_name);
+									this.hasFail = true;
+								}
+							}
+						}
+					);
+				}
+			}
+			if (this.cart.length != this.failCheckouts.length) {
+				this.checkoutSuccess = true;
+				window.setInterval(() => {
+					this.checkoutSuccess = false;
+				}, 20000);
+			}
+			window.setInterval(() => {
+				this.hasFail = false;
+			}, 20000);
+			this.$emit("checkout");
+		},
 		log() {
 			//this.branch = item;
 			console.log(this.branch);

@@ -61,7 +61,7 @@
 						</v-card>
 					</v-flex>
 					<v-alert
-						:value="this.value"
+						:value="this.addToCartSuccess"
 						dense
 						elevation="4"
 						transition="fade-transition"
@@ -78,21 +78,28 @@ import { getAllItems, getAvailableItems } from "../services/apiServices";
 export default {
 	name: "Items",
 	//This is where item data properties will be
-	props: ["cart", "items", "books", "movies", "availableItems"],
+	props: [
+		"cart",
+		"items",
+		"books",
+		"movies",
+		"availableItems",
+		"databaseReloaded",
+	],
 	data() {
 		return {
 			//items: [],
 			//books: [],
 			//movies: [],
 			//availableItems: [],
-			value: false,
+			addToCartSuccess: false,
 			tab: "items",
 			array: this.items,
 		};
 	},
 	methods: {
 		async getItems() {
-			if (!this.cart.length) {
+			if (!this.cart.length && this.databaseReloaded) {
 				//console.log("oops i did it again");
 				await getAllItems().then((response) => {
 					if (response.status == 200) {
@@ -138,6 +145,7 @@ export default {
 				await getAvailableItems().then((response) => {
 					if (response.status == 200) {
 						var objects = response.data;
+						//console.log(objects);
 						for (let obj in objects) {
 							var item = {
 								item_id: objects[obj]["item_id"],
@@ -152,13 +160,17 @@ export default {
 
 				for (let i = 0; i < this.items.length; i++) {
 					for (let j = 0; j < this.availableItems.length; j++) {
-						if (this.items[i].item_id == this.availableItems[j].item_id) {
+						if (
+							this.items[i].item_id == this.availableItems[j].item_id &&
+							this.availableItems[j].item_availability == 1
+						) {
 							this.items[i].copies += 1;
 							//this.items[i].barcode.push(this.availableItems[j].item_barcode);
 						}
 					}
 				}
-				//console.log(this.items);
+				this.$emit("getItems");
+				console.log(this.items);
 				//this.hasBeenVisited = true;
 				//this.itemsPageInitialized = true;
 			}
@@ -183,9 +195,9 @@ export default {
 			item.copies -= 1;
 			item.copies_in_cart += 1;
 			//console.log("items says:" + item.copies_in_cart);
-			this.value = true;
+			this.addToCartSuccess = true;
 			window.setInterval(() => {
-				this.value = false;
+				this.addToCartSuccess = false;
 			}, 3000);
 		},
 		placeHold() {},

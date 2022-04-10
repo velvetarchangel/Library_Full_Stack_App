@@ -37,17 +37,22 @@
 			<Cart
 				@removeFromCart="removeFromCart($event)"
 				@submitQty="submitQty($event)"
+				@checkout="checkout"
 				:cart="cart"
+				:availableItems="availableItems"
+				:card_no="card_no"
 			/>
 		</div>
 		<div v-if="page === 'items'">
 			<Items
+				@getItems="getItems"
 				@addToCart="addToCart"
 				:cart="cart"
 				:items="items"
 				:books="books"
 				:movies="movies"
 				:availableItems="availableItems"
+				:databaseReloaded="databaseReloaded"
 			/>
 		</div>
 	</div>
@@ -69,9 +74,13 @@ export default {
 			books: [],
 			movies: [],
 			availableItems: [],
+			databaseReloaded: true,
 		};
 	},
 	methods: {
+		getItems() {
+			this.databaseReloaded = false;
+		},
 		addToCart(item) {
 			//console.log("from item:" + item.copies);
 			var ids = [];
@@ -91,15 +100,18 @@ export default {
 			this.cart_count -= item.copies_in_cart;
 			item.copies_in_cart = 0;
 			this.cart.splice(this.cart.indexOf(item), 1);
-			if (!this.cart.length) {
-				this.items = [];
-				this.books = [];
-				this.movies = [];
-				this.availableItems = [];
-			}
 		},
 		submitQty(diff) {
 			this.cart_count -= diff;
+		},
+		checkout() {
+			this.databaseReloaded = true;
+			this.cart = [];
+			this.cart_count = 0;
+			this.items = [];
+			this.books = [];
+			this.movies = [];
+			this.availableItems = [];
 		},
 		goToCart() {
 			this.page = "cart";
