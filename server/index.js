@@ -1552,6 +1552,30 @@ app.get("/staff/", (req, res) => {
   });
 });
 
+/**
+ * Endpoint to get staff information using staff id
+ * as a query parameter
+ */
+app.get("/staff/", (req, res) => {
+  var staffQuery = `SELECT l.staff_id, u.first_name, u.last_name, u.email FROM library_user as u, librarian as l
+                    WHERE l.card_no = u.card_no`;
+  var users = [];
+  db.query(staffQuery, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        var staff_id = result[i].staff_id;
+        var name = result[i].first_name + " " + result[i].last_name;
+        var user = { staff_id, name };
+        users.push(user);
+      }
+    }
+    res.status(200);
+    res.send(users);
+  });
+});
+
 // Start the server on port 5000
 app.listen(PORT_NUM, () => {
   console.log("Node server running on port " + PORT_NUM);
