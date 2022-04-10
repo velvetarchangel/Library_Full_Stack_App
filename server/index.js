@@ -716,7 +716,7 @@ app.get("/getEventsParticipants", (req, res) => {
  * this is because there can be multiple events with the same name and we need a way to identify these.
  */
 
-//add query for coordinates info
+//add query for coordinates info and hosts_event
 app.post("/createEvent", (req, res) => {
   var all_events = [];
   var all_event_id = [];
@@ -799,7 +799,7 @@ app.post("/createEvent", (req, res) => {
           });
         } else {
           res.status(200);
-          var addedEventInfo = [
+          /* var addedEventInfo = [
           event_to_add.event_id,
           event_to_add.event_name,
           event_to_add.event_start_date,
@@ -808,9 +808,71 @@ app.post("/createEvent", (req, res) => {
           event_to_add.end_time,
           event_location_to_add.e_location,
         ];
-          res.send( addedEventInfo );
+          res.send( addedEventInfo ); */
         }
       });
+	  var branches;
+	  var get_branch_query = `SELECT branch_id FROM branch WHERE branch_name='${req.body.e_location}'`;
+	  db.query(get_branch_query, function (err, result) {
+        if (err) {
+          console.log(err);
+        } else {
+          //res.status(200);
+          branches = result[0]["branch_id"];
+		  
+		  var host_event_query = 
+        "INSERT INTO hosts_event (event_id, branch_id) VALUES (?, ?)";
+	var host_events_rec = [event_to_add.event_id, branches];
+	db.query(host_event_query, host_events_rec, function (err) {
+        if (err) {
+          res.status(400);
+          res.send({
+            message: err,
+          });
+        } else {
+          res.status(200);
+		 /*   var addedEventInfo = [
+          event_to_add.event_id,
+          event_to_add.event_name,
+          event_to_add.event_start_date,
+          event_to_add.end_date,
+          event_to_add.start_time,
+          event_to_add.end_time,
+          event_location_to_add.e_location,
+        ];
+          res.send( addedEventInfo ); */
+        }
+      });
+        }
+      });
+
+
+	  var coordinates_query =
+        "INSERT INTO coordinates (card_no, staff_id, event_id) VALUES (?,?, ?)";
+      var coordinates_rec = [req.body.card_no, req.body.staff_id, event_to_add.event_id];
+      db.query(coordinates_query, coordinates_rec, function (err) {
+        if (err) {
+          res.status(400);
+          res.send({
+            message: err,
+          });
+        } else {
+          res.status(200);
+           var addedEventInfo = [
+          event_to_add.event_id,
+          event_to_add.event_name,
+          event_to_add.event_start_date,
+          event_to_add.end_date,
+          event_to_add.start_time,
+          event_to_add.end_time,
+          event_location_to_add.e_location,
+		  coordinates_rec[0],
+		  coordinates_rec[1]
+        ];
+          res.send( addedEventInfo ); 
+        }
+      });
+	  
     }
   });
 });
