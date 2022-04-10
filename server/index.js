@@ -18,6 +18,11 @@ const db = mysql.createConnection({
 
 const PORT_NUM = 5001;
 
+// Start the server on port 5000
+app.listen(PORT_NUM, () => {
+  console.log("Node server running on port " + PORT_NUM);
+});
+
 /**
  * Get user endpoint where user is able to login using their email and password
  * Request body passes in email and password from the front end and queries the DB
@@ -682,27 +687,11 @@ app.get("/getUserRegisteredEvents", (req, res) => {
     if (err) {
       console.log(err);
     } else {
+      //console.log(result);
       for (let i = 0; i < result.length; i++) {
-        registered_events.push(result[i]); //push actual event information here. need to join with the lib_events table
+        registered_events.push(result[i]);
       }
-      res.send(registered_events);
-    }
-  });
-});
-
-//ERIC: create an endpoint to find all users registered for each event.
-app.get("/getEventsParticipants", (req, res) => {
-  //add to the registers table.
-  var registered_events = [];
-  var event_query = `SELECT card_no FROM registers WHERE event_id='${req.body.event_id}'`; //natural join with events?
-  db.query(event_query, function (err, result) {
-    if (err) {
-      console.log(err);
-    } else {
-      for (let i = 0; i < result.length; i++) {
-        registered_events.push(result[i]); //push actual event information here
-      }
-      res.send(registered_events);
+      res.send({ registered_events });
     }
   });
 });
@@ -1146,7 +1135,13 @@ app.post("/addItemCopy", (req, res) => {
   });
 });
 
-//himika (searching)
+/**
+ *Search endpoint where a librarian is able to search for books, events or movies
+ based on keywords. Currently this feature works for a single word only. There is 
+ no chaining of queries.
+ @param searchType: Selects category such as books, movies, events
+ @param searchTerm: contains the query string
+ */
 app.get("/search/:searchType/:searchTerm", (req, res) => {
   var searchType = req.params.searchType;
   var searchTerm = req.params.searchTerm;
@@ -1160,7 +1155,6 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
                                   OR publisher_name like '%${searchTerm}%'
                                   OR author_name like '%${searchTerm}%'
                                   OR b.isbn like '%${searchTerm}%'
-                                  OR item_desc like '%${searchTerm}%'
                                   )`;
   var movieQuery = ``;
   var eventQuery = `SELECT DISTINCT h.event_id, event_name, event_start_date, end_date, start_time, end_time, card_no, staff_id, e_location, branch_id
@@ -1249,6 +1243,7 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
         for (let i = 0; i < result.length; i++) {
           var event = {
             event_id: result[i].event_id,
+            event_name: result[i].event_name,
             event_start_date: result[i].event_start_date,
             end_date: result[i].end_date,
             start_time: result[i].start_time,
@@ -1454,6 +1449,8 @@ app.get("/items", (_, res) => {
       }
     }
   });
+  var item_query = `SELECT * from item`;
+  var item_query = `SELECT * from item`;
 
   db.query(item_query, function (err, result) {
     if (err) {
@@ -1475,7 +1472,6 @@ app.get("/items", (_, res) => {
         } else if (books.includes(item_id)) {
           item_type = "Book";
         }
-
         var item = {
           item_id,
           item_name,
@@ -1510,7 +1506,50 @@ app.get("/user/:userId", (req, res) => {
   });
 });
 
-// Start the server on port 5000
-app.listen(PORT_NUM, () => {
-  console.log("Node server running on port " + PORT_NUM);
+/**
+ * Endpoint to get staff information using staff id
+ * as a query parameter
+ */
+app.get("/staff/", (req, res) => {
+  var staffQuery = `SELECT l.staff_id, u.first_name, u.last_name, u.email FROM library_user as u, librarian as l
+                    WHERE l.card_no = u.card_no`;
+  var users = [];
+  db.query(staffQuery, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        var staff_id = result[i].staff_id;
+        var name = result[i].first_name + " " + result[i].last_name;
+        var user = { staff_id, name };
+        users.push(user);
+      }
+    }
+    res.status(200);
+    res.send(users);
+  });
+});
+
+/**
+ * Endpoint to get staff information using staff id
+ * as a query parameter
+ */
+app.get("/staff/", (req, res) => {
+  var staffQuery = `SELECT l.staff_id, u.first_name, u.last_name, u.email FROM library_user as u, librarian as l
+                    WHERE l.card_no = u.card_no`;
+  var users = [];
+  db.query(staffQuery, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        var staff_id = result[i].staff_id;
+        var name = result[i].first_name + " " + result[i].last_name;
+        var user = { staff_id, name };
+        users.push(user);
+      }
+    }
+    res.status(200);
+    res.send(users);
+  });
 });

@@ -2,10 +2,10 @@ import axios from "axios";
 const API_URL = "http://localhost:5001";
 
 export async function testAPI() {
-	const test = await fetch(`${API_URL}/testAPI`).then((response) =>
-		response.json()
-	);
-	return await test;
+  const test = await fetch(`${API_URL}/testAPI`).then((response) =>
+    response.json()
+  );
+  return await test;
 }
 
 /**
@@ -15,9 +15,9 @@ export async function testAPI() {
  * or error message if the email is already in the database
  */
 export async function createUser(user) {
-	const response = await axios.post(`${API_URL}/addUser`, user);
-	console.log(response);
-	return response;
+  const response = await axios.post(`${API_URL}/addUser`, user);
+  console.log(response);
+  return response;
 }
 
 /**
@@ -26,8 +26,8 @@ export async function createUser(user) {
  * @returns user object retreived from the database
  */
 export async function getUserByEmailAndPassword(user) {
-	const response = await axios.post(`${API_URL}/getUser`, user);
-	return response;
+  const response = await axios.post(`${API_URL}/getUser`, user);
+  return response;
 }
 
 /**
@@ -35,8 +35,8 @@ export async function getUserByEmailAndPassword(user) {
  * @returns an array of library customers
  */
 export async function getAllLibraryCustomers() {
-	const response = await axios.get(`${API_URL}/users`);
-	return response;
+  const response = await axios.get(`${API_URL}/users`);
+  return response;
 }
 
 /**
@@ -44,8 +44,8 @@ export async function getAllLibraryCustomers() {
  * @returnsan array of events with event id as key
  */
 export async function getAllEvents() {
-	const response = await axios.get(`${API_URL}/events`);
-	return response;
+  const response = await axios.get(`${API_URL}/events`);
+  return response;
 }
 
 /**
@@ -54,8 +54,8 @@ export async function getAllEvents() {
  * @returns a user object with name and email
  */
 export async function getUserByID(userId) {
-	const response = await axios.get(`${API_URL}/user/${userId}`);
-	return response;
+  const response = await axios.get(`${API_URL}/user/${userId}`);
+  return response;
 }
 
 // kelly
@@ -63,8 +63,8 @@ export async function getUserByID(userId) {
  * @returns array of item objects retreived from the database
  */
 export async function getAllItems() {
-	const response = await axios.get(`${API_URL}/items`);
-	return response;
+  const response = await axios.get(`${API_URL}/items`);
+  return response;
 }
 
 // kelly
@@ -72,8 +72,8 @@ export async function getAllItems() {
  * @returns array of available item objects retreived from the database
  */
 export async function getAvailableItems() {
-	const response = await axios.get(`${API_URL}/availableItems`);
-	return response;
+  const response = await axios.get(`${API_URL}/availableItems`);
+  return response;
 }
 
 /**
@@ -92,5 +92,28 @@ export async function getUserLoanedItems(userId) {
  */
 export async function getUserHoldItems(userId) {
   const response = await axios.get(`${API_URL}/holds/${userId}`);
+  return response;
+}
+
+/**
+ *
+ * @param {*} searchType
+ * @param {*} searchTerm
+ * @returns
+ */
+export async function getSearchResults(searchType, searchTerm) {
+  const response = await axios.get(
+    `${API_URL}/search/${searchType}/${searchTerm}`
+  );
+  return response;
+}
+
+/**
+ *
+ * @param {*} staffId
+ * @returns
+ */
+export async function getStaffInformation() {
+  const response = await axios.get(`${API_URL}/staff/`);
   return response;
 }
