@@ -18,6 +18,11 @@ const db = mysql.createConnection({
 
 const PORT_NUM = 5001;
 
+// Start the server on port 5000
+app.listen(PORT_NUM, () => {
+  console.log("Node server running on port " + PORT_NUM);
+});
+
 /**
  * Get user endpoint where user is able to login using their email and password
  * Request body passes in email and password from the front end and queries the DB
@@ -1045,7 +1050,6 @@ app.post("/addItem", (req, res) => {
   });
 }); //added this
 
-<<<<<<< HEAD
 app.post("/addItemCopy", (req, res) => {
   var all_item_name = []; //for checking if item exists in db yet
   var item_query = `SELECT * FROM item`;
@@ -1138,8 +1142,6 @@ app.post("/addItemCopy", (req, res) => {
   });
 });
 
-//himika (searching)
-=======
 /**
  *Search endpoint where a librarian is able to search for books, events or movies
  based on keywords. Currently this feature works for a single word only. There is 
@@ -1147,11 +1149,10 @@ app.post("/addItemCopy", (req, res) => {
  @param searchType: Selects category such as books, movies, events
  @param searchTerm: contains the query string
  */
->>>>>>> Search implementation in progress
 app.get("/search/:searchType/:searchTerm", (req, res) => {
   var searchType = req.params.searchType;
   var searchTerm = req.params.searchTerm;
-  //console.log(searchType, searchTerm);
+  console.log(searchType, searchTerm);
   var bookQuery = `SELECT b.item_id, b.publisher_name, b.isbn, i.release_date, i.item_desc, i.item_name, a.author_name 
                   FROM book as b, item as i, writes as w, author as a WHERE 
                               i.item_id = b.item_id AND w.item_id = i.item_id 
@@ -1161,10 +1162,14 @@ app.get("/search/:searchType/:searchTerm", (req, res) => {
                                   OR publisher_name like '%${searchTerm}%'
                                   OR author_name like '%${searchTerm}%'
 <<<<<<< HEAD
+<<<<<<< HEAD
                                   OR b.isbn like '%${searchTerm}%'
 =======
                                   OR b.isbn like '%%'
 >>>>>>> Search implementation in progress
+=======
+                                  OR b.isbn like '%%'
+>>>>>>> b9e342224665be9d201420c3845debfb9a3005cc
                                   )`;
   var movieQuery = ``;
   var eventQuery = `SELECT DISTINCT h.event_id, event_name, event_start_date, end_date, start_time, end_time, card_no, staff_id, e_location, branch_id
@@ -1434,7 +1439,6 @@ app.get("/availableItems", (_, res) => {
  */
 app.get("/items", (_, res) => {
   var all_items = [];
-<<<<<<< HEAD
   var movies = [];
   var books = [];
   var item_query = `SELECT * from item`;
@@ -1460,9 +1464,8 @@ app.get("/items", (_, res) => {
       }
     }
   });
-=======
   var item_query = `SELECT * from item`;
->>>>>>> Search implementation in progress
+  var item_query = `SELECT * from item`;
 
   db.query(item_query, function (err, result) {
     if (err) {
@@ -1474,33 +1477,22 @@ app.get("/items", (_, res) => {
         var release_date = result[i].release_date.toDateString(); //mysql date format
         var item_desc = result[i].item_desc;
         var item_availability = result[i].item_availability;
-<<<<<<< HEAD
         var item_type;
-=======
->>>>>>> Search implementation in progress
 
         // Take day of week out of date string
         release_date = release_date.split(" ").slice(1).join(" ");
-
-<<<<<<< HEAD
         if (movies.includes(item_id)) {
           item_type = "Movie";
         } else if (books.includes(item_id)) {
           item_type = "Book";
         }
-
-=======
->>>>>>> Search implementation in progress
         var item = {
           item_id,
           item_name,
           release_date,
           item_desc,
           item_availability,
-<<<<<<< HEAD
           item_type,
-=======
->>>>>>> Search implementation in progress
         };
         all_items.push(item);
       }
@@ -1574,9 +1566,4 @@ app.get("/staff/", (req, res) => {
     res.status(200);
     res.send(users);
   });
-});
-
-// Start the server on port 5000
-app.listen(PORT_NUM, () => {
-  console.log("Node server running on port " + PORT_NUM);
 });
