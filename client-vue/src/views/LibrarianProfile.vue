@@ -108,8 +108,25 @@
           :items="events"
           :sort-by="['event_location', 'start_time']"
           :sort-desc="[false, true]"
+          :single-expand="true"
+          show-expand
           multi-sort
-        ></v-data-table>
+        >
+          <template v-slot:expanded-item="{ headers, item }">
+            <td :colspan="headers.length">
+              <v-row v-if="item.participants.length === 0">
+                No one is currently registered for this event</v-row
+              >
+              <v-card
+                width="100%"
+                v-for="(i, index) in item.participants"
+                :key="index"
+              >
+                <b>Name: </b>{{ i.name }}, <b>Email: </b>{{ i.email }}</v-card
+              >
+            </td>
+          </template>
+        </v-data-table>
       </v-card>
       <v-card
         v-if="searchResults.length === 0 && showSearchResult"
@@ -163,6 +180,7 @@ import {
   getUserByID,
   getSearchResults,
   getStaffInformation,
+  getEventParticipants,
 } from "../services/apiServices";
 
 export default {
@@ -286,10 +304,10 @@ export default {
       await getAllEvents().then((response) => {
         if (response.status == 200) {
           let curr_events = response.data;
+          console.log(curr_events);
           for (let e in curr_events) {
-            // var name = this.getStaffName(curr_events[e]["staff_id"]);
-            // console.log(name);
             var event = {
+              event_id: e,
               event_name: curr_events[e]["event_name"],
               e_location: curr_events[e]["event_location"],
               time: curr_events[e]["event_time"].substring(0, 10),
@@ -299,6 +317,18 @@ export default {
           }
         }
       });
+      this.getEventParticipants();
+    },
+    async getEventParticipants() {
+      console.log("Event participants triggered");
+      for (let i = 0; i < this.events.length; i++) {
+        await getEventParticipants(this.events[i].event_id).then((response) => {
+          if (response.status == 200) {
+            var participants = response.data;
+            this.events[i].participants = participants;
+          }
+        });
+      }
     },
     async search() {
       this.searchResults = []; //clear search results
@@ -335,6 +365,10 @@ export default {
         }
       );
     },
+    expandRow(item) {
+      console.log("Expanding row");
+      this.expanded = item === this.expanded[0] ? [] : [item];
+    },
   },
   //Functions that are triggered when page is loaded
   mounted: function () {
@@ -342,6 +376,7 @@ export default {
     this.getEvents();
     this.getLoggedInUser(this.card_no);
     this.getStaffInformation();
+    //this.getEventParticipants();
   },
 
   watch: {
