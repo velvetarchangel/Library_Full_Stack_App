@@ -673,25 +673,43 @@ app.post("/userRegistersEvents", (req, res) => {
  * Finds all the events that a user is registered for
  *
  * Inputs:
- * card_no: card number of the user
+ * card_no: card number of the user as a path variable
  *
  * Output:
  * array containing the event_id(s) that the user is registered for
  */
 //TODO: add more event info here
-app.get("/getUserRegisteredEvents", (req, res) => {
+app.get("/getUserRegisteredEvents/:card_no", (req, res) => {
   //add to the registers table.
   var registered_events = [];
-  var event_query = `SELECT * FROM registers NATURAL JOIN lib_events WHERE card_no='${req.body.card_no}'`; //natural join with events?
+  //var event_query = `SELECT * FROM registers NATURAL JOIN lib_events WHERE card_no='${req.body.card_no}'`; //natural join with events?
+  var event_query = `SELECT DISTINCT * FROM registers as r, lib_events as l, event_location as e WHERE 
+					          (r.card_no = '${req.params.card_no}' AND l.event_id = r.event_id AND r.event_id = e.event_id);`;
   db.query(event_query, function (err, result) {
     if (err) {
       console.log(err);
     } else {
-      //console.log(result);
       for (let i = 0; i < result.length; i++) {
-        registered_events.push(result[i]);
+        var event_id = result[i].event_id;
+        var event_name = result[i].event_name;
+        var event_start_date = result[i].event_start_date;
+        var end_date = result[i].end_date;
+        var start_time = result[i].start_time;
+        var end_time = result[i].end_time;
+        var e_location = result[i].e_location;
+        var event = {
+          event_id,
+          event_name,
+          event_start_date,
+          end_date,
+          start_time,
+          end_time,
+          e_location,
+        };
+        registered_events.push(event);
       }
-      res.send({ registered_events });
+      res.status(200);
+      res.send(registered_events);
     }
   });
 });
