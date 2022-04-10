@@ -247,7 +247,9 @@ export default {
       await getStaffInformation().then((response) => {
         if (response.status == 200) {
           for (let i = 0; i < response.data.length; i++) {
-            this.staff_map.push(response.data[i]);
+            this.staff_map.push(
+              response.data[i].staff_id + response.data[i].name
+            );
           }
         }
       });
@@ -267,20 +269,25 @@ export default {
         }
       });
     },
-    getStaffName(staffId) {
-      var name;
-      for (let i = 0; i < this.staff_map.length; i++) {
-        if (this.staff_map[i].staff_id == staffId) {
-          name = this.staff_map[i].name;
-        }
-      }
-      return name;
-    },
+    // getStaffName(staffId) {
+    //   var name;
+    //   console.log(this.staff_map);
+    //   //console.log(Array.from(this.staff_map));
+    //   for (let i = 0; i < this.staff_map.length; i++) {
+    //     if (this.staff_map[i].substring(0, 3) == staffId) {
+    //       name = this.staff_map[i].substring(4, this.staff_map[i].length);
+    //     }
+    //   }
+    //   return name;
+    // },
     async getEvents() {
+      //console.log(JSON.stringify(this.staff_map)));
       await getAllEvents().then((response) => {
         if (response.status == 200) {
           let curr_events = response.data;
           for (let e in curr_events) {
+            // var name = this.getStaffName(curr_events[e]["staff_id"]);
+            // console.log(name);
             var event = {
               event_name: curr_events[e]["event_name"],
               e_location: curr_events[e]["event_location"],
@@ -293,6 +300,7 @@ export default {
       });
     },
     async search() {
+      this.searchResults = []; //clear search results
       await getSearchResults(this.searchCategory, this.searchTerm).then(
         (response) => {
           if (this.searchCategory === "Books") {
