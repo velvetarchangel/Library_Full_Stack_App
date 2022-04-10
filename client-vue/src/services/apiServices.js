@@ -84,13 +84,22 @@ export async function getAvailableItems() {
  * 					or error message if the item is not available
  */
 export async function createSignedOutObject(userId, itemId, branchId) {
-	console.log(
+	/*	console.log(
 		"user: " + userId.card_no + "\nitem " + itemId + "\nbranch: " + branchId
 	);
-	const response = await axios.post(
+*/ const response = await axios.post(
 		`${API_URL}/signout/${itemId}/${branchId}`,
 		userId
 	);
 	//console.log(response);
+	return response;
+}
+
+// kelly
+/**
+ * @returns array of branch objects retreived from the database
+ */
+export async function getBranches() {
+	const response = await axios.get(`${API_URL}/branches`);
 	return response;
 }

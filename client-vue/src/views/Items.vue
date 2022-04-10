@@ -105,8 +105,8 @@ export default {
 					if (response.status == 200) {
 						var objects = response.data;
 
-						// Shorten long titles
 						for (let obj in objects) {
+							// Shorten long titles
 							var title = objects[obj]["item_name"];
 							var short_title = "";
 							if (title.length > 21) {
@@ -145,7 +145,7 @@ export default {
 				await getAvailableItems().then((response) => {
 					if (response.status == 200) {
 						var objects = response.data;
-						//console.log(objects);
+
 						for (let obj in objects) {
 							var item = {
 								item_id: objects[obj]["item_id"],
@@ -170,7 +170,7 @@ export default {
 					}
 				}
 				this.$emit("getItems");
-				console.log(this.items);
+				//console.log(this.items);
 				//this.hasBeenVisited = true;
 				//this.itemsPageInitialized = true;
 			}

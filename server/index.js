@@ -1144,6 +1144,45 @@ app.get("/availableItems", (_, res) => {
 	});
 });
 
+//Kelly
+/**
+ * Gets all branches (and their infro) from database
+ *
+ * Inputs:
+ *    none
+ *
+ * Output:
+ *    all_branches: array of branch objects with values:
+ * 			branch_id,
+ * 			branch_name,
+ * 			branch_address
+ */
+app.get("/branches", (_, res) => {
+	var branches = [];
+	var branch_query = `SELECT * from branch`;
+
+	db.query(branch_query, function (err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			for (let i = 0; i < result.length; i++) {
+				var branch_id = result[i].branch_id;
+				var branch_name = result[i].branch_name;
+				var branch_address = result[i].branch_address;
+
+				var branch = {
+					branch_id,
+					branch_name,
+					branch_address,
+				};
+				branches.push(branch);
+			}
+		}
+		res.status(200);
+		res.send(branches);
+	});
+});
+
 /**
  * Gets all items in database
  *

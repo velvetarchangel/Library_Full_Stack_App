@@ -111,6 +111,7 @@ export default {
 			this.items = [];
 			this.books = [];
 			this.movies = [];
+			//these are items that are initially available in db
 			this.availableItems = [];
 		},
 		goToCart() {

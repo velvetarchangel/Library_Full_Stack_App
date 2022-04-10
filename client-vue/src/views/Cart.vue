@@ -1,17 +1,5 @@
 <template>
 	<div>
-		<!--<h1>Your Cart</h1>
-		<div class="items">
-			<div v-for="(item, index) in cart" :key="index">
-				<h3>{{ item.item_name }}</h3>
-				<img :src="item.image" />
-				<div>
-					<v-btn color="error" class="mr-4" @click="removeFromCart(item)">
-						Remove from cart
-					</v-btn>
-				</div>
-			</div>
-		</div>-->
 		<div class="items">
 			<v-card flat class="ma-7" max-width="1450">
 				<h4 class="display-1">Your Cart</h4>
@@ -33,17 +21,6 @@
 						<v-card-text>
 							{{ item.item_desc }}
 						</v-card-text>
-						<!--<p class="subheading .font-weight-medium ms-3">
-						Item Barcode: {{ item.barcode }}
-					</p>
-					<v-responsive max-width="50" class="ml-7">
-						<v-text-field
-							type="number"
-							label="Quantity"
-							min="0"
-							max="10"
-						></v-text-field>
-					</v-responsive>-->
 						<v-card-actions>
 							<div class="ma-7">
 								<v-menu offset-y>
@@ -102,7 +79,7 @@
 								class="mt-2"
 								v-model="branch"
 								outlined
-								:items="this.branches"
+								:items="this.branchNames"
 								label="*Select a branch"
 								:disabled="inBranch == false"
 								hint="Required"
@@ -115,10 +92,29 @@
 								:disabled="
 									!this.cart.length || (this.inBranch && this.branch == 0)
 								"
-								@click="checkout()"
+								@click="proceedCheckout()"
 							>
 								Proceed to Checkout
 							</v-btn>
+							<v-dialog
+								v-model="this.unavailableAlert"
+								persistent
+								max-width="400"
+							>
+								<v-card>
+									<v-card-title class="text-h5"> Uh oh! </v-card-title>
+									<v-card-text v-html="unavailability"></v-card-text>
+									<v-card-actions>
+										<v-spacer></v-spacer>
+										<v-btn color="green darken-1" text @click="resetFields()">
+											No
+										</v-btn>
+										<v-btn color="green darken-1" text @click="checkout()">
+											Yes
+										</v-btn>
+									</v-card-actions>
+								</v-card>
+							</v-dialog>
 						</div>
 					</v-container>
 				</v-card-text>
@@ -142,9 +138,7 @@
 					colored-border
 					type="error"
 					elevation="2"
-				>
-					Sorry, we were unable to checkout the following items as they are now
-					unavailable: {{ this.failCheckouts }}
+					><span v-html="unavailability"></span>
 				</v-alert>
 			</v-card>
 		</div>
@@ -152,20 +146,44 @@
 </template>
 
 <script>
-import { createSignedOutObject } from "../services/apiServices";
+import { createSignedOutObject, getBranches } from "../services/apiServices";
 export default {
 	props: ["cart", "cart_count", "availableItems", "card_no"],
 	data() {
 		return {
 			inBranch: false,
-			branches: [1234, 1235, 1236],
-			branch: 0,
+			branches: [],
+			branchNames: [],
+			branch: "",
+			branchString: "",
+			unavailableItems: [],
+			unavailableInBranch: [],
+			unavailability: "",
+			unavailableAlert: false,
+			itemsToCheckout: [],
 			checkoutSuccess: false,
 			failCheckouts: [],
 			hasFail: false,
 		};
 	},
 	methods: {
+		async getAllBranches() {
+			await getBranches().then((response) => {
+				if (response.status == 200) {
+					var all_branches = response.data;
+
+					for (let i in all_branches) {
+						var branch = {
+							branch_id: all_branches[i]["branch_id"],
+							branch_name: all_branches[i]["branch_name"],
+							branch_address: all_branches[i]["branch_address"],
+						};
+						this.branches.push(branch);
+						this.branchNames.push(branch.branch_name);
+					}
+				}
+			});
+		},
 		removeFromCart(item) {
 			this.$emit("removeFromCart", item);
 		},
@@ -180,63 +198,150 @@ export default {
 
 			//console.log("cart says:" + item.copies);
 		},
-		async checkout() {
+		proceedCheckout() {
 			for (let i = 0; i < this.cart.length; i++) {
 				let item = this.cart[i];
-				console.log(item);
 				for (let j = 0; j < item.copies_in_cart; j++) {
-					let user = {
-						card_no: this.card_no,
-					};
-					var branchId;
+					var branchId = 0;
 					var branchlist = [];
-					// If user does not have a branch preference
+					var availableHere = [];
+
 					for (let k = 0; k < this.availableItems.length; k++) {
 						// get random branch
 						if (this.availableItems[k].item_id == item.item_id) {
+							if (this.availableItems[k].item_availability == 1) {
+								availableHere.push(this.availableItems[k].branch_id);
+							}
 							branchlist.push(this.availableItems[k].branch_id);
 						}
 					}
-					console.log("branchlist: " + branchlist + ", copy#: " + j);
+
 					// If user prefer to checkout from a specific branch
 					if (this.inBranch) {
-						branchId = this.branch;
-					} else {
-						branchId = branchlist[j];
-					}
-
-					await createSignedOutObject(user, item.item_id, branchId).then(
-						(response) => {
-							if (response.status == 200) {
-								var object = response.data;
-								if (object.status == 400) {
-									console.log(response.data.message);
-									this.failCheckouts.push(item.item_name);
-									this.hasFail = true;
-								}
+						// Get id of selected branch
+						for (let b in this.branches) {
+							if (this.branches[b]["branch_name"] == this.branch) {
+								branchId = this.branches[b]["branch_id"];
 							}
 						}
-					);
+						var thisItem = {
+							item: item,
+							branchId: branchId,
+						};
+
+						this.itemsToCheckout.push(thisItem);
+
+						if (!availableHere.includes(branchId)) {
+							this.getUnavailableItem(item, "at " + this.branch);
+						}
+					} else {
+						// If user does not have a branch preference
+						// get random branch
+						if (availableHere.length > j) {
+							branchId = availableHere[j];
+						} else {
+							this.getUnavailableItem(item, "in any branch");
+						}
+						var thatItem = {
+							item: item,
+							branchId: branchId,
+						};
+						this.itemsToCheckout.push(thatItem);
+					}
 				}
 			}
+
+			if (this.unavailableItems.length > 0) {
+				// Generate unavailability alert string
+				this.unavailability =
+					"It looks like the following item(s) are unavailable " +
+					this.branchString +
+					":<br />";
+				for (let i = 0; i < this.unavailableInBranch.length; i++) {
+					this.unavailability +=
+						"<br/>" +
+						this.unavailableInBranch[i].copy +
+						" copy(s) of " +
+						this.unavailableInBranch[i].name;
+				}
+				this.unavailability += "<br/><br/>Would you still like to proceed?";
+				this.unavailableAlert = true;
+			} else {
+				this.checkout();
+			}
+		},
+		getUnavailableItem(item, branchName) {
+			this.branchString = branchName;
+			if (
+				!this.unavailableItems.length ||
+				!this.unavailableItems.includes(item.item_name)
+			) {
+				let someItem = {
+					name: item.item_name,
+					copy: 1,
+					//branch: branchName,
+				};
+				this.unavailableInBranch.push(someItem);
+				this.unavailableItems.push(item.item_name);
+			} else {
+				for (let u in this.unavailableItems) {
+					if (this.unavailableItems[u] == item.item_name) {
+						this.unavailableInBranch[u]["copy"] += 1;
+					}
+				}
+			}
+		},
+		async checkout() {
+			this.unavailableAlert = false;
+			this.unavailability =
+				"Sorry, we were unable to checkout the following item(s):<br/>";
+			let user = {
+				card_no: this.card_no,
+			};
+			for (let x = 0; x < this.itemsToCheckout.length; x++) {
+				let item = this.itemsToCheckout[x].item;
+				let branchId = this.itemsToCheckout[x].branchId;
+				await createSignedOutObject(user, item.item_id, branchId).then(
+					(response) => {
+						if (response.status == 200) {
+							var object = response.data;
+							if (object.status == 400) {
+								this.failCheckouts.push(item.item_name);
+								this.unavailability += item.item_name + "<br/>";
+							}
+						}
+					}
+				);
+			}
+
+			//console.log(this.failCheckouts);
+
+			// Show success/fail alerts
 			if (this.cart.length != this.failCheckouts.length) {
 				this.checkoutSuccess = true;
 				window.setInterval(() => {
 					this.checkoutSuccess = false;
 				}, 20000);
 			}
-			window.setInterval(() => {
-				this.hasFail = false;
-			}, 20000);
+			if (this.failCheckouts.length > 0) {
+				this.hasFail = true;
+				window.setInterval(() => {
+					this.hasFail = false;
+				}, 20000);
+			}
+
 			this.$emit("checkout");
 		},
-		log() {
-			//this.branch = item;
-			console.log(this.branch);
+		resetFields() {
+			this.unavailableItems = [];
+			this.unavailableInBranch = [];
+			this.unavailability = "";
+			this.unavailableAlert = false;
+			this.itemsToCheckout = [];
 		},
 	},
 	mounted: function () {
-		//this.log();
+		this.getAllBranches();
 	},
 };
 </script>
