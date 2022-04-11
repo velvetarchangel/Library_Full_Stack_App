@@ -12,7 +12,7 @@ app.use(bodyparser.json());
 const db = mysql.createConnection({
 	user: "root",
 	host: "localhost",
-	password: "mysqlpassword",
+	password: "odd&Oracle68",
 	database: "library",
 });
 
@@ -499,7 +499,7 @@ app.get("/loanedItems/:card_no", (req, res) => {
 				var item_desc = result[i].item_desc;
 				var item_barcode = result[i].item_barcode.toString();
 				var checkout_date = result[i].checkout_date;
-				var return_date = result[i].return_date;
+				var return_date = result[i].return_date.toString();
 
 				// Take day of week out of date string
 				release_date = release_date.split(" ").slice(1).join(" ");
