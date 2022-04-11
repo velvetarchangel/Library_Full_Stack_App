@@ -30,47 +30,47 @@
                       'Virtual',
                     ]"
                     v-model="event_location"
-                    label="Location"
+                    label="Location*"
                     multiple
                   ></v-autocomplete>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
                     v-model="staff_id"
-                    label="Coordinator Staff ID"
-                    hint="example of helper text only on focus"
+                    label="Coordinator Staff ID*"
+                    hint="3 digit Coordinator Staff ID"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
                     v-model="event_start_date"
                     type="date"
-                    label="Start Date"
-                    hint="example of helper text only on focus"
+                    label="Start Date*"
+                    hint="start date of event"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
                     v-model="event_end_date"
                     type="date"
-                    label="End Date"
-                    hint="example of helper text only on focus"
+                    label="End Date*"
+                    hint="end date of event"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
                     v-model="event_start_time"
                     type="time"
-                    label="Start Time"
-                    hint="example of helper text only on focus"
+                    label="Start Time*"
+                    hint="start time of event"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
                     v-model="event_end_time"
                     type="time"
-                    label="End Time"
-                    hint="example of helper text only on focus"
+                    label="End Time*"
+                    hint="end time of event"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
@@ -107,7 +107,7 @@ export default {
       event_start_time: "",
       event_end_time: "",
       event_location: "",
-      card_no: "",
+      card_no: this.$route.params.card_no,
       staff_id: "",
       showModal: false,
     };
