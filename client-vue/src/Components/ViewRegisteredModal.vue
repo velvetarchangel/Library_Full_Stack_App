@@ -4,22 +4,6 @@
       <v-dialog v-model="showModal" persistent max-width="600px">
         <v-card>
           
-       <!--      <v-container fluid fill-width>
-      <v-card width="150vw">
-        <v-data-table
-          class="elevation-1 100%"
-          v-if="showEventTab"
-          :headers="eventHeaders"
-          :items="events"
-          :sort-by="['event_location', 'start_time']"
-          :sort-desc="[false, true]"
-          multi-sort
-        >
-        </v-data-table>
-      </v-card>      
-    </v-container> -->
-
-
     <v-divider inset></v-divider>
       <v-subheader inset>Events for {{this.card_no}}</v-subheader>
       <v-list-item v-if="registered_events.length === 0" class="text-center">

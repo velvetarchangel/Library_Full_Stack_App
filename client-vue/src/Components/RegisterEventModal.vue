@@ -45,7 +45,6 @@ export default {
   data() {
     return {
       event_id: "",
-      //card_no: "",
       card_no: this.$route.params.card_no,
       showModal: false,
     };
