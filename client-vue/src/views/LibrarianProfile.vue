@@ -157,7 +157,7 @@
           <v-card v-for="(result, index) in searchResults" :key="index">
             <v-card-title> Event Name: {{ result.event_name }} </v-card-title>
             <v-card-subtitle>
-              <b>Coordinator:</b> {{ result.author_name }}</v-card-subtitle
+              <b>Coordinator:</b> {{ result.e_coordinator }}</v-card-subtitle
             >
             <v-divider class="mx-4"></v-divider>
             <v-card-text><b>Location:</b> {{ result.e_location }}</v-card-text>
@@ -353,11 +353,13 @@ export default {
           } else if (this.searchCategory == "Events") {
             var events = response.data.events;
             for (let i = 0; i < events.length; i++) {
+              console.log(events[i]);
               var event = {
                 event_name: events[i].event_name,
                 e_location: events[i].e_location,
                 start_date: events[i].event_start_date,
                 end_date: events[i].end_date,
+                e_coordinator: events[i].staff_id,
               };
               this.searchResults.push(event);
             }
