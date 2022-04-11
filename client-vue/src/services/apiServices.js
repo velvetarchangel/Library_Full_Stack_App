@@ -188,14 +188,10 @@ export async function getStaffInformation() {
  * 					or error message if the item is not available
  */
 export async function createSignedOutObject(userId, itemId, branchId) {
-	/*	console.log(
-		"user: " + userId.card_no + "\nitem " + itemId + "\nbranch: " + branchId
-	);
-*/ const response = await axios.post(
+	const response = await axios.post(
 		`${API_URL}/signout/${itemId}/${branchId}`,
 		userId
 	);
-	//console.log(response);
 	return response;
 }
 
@@ -224,5 +220,24 @@ export async function getRegisteredEvent(card_no) {
 export async function getEventParticipants(event_id) {
 	console.log(event_id);
 	const response = await axios.get(`${API_URL}/participants/${event_id}`);
+	return response;
+}
+
+// kelly
+/**
+ * @returns array of hold records retreived from the database
+ */
+export async function getAllHolds() {
+	const response = await axios.get(`${API_URL}/holds`);
+	return response;
+}
+
+//kelly
+/**
+ * @returns response with the created hold record or
+ * 					error message if the item is not available
+ */
+export async function createHoldRecord(itemId, card_no) {
+	const response = await axios.post(`${API_URL}/hold/${itemId}/${card_no}`);
 	return response;
 }

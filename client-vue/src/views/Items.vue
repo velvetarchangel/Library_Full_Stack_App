@@ -10,6 +10,10 @@
 				<v-layout row wrap>
 					<v-flex xs12 sm6 md4 lg3 v-for="(item, index) in array" :key="index">
 						<v-card class="text-xs-center ma-1" max-width="380">
+							<!--<v-img
+								src="https://cdn.diys.com/wp-content/uploads/2018/02/Pale-yellow-with-blues.jpg"
+								height="200px"
+							></v-img>-->
 							<div v-if="item.show === false">
 								<v-card-title>{{ item.short_name }}</v-card-title>
 							</div>
@@ -37,9 +41,32 @@
 									:disabled="item.copies > 0"
 									color="blue"
 									text
-									@click="placeHold()"
+									@click="inquireHold(item)"
 									>Place Hold</v-btn
 								>
+
+								<v-overlay :absolute="absolute" :value="item.inquireHold">
+									<v-card class="text-center ma-3">
+										<v-card-text v-html="holdInquiryString"></v-card-text>
+										<v-card-actions>
+											<v-spacer></v-spacer>
+											<v-btn
+												color="green lighten-1"
+												text
+												@click="item.inquireHold = false"
+											>
+												No
+											</v-btn>
+											<v-btn
+												color="green lighten-1"
+												text
+												@click="placeHold(item)"
+											>
+												Yes
+											</v-btn>
+										</v-card-actions>
+									</v-card>
+								</v-overlay>
 
 								<v-spacer></v-spacer>
 
@@ -67,6 +94,12 @@
 						transition="fade-transition"
 						>Item added to cart!</v-alert
 					>
+					<v-alert
+						:value="holdProcessed"
+						elevation="4"
+						transition="fade-transition"
+						>{{ this.holdStat }}</v-alert
+					>
 				</v-layout>
 			</v-container>
 		</div>
@@ -74,11 +107,17 @@
 </template>
 
 <script>
-import { getAllItems, getAvailableItems } from "../services/apiServices";
+import {
+	getAllItems,
+	getAvailableItems,
+	getAllHolds,
+	createHoldRecord,
+} from "../services/apiServices";
 export default {
 	name: "Items",
 	//This is where item data properties will be
 	props: [
+		"card_no",
 		"cart",
 		"items",
 		"books",
@@ -93,8 +132,13 @@ export default {
 			//movies: [],
 			//availableItems: [],
 			addToCartSuccess: false,
+			holdProcessed: false,
 			tab: "items",
 			array: this.items,
+			holdsInDB: [],
+			absolute: true,
+			holdInquiryString: "",
+			holdStat: "",
 		};
 	},
 	methods: {
@@ -122,7 +166,6 @@ export default {
 								show: false,
 								copies: 0,
 								copies_in_cart: 0,
-								//barcodes: [],
 								item_type: objects[obj]["item_type"],
 								item_id: objects[obj]["item_id"],
 								short_name: short_title,
@@ -130,6 +173,7 @@ export default {
 								release_date: objects[obj]["release_date"],
 								item_desc: objects[obj]["item_desc"],
 								item_availability: objects[obj]["item_availability"],
+								inquireHold: false,
 							};
 							if (objects[obj]["item_type"] == "Book") {
 								this.books.push(item);
@@ -175,6 +219,22 @@ export default {
 				//this.itemsPageInitialized = true;
 			}
 		},
+		async getHolds() {
+			await getAllHolds().then((response) => {
+				if (response.status == 200) {
+					var objects = response.data;
+
+					for (let obj in objects) {
+						var item = {
+							card_no: objects[obj]["card_no"],
+							item_id: objects[obj]["item_id"],
+							hold_position: objects[obj]["hold_position"],
+						};
+						this.holdsInDB.push(item);
+					}
+				}
+			});
+		},
 		goToTab(string) {
 			if (string === "items") {
 				this.tab = string;
@@ -200,15 +260,49 @@ export default {
 				this.addToCartSuccess = false;
 			}, 3000);
 		},
-		placeHold() {},
-		/*		log() {
-			console.log(this.cart_count);
+		inquireHold(item) {
+			item.inquireHold = true;
+			var holdsOfItem = [];
+			for (let i = 0; i < this.holdsInDB.length; i++) {
+				if (this.holdsInDB[i].item_id == item.item_id) {
+					holdsOfItem.push(item);
+				}
+			}
+
+			// Generate string for hold inquiry
+			this.holdInquiryString =
+				"Your place in the waiting list will be: " +
+				holdsOfItem.length +
+				"<br/> Put this item on hold?";
 		},
-*/
+		async placeHold(item) {
+			await createHoldRecord(item.item_id, this.card_no).then((response) => {
+				if (response.status == 200) {
+					var object = response.data;
+					console.log(object);
+
+					if (object.status == 400) {
+						this.holdStat += response.data.message;
+					} else if (object[0].item_id == item.item_id) {
+						this.holdStat = "Item successfully put on hold!";
+					} else {
+						this.holdStat =
+							"Sorry, we were unable to put this item on hold for you.";
+					}
+				}
+			});
+
+			item.inquireHold = false;
+			this.holdProcessed = true;
+			window.setInterval(() => {
+				this.holdProcessed = false;
+				this.holdStat = "";
+			}, 6000);
+		},
 	},
 	mounted: function () {
-		//this.log();
 		this.getItems();
+		this.getHolds();
 		this.goToTab("items");
 	},
 };
