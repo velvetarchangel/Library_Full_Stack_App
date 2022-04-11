@@ -58,6 +58,21 @@ export async function getUserByID(userId) {
   return response;
 }
 
+
+/**
+ *
+ * @param {*} event object with information to add event to the database
+ * @returns response with the event object once its added to the database
+ * or error message if the event is already in the database
+ */
+ export async function createEventAPI(event) {
+  const response = await axios.post(`${API_URL}/createEvent`, event);
+  console.log(response);
+  return response;
+}
+
+
+
 // kelly
 /**
  * @returns array of item objects retreived from the database

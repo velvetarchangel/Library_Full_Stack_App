@@ -10,7 +10,10 @@
             <v-container>
               <v-row>
                 <v-col cols="12" sm="6" md="4">
-                  <v-text-field label="Event Name*" required></v-text-field>
+                  <v-text-field 
+                  v-model="event_name"
+                  label="Event Name*" 
+                  required></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-autocomplete
@@ -26,18 +29,21 @@
                       'Judith Umbach Library',
                       'Virtual',
                     ]"
+                    v-model="event_location"
                     label="Location"
                     multiple
                   ></v-autocomplete>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
-                    label="Coordinator Name"
+                    v-model="staff_id"
+                    label="Coordinator Staff ID"
                     hint="example of helper text only on focus"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
+                    v-model="event_start_date"
                     type="date"
                     label="Start Date"
                     hint="example of helper text only on focus"
@@ -45,6 +51,7 @@
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
+                    v-model="event_end_date"
                     type="date"
                     label="End Date"
                     hint="example of helper text only on focus"
@@ -52,6 +59,7 @@
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
+                    v-model="event_start_time"
                     type="time"
                     label="Start Time"
                     hint="example of helper text only on focus"
@@ -59,6 +67,7 @@
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
+                    v-model="event_end_time"
                     type="time"
                     label="End Time"
                     hint="example of helper text only on focus"
@@ -66,7 +75,8 @@
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
-                    label=" Coorinator Email*"
+                    v-model="card_no"
+                    label=" Coorinator Card Number*"
                     required
                   ></v-text-field>
                 </v-col>
@@ -87,9 +97,18 @@
   </div>
 </template>
 <script>
+import { createEventAPI } from "../services/apiServices";
 export default {
   data() {
     return {
+      event_name: "",
+      event_start_date: "",
+      event_end_date: "",
+      event_start_time: "",
+      event_end_time: "",
+      event_location: "",
+      card_no: "",
+      staff_id: "",
       showModal: false,
     };
   },
@@ -100,7 +119,37 @@ export default {
     hide() {
       this.showModal = false;
     },
-    addNewEvent() {},
+    async addNewEvent() {
+      if (this.event_name == "" || this.event_start_date == "" || this.event_end_date == "" || this.event_start_time == "" 
+      || this.event_end_time == "" || this.event_location == "" || this.card_no == "" || this.staff_id == "" ) {
+        this.errormessage = "All fields are required";
+        this.resetValidation();
+      } else {
+        let newEvent = {
+          event_name: this.event_name,
+          event_start_date: this.event_start_date,
+          end_date: this.event_end_date,
+          start_time: this.event_start_time,
+          end_time: this.event_end_time,
+          e_location: this.event_location,
+          card_no: this.card_no,
+          staff_id: this.staff_id,
+        };
+
+        await createEventAPI(newEvent).then((response) => {
+          if (response.status == 200) {
+            newEvent = response.data;
+            if (response.data.status == 400) {
+              this.errormessage = response.data.message;
+            } /* else {
+              this.$router.push(`profile/${newUser.card_no}`); //change this
+            } */
+          }
+        });
+      }
+    },
+
+
   },
 };
 </script>
