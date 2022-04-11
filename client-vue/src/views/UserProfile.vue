@@ -12,11 +12,19 @@
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToCart()"
 					><v-icon small left>mdi-cart</v-icon>View Cart</v-btn
 				>
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToEvents()"
+					><v-icon small left>mdi-cart</v-icon>Browse Events</v-btn
+				>
 			</div>
 			<div v-if="page === 'cart'">
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToItems()"
 					><v-icon small left>mdi-bookshelf</v-icon>Browse Items</v-btn
 				>
+
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToEvents()"
+					><v-icon small left>mdi-cart</v-icon>Browse Events</v-btn
+				>
+
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToProfile()"
 					><v-icon small left>mdi-account</v-icon>Back To Profile</v-btn
 				>
@@ -25,6 +33,23 @@
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToCart()"
 					><v-icon small left>mdi-cart</v-icon>View Cart</v-btn
 				>
+
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToEvents()"
+					><v-icon small left>mdi-cart</v-icon>Browse Events</v-btn
+				>
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToProfile()"
+					><v-icon small left>mdi-account</v-icon>Back To Profile</v-btn
+				>
+			</div>
+			<div v-if="page === 'events'">
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToItems()"
+					><v-icon small left>mdi-bookshelf</v-icon>Browse Items</v-btn
+				>
+
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToCart()"
+					><v-icon small left>mdi-cart</v-icon>View Cart</v-btn
+				>
+
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToProfile()"
 					><v-icon small left>mdi-account</v-icon>Back To Profile</v-btn
 				>
@@ -55,12 +80,27 @@
 				:databaseReloaded="databaseReloaded"
 			/>
 		</div>
+		<!-- update the next field and add functionality to create the visuals for user profile -->
+		<div v-if="page === 'events'"> 
+			<Events
+				@getItems="getItems"
+				@addToCart="addToCart"
+				:cart="cart"
+				:events="events"
+				:items="items"
+				:books="books"
+				:movies="movies"
+				:availableItems="availableItems"
+				:databaseReloaded="databaseReloaded"
+			/>
+		</div>
 	</div>
 </template>
 
 <script>
 import Items from "./Items.vue";
 import Cart from "./Cart.vue";
+import Events from "./Events.vue";
 
 export default {
 	//name: "UserProfile",
@@ -120,6 +160,9 @@ export default {
 		goToItems() {
 			this.page = "items";
 		},
+		goToEvents() {
+			this.page = "events";
+		},
 		goToProfile() {
 			this.page = "userprofile";
 		},
@@ -134,7 +177,7 @@ export default {
 		this.log();
 */
 	},
-	components: { Items, Cart },
+	components: { Items, Cart, Events },
 };
 </script>
 
