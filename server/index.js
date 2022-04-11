@@ -456,7 +456,7 @@ app.post("/hold/:itemId/:card_no", (req, res) => {
 								});
 							} else {
 								res.status(200);
-								res.send({ item_to_hold });
+								res.send([hold_record]);
 							}
 						});
 					});
@@ -571,8 +571,54 @@ app.get("/holds/:card_no", (req, res) => {
 	});
 });
 
-//kelly -- questions
-app.get("/holds/:branchId", (req, res) => {});
+//kelly
+/**
+ * Gets all items on hold in database
+ *
+ * Output:
+ *    items_on_hold: array of objects with values:
+ *      card_no, (of user)
+ * 			item_id,
+ * 			item_name,
+ * 			item_desc,
+ * 			hold_position,
+ *
+ */
+app.get("/holds", (req, res) => {
+	var items_on_hold = [];
+	var holds_query = `SELECT DISTINCT * FROM places_hold as p, item as i 
+										WHERE p.item_id = i.item_id`;
+
+	db.query(holds_query, function (err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			for (let i = 0; i < result.length; i++) {
+				var card_no = result[i].card_no;
+				var item_id = result[i].item_id;
+				var item_name = result[i].item_name;
+				var release_date = result[i].release_date.toDateString(); //mysql date format
+				var item_desc = result[i].item_desc;
+				var hold_position = result[i].hold_position.toString();
+
+				// Take day of week out of date string
+				release_date = release_date.split(" ").slice(1).join(" ");
+
+				var item = {
+					card_no,
+					item_id,
+					item_name,
+					release_date,
+					item_desc,
+					hold_position,
+				};
+				items_on_hold.push(item);
+			}
+		}
+		res.status(200);
+		res.send(items_on_hold);
+	});
+});
 
 /**
  * ENDPOINT URL: localhost:5001/returnItem

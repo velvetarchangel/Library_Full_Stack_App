@@ -53,6 +53,7 @@
 				:movies="movies"
 				:availableItems="availableItems"
 				:databaseReloaded="databaseReloaded"
+				:card_no="card_no"
 			/>
 		</div>
 	</div>
