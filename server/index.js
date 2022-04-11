@@ -263,70 +263,97 @@ app.post("/signout/:itemId/:branchId", (req, res) => {
                       WHERE branch_id = ${req.params.branchId} 
                       AND item_id = ${req.params.itemId} AND item_availability='1'`;
 
-  db.query(items_query, function (err, result) {
-    if (err) {
-      console.log(err);
-    } else {
-      for (let i = 0; i < result.length; i++) {
-        item_copies_in_branch.push(parseInt(result[i]["item_barcode"]));
-      }
-    }
+	db.query(items_query, function (err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			for (let i = 0; i < result.length; i++) {
+				item_copies_in_branch.push(parseInt(result[i]["item_barcode"]));
+			}
+		}
 
-    // If there are no copy of item available in branch
-    if (!item_copies_in_branch.length) {
-      res.send({
-        status: 400,
-        message: "Item is currently unavailable to signout",
-      });
-    } else {
-      let today = new Date();
+		// If there are no copy of item available in branch
+		if (!item_copies_in_branch.length) {
+			res.send({
+				status: 400,
+				message: "Item is currently unavailable to signout",
+			});
+		} else {
+			let today = new Date();
 
-      // Set a return_date
-      var duedate = new Date();
-      duedate.setDate(today.getDate() + 31);
+			// Set a return_date
+			var duedate = new Date();
+			duedate.setDate(today.getDate() + 31);
 
-      var item_to_signout = {
-        item_id: req.params.itemId,
-        card_no: req.body.card_no,
-        item_barcode: item_copies_in_branch[0].toString(),
-        checkout_date: today,
-        return_date: duedate,
-      };
+			var item_to_signout = {
+				item_id: req.params.itemId,
+				card_no: req.body.card_no,
+				item_barcode: item_copies_in_branch[0].toString(),
+				checkout_date: today,
+				return_date: duedate,
+			};
 
-      var sql_query = `INSERT INTO signed_out (item_id, card_no, item_barcode, checkout_date, return_date) VALUES(?, ?, ?, ?, ?)`;
-      var item_to_insert = [
-        item_to_signout.item_id,
-        item_to_signout.card_no,
-        item_to_signout.item_barcode,
-        item_to_signout.checkout_date,
-        item_to_signout.return_date,
-      ];
-      db.query(sql_query, item_to_insert, function (err) {
-        if (err) {
-          res.status(400);
-          res.send({
-            message: err,
-          });
-        } else {
-          res.send([item_to_signout]);
-        }
-      });
+			var sql_query = `INSERT INTO signed_out (item_id, card_no, item_barcode, checkout_date, return_date) VALUES(?, ?, ?, ?, ?)`;
+			var item_to_insert = [
+				item_to_signout.item_id,
+				item_to_signout.card_no,
+				item_to_signout.item_barcode,
+				item_to_signout.checkout_date,
+				item_to_signout.return_date,
+			];
+			db.query(sql_query, item_to_insert, function (err) {
+				if (err) {
+					res.status(400);
+					res.send({
+						message: err,
+					});
+				} else {
+					res.send([item_to_signout]);
+				}
+			});
 
-      // Update item availability in has_for_branch_and_item
-      var barcode = item_copies_in_branch[0].toString();
-      var sql_update = `UPDATE has_for_branch_and_item SET item_availability='0' WHERE item_barcode=${barcode}`;
-      db.query(sql_update, function (err) {
-        if (err) {
-          res.status(400);
-          res.send({
-            message: item_copies_in_branch[0],
-          });
-        } else {
-          res.status(200);
-        }
-      });
-    }
-  });
+			// Update item availability in has_for_branch_and_item
+			var barcode = item_copies_in_branch[0].toString();
+			var sql_update = `UPDATE has_for_branch_and_item SET item_availability='0' WHERE item_barcode=${barcode}`;
+			db.query(sql_update, function (err) {
+				if (err) {
+					res.status(400);
+					res.send({
+						message: item_copies_in_branch[0],
+					});
+				} else {
+					res.status(200);
+				}
+
+				var result_copy_in_branch = [];
+				var result_query = `SELECT * from has_for_branch_and_item 
+														WHERE item_id = ${req.params.itemId} 
+																	AND item_availability='1'`;
+				db.query(result_query, function (err, result) {
+					if (err) {
+						console.log(err);
+					} else {
+						for (let i = 0; i < result.length; i++) {
+							item_copies_in_branch.push(parseInt(result[i]["item_barcode"]));
+						}
+					}
+
+					if (!result_copy_in_branch.length) {
+						var item_update = `UPDATE item SET item_availability='0' WHERE item_id=${req.params.itemId}`;
+						db.query(item_update, function (err) {
+							if (err) {
+								console.log(err);
+							} else {
+								res.status(200);
+							}
+						});
+					} else {
+						res.status(200);
+					}
+				});
+			});
+		}
+	});
 });
 
 //kelly
@@ -1423,6 +1450,45 @@ app.get("/availableItems", (_, res) => {
     res.status(200);
     res.send(available_items);
   });
+});
+
+//Kelly
+/**
+ * Gets all branches (and their infro) from database
+ *
+ * Inputs:
+ *    none
+ *
+ * Output:
+ *    all_branches: array of branch objects with values:
+ * 			branch_id,
+ * 			branch_name,
+ * 			branch_address
+ */
+app.get("/branches", (_, res) => {
+	var branches = [];
+	var branch_query = `SELECT * from branch`;
+
+	db.query(branch_query, function (err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			for (let i = 0; i < result.length; i++) {
+				var branch_id = result[i].branch_id;
+				var branch_name = result[i].branch_name;
+				var branch_address = result[i].branch_address;
+
+				var branch = {
+					branch_id,
+					branch_name,
+					branch_address,
+				};
+				branches.push(branch);
+			}
+		}
+		res.status(200);
+		res.send(branches);
+	});
 });
 
 /**

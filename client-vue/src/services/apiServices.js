@@ -118,6 +118,33 @@ export async function getStaffInformation() {
   return response;
 }
 
+//kelly
+/**
+ *
+ * @param {*} object with user card_no to add to signed_out in database
+ * @returns response with the user object once its added to the database
+ * 					or error message if the item is not available
+ */
+export async function createSignedOutObject(userId, itemId, branchId) {
+	/*	console.log(
+		"user: " + userId.card_no + "\nitem " + itemId + "\nbranch: " + branchId
+	);
+*/ const response = await axios.post(
+		`${API_URL}/signout/${itemId}/${branchId}`,
+		userId
+	);
+	//console.log(response);
+	return response;
+}
+
+// kelly
+/**
+ * @returns array of branch objects retreived from the database
+ */
+export async function getBranches() {
+	const response = await axios.get(`${API_URL}/branches`);
+	return response;
+
 /**
  *
  * @param {*} card_no
@@ -135,4 +162,5 @@ export async function getEventParticipants(event_id) {
   console.log(event_id);
   const response = await axios.get(`${API_URL}/participants/${event_id}`);
   return response;
+
 }
