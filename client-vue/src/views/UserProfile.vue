@@ -44,7 +44,6 @@
 				>
 			</div>
 			<div v-if="page === 'events'">
-				Card Number: {{ this.card_no }}
 				<v-btn color="secondary" class="mr-4" @click="registerEvent()"
 					><v-icon small left>mdi-bookshelf</v-icon>Register Event</v-btn
 				>
