@@ -1571,3 +1571,28 @@ app.get("/staff/", (req, res) => {
     res.send(users);
   });
 });
+
+/**
+ *
+ */
+app.get("/participants/:eventId", (req, res) => {
+  var query = `SELECT DISTINCT r.card_no, u.first_name, u.last_name, u.email FROM 
+              lib_events as l, registers as r, library_user as u
+              WHERE r.card_no = u.card_no AND r.event_id = l.event_id AND l.event_id = '${req.params.eventId}';`;
+  var users = [];
+  db.query(query, function (err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      for (let i = 0; i < result.length; i++) {
+        var card_no = result[i].card_no;
+        var name = result[i].first_name + " " + result[i].last_name;
+        var email = result[i].email;
+        var user = { card_no, name, email };
+        users.push(user);
+      }
+      res.status(200);
+      res.send(users);
+    }
+  });
+});
