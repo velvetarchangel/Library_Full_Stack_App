@@ -87,13 +87,26 @@ export async function getUserByID(userId) {
  *
  * @param {*} item object with information to add item copy to the database
  * @returns response with the item copy object once its added to the database
- * or error message if the item not in in the database
+ * or error message if the item is not in the database
  */
  export async function createItemCopyAPI(item) {
   const response = await axios.post(`${API_URL}/addItemCopy`, item);
   console.log(response);
   return response;
 }
+
+
+/**
+ *
+ * @param {*} item object with information about user and item to return to the database
+ * @returns response with the provided info once its removed from the database
+ * or error message if something went wrong
+ */
+ export async function returnItemAPI(card_no, item) {
+	const response = await axios.post(`${API_URL}/returnItem/${card_no}`, item);
+	console.log(response);
+	return response;
+  }
 
 /**
  *

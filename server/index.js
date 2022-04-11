@@ -586,10 +586,10 @@ app.get("/holds/:branchId", (req, res) => {});
  *
  * Output: item copy removed from user record, item_availability = true for that copy
  */
-app.put("/returnItem", (req, res) => {
+app.put("/returnItem/:card_no", (req, res) => {
 	//finding the copy of item being returned from the checked out items
 	var checked_out_copy = [];
-	var return_query = `SELECT * FROM signed_out WHERE item_barcode='${req.body.item_barcode}' AND card_no='${req.body.card_no}'`;
+	var return_query = `SELECT * FROM signed_out WHERE item_barcode='${req.body.item_barcode}' AND card_no='${req.params.card_no}'`;
 	db.query(return_query, function (err, result) {
 		if (err) {
 			console.log(err);
@@ -607,7 +607,7 @@ app.put("/returnItem", (req, res) => {
 			});
 		} else {
 			//removing the checked out item
-			var sql_query = `DELETE FROM signed_out WHERE item_barcode='${req.body.item_barcode}' AND card_no='${req.body.card_no}'`;
+			var sql_query = `DELETE FROM signed_out WHERE item_barcode='${req.body.item_barcode}' AND card_no='${req.params.card_no}'`;
 			db.query(sql_query, function (err) {
 				if (err) {
 					res.status(400);
