@@ -144,4 +144,23 @@ export async function createSignedOutObject(userId, itemId, branchId) {
 export async function getBranches() {
 	const response = await axios.get(`${API_URL}/branches`);
 	return response;
+
+/**
+ *
+ * @param {*} card_no
+ * @returns
+ */
+export async function getRegisteredEvent(card_no) {
+  console.log(card_no);
+  const response = await axios.get(
+    `${API_URL}/getUserRegisteredEvents/${card_no}`
+  );
+  return response;
+}
+
+export async function getEventParticipants(event_id) {
+  console.log(event_id);
+  const response = await axios.get(`${API_URL}/participants/${event_id}`);
+  return response;
+
 }

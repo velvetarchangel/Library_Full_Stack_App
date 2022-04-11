@@ -21,8 +21,9 @@
     <v-list subheader two-line>
       <v-divider inset></v-divider>
       <v-subheader inset>Loaned items</v-subheader>
-      <v-list-item v-if="loaned_items.length === 0" class="text-center"
-        >User currently has items on loan
+      <v-list-item v-if="loaned_items.length === 0" class="text-center">
+        <v-btn icon><v-icon color="grey lighten-1">mdi-book-open</v-icon></v-btn
+        >User currently has no items on loan
       </v-list-item>
       <v-list-item v-for="loaned_item in loaned_items" :key="loaned_item.name">
         <v-list-item-avatar>
@@ -53,8 +54,9 @@
 
       <v-divider inset></v-divider>
       <v-subheader inset>Hold items</v-subheader>
-      <v-list-item v-if="hold_items.length === 0" class="text-center"
-        >User currently has items on hold
+      <v-list-item v-if="hold_items.length === 0" class="text-center">
+        <v-btn icon><v-icon color="grey lighten-1">mdi-book</v-icon></v-btn>
+        User currently has no items on hold
       </v-list-item>
       <v-list-item v-for="hold_item in hold_items" :key="hold_item.name">
         <v-list-item-avatar>
@@ -82,10 +84,13 @@
 
       <v-divider inset></v-divider>
       <v-subheader inset>Events</v-subheader>
-
+      <v-list-item v-if="registered_events.length === 0" class="text-center">
+        <v-btn icon><v-icon color="grey lighten-1">mdi-calendar</v-icon></v-btn>
+        User is currently not registered for any events
+      </v-list-item>
       <v-list-item
         v-for="registered_event in registered_events"
-        :key="registered_event.title"
+        :key="registered_event.event_name"
       >
         <v-list-item-avatar>
           <v-icon
@@ -97,12 +102,20 @@
 
         <v-list-item-content>
           <v-list-item-title
-            v-text="registered_event.title"
+            v-text="registered_event.event_name"
           ></v-list-item-title>
 
           <v-list-item-subtitle
-            v-text="registered_event.subtitle"
+            v-text="registered_event.e_location"
           ></v-list-item-subtitle>
+          <v-list-item-subtitle
+            ><b>Start Date:</b
+            >{{ registered_event.event_start_date }}</v-list-item-subtitle
+          >
+          <v-list-item-subtitle
+            ><b>End Date: </b
+            >{{ registered_event.end_date }}</v-list-item-subtitle
+          >
         </v-list-item-content>
 
         <v-list-item-action>
@@ -115,7 +128,7 @@
   </v-card>
 </template>
 <script>
-import { getUserByID } from "../services/apiServices";
+import { getRegisteredEvent, getUserByID } from "../services/apiServices";
 import { getUserLoanedItems } from "../services/apiServices";
 import { getUserHoldItems } from "../services/apiServices";
 
@@ -126,26 +139,7 @@ export default {
       customer_name: "",
       admin_card: this.$route.params.admin_card,
       loaned_items: [],
-      registered_events: [
-        {
-          color: "amber",
-          icon: "mdi-gesture-tap-button",
-          subtitle: "Jan 9, 2014",
-          title: "Photos",
-        },
-        {
-          color: "amber",
-          icon: "mdi-gesture-tap-button",
-          subtitle: "Jan 17, 2014",
-          title: "Recipes",
-        },
-        {
-          color: "amber",
-          icon: "mdi-gesture-tap-button",
-          subtitle: "Jan 28, 2014",
-          title: "Work",
-        },
-      ],
+      registered_events: [],
       hold_items: [],
     };
   },
@@ -164,7 +158,7 @@ export default {
           for (var i = 0; i < response.data.length; i++) {
             var loaned_item = {
               color: "amber",
-              icon: "mdi-clipboard-text",
+              icon: "mdi-book-open",
               name: response.data[i].item_name,
               checkout_date: response.data[i].checkout_date.substring(0, 10),
               return_date: response.data[i].return_date.substring(0, 10),
@@ -180,13 +174,32 @@ export default {
           for (var i = 0; i < response.data.length; i++) {
             var item = {
               color: "amber",
-              icon: "mdi-clipboard-text",
+              icon: "mdi-book",
               name: response.data[i].item_name,
               hold_position: response.data[i].hold_position,
-              //checkout_date: response.data[i].checkout_date.substring(0, 10),
-              //return_date: response.data[i].return_date.substring(0, 10),
             };
             this.hold_items.push(item);
+          }
+        }
+      });
+    },
+    async getRegisteredEvent() {
+      await getRegisteredEvent(this.customer_card).then((response) => {
+        console.log(response.data);
+        if (response.status == 200) {
+          for (var i = 0; i < response.data.length; i++) {
+            var event = {
+              color: "amber",
+              icon: "mdi-calendar",
+              event_name: response.data[i].event_name,
+              e_location: response.data[i].e_location,
+              event_start_date: response.data[i].event_start_date.substring(
+                0,
+                10
+              ),
+              end_date: response.data[i].end_date.substring(0, 10),
+            };
+            this.registered_events.push(event);
           }
         }
       });
@@ -197,6 +210,7 @@ export default {
     this.getCustomer();
     this.getUserLoanedItems();
     this.getUserHoldItems();
+    this.getRegisteredEvent();
   },
 };
 </script>
