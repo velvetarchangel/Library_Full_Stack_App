@@ -141,9 +141,7 @@ export default {
             newEvent = response.data;
             if (response.data.status == 400) {
               this.errormessage = response.data.message;
-            } /* else {
-              this.$router.push(`profile/${newUser.card_no}`); //change this
-            } */
+            } 
           }
         });
       }

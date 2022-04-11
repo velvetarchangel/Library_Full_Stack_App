@@ -71,6 +71,17 @@ export async function getUserByID(userId) {
   return response;
 }
 
+/**
+ *
+ * @param {*} item object with information to add item to the database
+ * @returns response with the item object once its added to the database
+ * or error message if the item is already in the database
+ */
+ export async function createItemAPI(item) {
+  const response = await axios.post(`${API_URL}/addItem`, item);
+  console.log(response);
+  return response;
+}
 
 
 // kelly
