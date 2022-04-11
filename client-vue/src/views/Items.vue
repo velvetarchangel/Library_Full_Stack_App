@@ -10,6 +10,10 @@
 				<v-layout row wrap>
 					<v-flex xs12 sm6 md4 lg3 v-for="(item, index) in array" :key="index">
 						<v-card class="text-xs-center ma-1" max-width="380">
+							<!--<v-img
+								src="https://cdn.diys.com/wp-content/uploads/2018/02/Pale-yellow-with-blues.jpg"
+								height="200px"
+							></v-img>-->
 							<div v-if="item.show === false">
 								<v-card-title>{{ item.short_name }}</v-card-title>
 							</div>

@@ -31,7 +31,85 @@
 			</div>
 		</header>
 		<div v-if="page === 'userprofile'">
-			User profile for user {{ this.card_no }}
+			<template>
+				<v-parallax
+					height="180"
+					src="https://assets.bwbx.io/images/users/iqjWHBFdfxIU/il9FqTeLlWXU/v2/1200x-1.jpg"
+				></v-parallax>
+				<h2 class="text-button ma-4">Welcome back!<br /></h2>
+				<v-sheet class="mx-auto" elevation="8" max-width="1100">
+					<h2 class="text-button ma-4">
+						Check out these events going on at our locations!
+					</h2>
+					<v-slide-group
+						v-model="model"
+						class="pa-4"
+						active-class="success"
+						show-arrows
+					>
+						<v-slide-item v-for="n in 15" :key="n" v-slot="{ active, toggle }">
+							<v-card
+								:color="active ? undefined : 'grey lighten-1'"
+								class="ma-4"
+								height="200"
+								width="300"
+								@click="toggle"
+							>
+								<v-row class="fill-height" align="center" justify="center">
+									<v-scale-transition>
+										<v-icon
+											v-if="active"
+											color="white"
+											size="48"
+											v-text="'mdi-close-circle-outline'"
+										></v-icon>
+									</v-scale-transition>
+								</v-row>
+							</v-card>
+						</v-slide-item>
+					</v-slide-group>
+					<h2 class="text-button ma-4">Your borrowed items:</h2>
+					<v-slide-group
+						v-model="display"
+						class="pa-4"
+						active-class="success"
+						show-arrows
+					>
+						<v-slide-item
+							v-for="(item, index) in this.loanedItems"
+							:key="index"
+							v-slot="{ active, toggle }"
+						>
+							<v-card
+								:color="active ? undefined : 'grey lighten-1'"
+								class="ma-4"
+								height="200"
+								width="300"
+								@click="toggle"
+							>
+								<h1 class="font-weight-light">{{ item.item_name }}</h1>
+								<v-row class="fill-height" align="center" justify="center">
+									<v-scale-transition>
+										<v-icon
+											v-if="active"
+											color="white"
+											size="48"
+											v-text="'mdi-close-circle-outline'"
+										></v-icon>
+									</v-scale-transition>
+								</v-row>
+							</v-card>
+						</v-slide-item>
+					</v-slide-group>
+					<v-expand-transition>
+						<v-sheet v-if="display != null" height="200" tile>
+							<v-row class="fill-height" align="center" justify="center">
+								<h3 class="text-h6">Selected {{ model }}</h3>
+							</v-row>
+						</v-sheet>
+					</v-expand-transition>
+				</v-sheet>
+			</template>
 		</div>
 		<div v-if="page === 'cart'">
 			<Cart
@@ -61,6 +139,7 @@
 <script>
 import Items from "./Items.vue";
 import Cart from "./Cart.vue";
+import { getUserLoanedItems } from "../services/apiServices";
 
 export default {
 	//name: "UserProfile",
@@ -75,9 +154,43 @@ export default {
 			movies: [],
 			availableItems: [],
 			databaseReloaded: true,
+			userEvents: [],
+			events: [],
+			loanedItems: [],
+			holds: [],
+			model: null, //temporary
+			display: null,
+			recordHeads: [
+				//temporary
+
+				"Items you put on hold:",
+				"Events you're registered for:",
+			],
 		};
 	},
 	methods: {
+		async getEvents() {},
+		async getLoanedItems() {
+			await getUserLoanedItems(this.card_no).then((response) => {
+				if (response.status == 200) {
+					var objects = response.data;
+
+					for (let i in objects) {
+						var obj = {
+							item_id: objects[i]["item_id"],
+							item_name: objects[i]["item_name"],
+							release_date: objects[i]["release_date"],
+							item_desc: objects[i]["item_desc"],
+							item_barcode: objects[i]["item_barcode"],
+							checkout_date: objects[i]["checkout_date"],
+							return_date: objects[i]["return_date"],
+						};
+						this.loanedItems.push(obj);
+					}
+				}
+			});
+		},
+		async getHolds() {},
 		getItems() {
 			this.databaseReloaded = false;
 		},
@@ -126,13 +239,11 @@ export default {
 		signOut() {
 			this.$router.push("/");
 		},
-		/*		log() {
-			console.log(this.cart_count);
-		},
 	},
 	mounted: function () {
-		this.log();
-*/
+		this.getEvents();
+		this.getLoanedItems();
+		this.getHolds();
 	},
 	components: { Items, Cart },
 };
