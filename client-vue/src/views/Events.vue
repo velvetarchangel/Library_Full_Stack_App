@@ -33,8 +33,8 @@ export default {
   data() {
     return {
       isLoading: false,
-      items: [],
-      librarianUser: { name: null },
+      // items: [],
+      // librarianUser: { name: null },
       eventHeaders: [
         {
           text: "Event Name",
@@ -47,17 +47,17 @@ export default {
         { text: "Event Start Time", value: "e_hour" },
         { text: "Event End Time", value: "e_hour_end" },
       ],
-      searchResults: [],
+     /*  searchResults: [],
       options: ["Movies", "Books", "Events"],
       model: null,
       mselect: null,
       searchTerm: null,
       searchCategory: null,
-      showCustTab: false, 
+      showCustTab: false,  */
       showEventTab: true, 
-      showSearchResult: false,
+      // showSearchResult: false,
       events: [],
-      customers: [],
+      // customers: [],
       val: "",
       card_no: this.$route.params.card_no,
       staff_map: [],

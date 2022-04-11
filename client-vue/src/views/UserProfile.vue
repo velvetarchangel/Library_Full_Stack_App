@@ -93,15 +93,9 @@
 		<!-- update the next field and add functionality to create the visuals for user profile -->
 		<div v-if="page === 'events'"> 
 			<Events
-				@getItems="getItems"
-				@addToCart="addToCart"
-				:cart="cart"
+			
 				:events="events"
-				:items="items"
-				:books="books"
-				:movies="movies"
-				:availableItems="availableItems"
-				:databaseReloaded="databaseReloaded"
+				
 			/>
 		</div>
 	</div>
@@ -125,6 +119,7 @@ export default {
 			items: [],
 			books: [],
 			movies: [],
+			events:[],
 			availableItems: [],
 			databaseReloaded: true,
 		};
