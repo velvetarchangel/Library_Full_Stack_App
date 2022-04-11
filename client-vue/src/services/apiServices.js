@@ -95,6 +95,18 @@ export async function getUserByID(userId) {
   return response;
 }
 
+/**
+ *
+ * @param {*} event object with information about user and event to register to the database
+ * @returns response with the provided info once its added to the database
+ * or error message if the event is already registered in the database
+ */
+ export async function registerEventAPI(event) {
+  const response = await axios.post(`${API_URL}/userRegistersEvents`, event);
+  console.log(response);
+  return response;
+}
+
 // kelly
 /**
  * @returns array of item objects retreived from the database

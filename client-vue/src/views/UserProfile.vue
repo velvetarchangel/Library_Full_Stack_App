@@ -1,5 +1,6 @@
 <template>
 	<div>
+		<register-event-modal ref="registereventmodal"></register-event-modal>
 		<header>
 			{{ this.cart_count }} ITEMS IN CART
 			<v-btn class="ma-2" color="secondary" @click="signOut"
@@ -42,6 +43,15 @@
 				>
 			</div>
 			<div v-if="page === 'events'">
+				Card Number: {{ this.card_no }}
+				<v-btn color="secondary" class="mr-4" @click="registerEvent()"
+					><v-icon small left>mdi-bookshelf</v-icon>Register Event</v-btn
+				>
+
+				<v-btn color="secondary" class="mr-4" @click="goToItems()"
+					><v-icon small left>mdi-bookshelf</v-icon>View Registered Event</v-btn
+				>
+
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToItems()"
 					><v-icon small left>mdi-bookshelf</v-icon>Browse Items</v-btn
 				>
@@ -101,9 +111,11 @@
 import Items from "./Items.vue";
 import Cart from "./Cart.vue";
 import Events from "./Events.vue";
+import RegisterEventModal from "../Components/RegisterEventModal.vue";
 
 export default {
 	//name: "UserProfile",
+	
 	data() {
 		return {
 			card_no: this.$route.params.card_no,
@@ -169,6 +181,9 @@ export default {
 		signOut() {
 			this.$router.push("/");
 		},
+		registerEvent() {
+			this.$refs.registereventmodal.show();
+		},
 		/*		log() {
 			console.log(this.cart_count);
 		},
@@ -177,7 +192,7 @@ export default {
 		this.log();
 */
 	},
-	components: { Items, Cart, Events },
+	components: { Items, Cart, Events, RegisterEventModal },
 };
 </script>
 

@@ -1,7 +1,7 @@
 <template>
   <div class="container" width="80%">
     <event-modal ref="modal"></event-modal>
-    <item-modal ref="itemmodal"></item-modal>
+    <register-event-modal ref="registereventmodal"></register-event-modal>
     <item-copy-modal ref="itemcopymodal"></item-copy-modal>
     
     <v-container fluid fill-width>
@@ -22,7 +22,7 @@
 </template>
 <script>
 import EventModal from "../Components/EventModal.vue";
-import ItemModal from "../Components/ItemModal.vue";
+import RegisterEventModal from "../Components/RegisterEventModal.vue";
 import ItemCopyModal from "../Components/ItemCopyModal.vue";
 import {
 //   getAllLibraryCustomers,
@@ -34,7 +34,7 @@ import {
 } from "../services/apiServices";
 
 export default {
-  components: { EventModal, ItemModal, ItemCopyModal },
+  components: { EventModal, RegisterEventModal, ItemCopyModal },
   data() {
     return {
       isLoading: false,
@@ -55,6 +55,7 @@ export default {
           align: "event_name",
           value: "event_name",
         },
+        { text: "Event ID", value: "event_id" },
         { text: "Event Location", value: "e_location" },
         { text: "Event Time", value: "time" },
         { text: "Event Start Time", value: "e_hour" },
@@ -99,6 +100,10 @@ export default {
     addEvent() {
       this.$refs.modal.show();
     },
+    /*  registerEvent() {
+      this.$refs.registereventmodal.show();
+    }, */
+    
    /*  addItem() {
       this.$refs.itemmodal.show();
     },
