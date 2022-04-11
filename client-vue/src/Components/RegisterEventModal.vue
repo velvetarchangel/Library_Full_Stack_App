@@ -69,6 +69,8 @@ export default {
         await registerEventAPI(newEventRegister).then((response) => {
           if (response.status == 200) {
             newEventRegister = response.data;
+                  this.showModal = false;
+
             if (response.data.status == 400) {
               this.errormessage = response.data.message;
             } 

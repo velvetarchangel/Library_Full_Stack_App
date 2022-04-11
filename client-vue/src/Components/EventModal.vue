@@ -139,6 +139,7 @@ export default {
         await createEventAPI(newEvent).then((response) => {
           if (response.status == 200) {
             newEvent = response.data;
+            this.showModal = false;
             if (response.data.status == 400) {
               this.errormessage = response.data.message;
             } 

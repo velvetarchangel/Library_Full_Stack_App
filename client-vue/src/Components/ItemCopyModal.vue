@@ -69,6 +69,7 @@ export default {
         await createItemCopyAPI(newItemCopy).then((response) => {
           if (response.status == 200) {
             newItemCopy = response.data;
+            this.showModal = false;
             if (response.data.status == 400) {
               this.errormessage = response.data.message;
             } 

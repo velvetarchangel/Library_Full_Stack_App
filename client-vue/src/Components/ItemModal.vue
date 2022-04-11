@@ -151,6 +151,7 @@ export default {
         await createItemAPI(newItem).then((response) => {
           if (response.status == 200) {
             newItem = response.data;
+            this.showModal = false;
             if (response.data.status == 400) {
               this.errormessage = response.data.message;
             } 

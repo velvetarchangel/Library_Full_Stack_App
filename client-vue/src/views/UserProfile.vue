@@ -1,6 +1,7 @@
 <template>
 	<div>
 		<register-event-modal ref="registereventmodal"></register-event-modal>
+		<view-registered-modal ref="viewregisteredmodal"></view-registered-modal>
 		<header>
 			{{ this.cart_count }} ITEMS IN CART
 			<v-btn class="ma-2" color="secondary" @click="signOut"
@@ -48,7 +49,7 @@
 					><v-icon small left>mdi-bookshelf</v-icon>Register Event</v-btn
 				>
 
-				<v-btn color="secondary" class="mr-4" @click="goToItems()"
+				<v-btn color="secondary" class="mr-4" @click="viewRegisteredEvents()"
 					><v-icon small left>mdi-bookshelf</v-icon>View Registered Event</v-btn
 				>
 
@@ -112,7 +113,7 @@ import Items from "./Items.vue";
 import Cart from "./Cart.vue";
 import Events from "./Events.vue";
 import RegisterEventModal from "../Components/RegisterEventModal.vue";
-
+import ViewRegisteredModal from "../Components/ViewRegisteredModal.vue";
 export default {
 	//name: "UserProfile",
 	
@@ -184,6 +185,9 @@ export default {
 		registerEvent() {
 			this.$refs.registereventmodal.show();
 		},
+		viewRegisteredEvents() {
+			this.$refs.viewregisteredmodal.show();
+		},
 		/*		log() {
 			console.log(this.cart_count);
 		},
@@ -192,7 +196,7 @@ export default {
 		this.log();
 */
 	},
-	components: { Items, Cart, Events, RegisterEventModal },
+	components: { Items, Cart, Events, RegisterEventModal, ViewRegisteredModal },
 };
 </script>
 
@@ -204,7 +208,6 @@ body {
 	display: grid;
 	grid-template-columns: 1fr 1fr 1fr 1fr;
 }
-
 header {
 	height: 108px;
 	background-color: rgb(245, 148, 78);
