@@ -161,7 +161,7 @@
 											v-if="active"
 											color="yellow"
 											size="48"
-											@click="returnItem()"
+											@click="returnItem(item.item_barcode)"
 											>Return Item</v-btn
 										>
 									</v-scale-transition>
