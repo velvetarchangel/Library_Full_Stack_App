@@ -1,5 +1,7 @@
 <template>
 	<div>
+		<register-event-modal ref="registereventmodal"></register-event-modal>
+		<view-registered-modal ref="viewregisteredmodal"></view-registered-modal>
 		<header>
 			{{ this.cart_count }} ITEMS IN CART
 			<v-btn class="ma-2" color="secondary" @click="signOut"
@@ -12,11 +14,19 @@
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToCart()"
 					><v-icon small left>mdi-cart</v-icon>View Cart</v-btn
 				>
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToEvents()"
+					><v-icon small left>mdi-cart</v-icon>Browse Events</v-btn
+				>
 			</div>
 			<div v-if="page === 'cart'">
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToItems()"
 					><v-icon small left>mdi-bookshelf</v-icon>Browse Items</v-btn
 				>
+
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToEvents()"
+					><v-icon small left>mdi-cart</v-icon>Browse Events</v-btn
+				>
+
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToProfile()"
 					><v-icon small left>mdi-account</v-icon>Back To Profile</v-btn
 				>
@@ -25,6 +35,31 @@
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToCart()"
 					><v-icon small left>mdi-cart</v-icon>View Cart</v-btn
 				>
+
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToEvents()"
+					><v-icon small left>mdi-cart</v-icon>Browse Events</v-btn
+				>
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToProfile()"
+					><v-icon small left>mdi-account</v-icon>Back To Profile</v-btn
+				>
+			</div>
+			<div v-if="page === 'events'">
+				<v-btn color="secondary" class="mr-4" @click="registerEvent()"
+					><v-icon small left>mdi-bookshelf</v-icon>Register Event</v-btn
+				>
+
+				<v-btn color="secondary" class="mr-4" @click="viewRegisteredEvents()"
+					><v-icon small left>mdi-bookshelf</v-icon>View Registered Event</v-btn
+				>
+
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToItems()"
+					><v-icon small left>mdi-bookshelf</v-icon>Browse Items</v-btn
+				>
+
+				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToCart()"
+					><v-icon small left>mdi-cart</v-icon>View Cart</v-btn
+				>
+
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToProfile()"
 					><v-icon small left>mdi-account</v-icon>Back To Profile</v-btn
 				>
@@ -262,16 +297,28 @@
 				:card_no="card_no"
 			/>
 		</div>
+		<!-- update the next field and add functionality to create the visuals for user profile -->
+		<div v-if="page === 'events'"> 
+			<Events
+			
+				:events="events"
+				
+			/>
+		</div>
 	</div>
 </template>
 
 <script>
 import Items from "./Items.vue";
 import Cart from "./Cart.vue";
+import Events from "./Events.vue";
+import RegisterEventModal from "../Components/RegisterEventModal.vue";
+import ViewRegisteredModal from "../Components/ViewRegisteredModal.vue";
 import { getUserLoanedItems } from "../services/apiServices";
 
 export default {
 	//name: "UserProfile",
+	
 	data() {
 		return {
 			card_no: this.$route.params.card_no,
@@ -281,10 +328,11 @@ export default {
 			items: [],
 			books: [],
 			movies: [],
+			events:[],
 			availableItems: [],
 			databaseReloaded: true,
 			userEvents: [1, 2, 3], //temp
-			events: [0, 1, 2], //temp
+			//events: [0, 1, 2], //temp
 			loanedItems: [],
 			holds: [1, 2, 3], // temp
 			eventDisplay: null,
@@ -363,19 +411,29 @@ export default {
 		goToItems() {
 			this.page = "items";
 		},
+		goToEvents() {
+			this.page = "events";
+		},
 		goToProfile() {
 			this.page = "userprofile";
 		},
 		signOut() {
 			this.$router.push("/");
 		},
+		registerEvent() {
+			this.$refs.registereventmodal.show();
+		},
+		viewRegisteredEvents() {
+			this.$refs.viewregisteredmodal.show();
+		},
+
 	},
 	mounted: function () {
 		this.getEvents();
 		this.getLoanedItems();
 		this.getHolds();
 	},
-	components: { Items, Cart },
+	components: { Items, Cart, Events, RegisterEventModal, ViewRegisteredModal },
 };
 </script>
 
@@ -387,7 +445,6 @@ body {
 	display: grid;
 	grid-template-columns: 1fr 1fr 1fr 1fr;
 }
-
 header {
 	height: 108px;
 	background-color: rgb(245, 148, 78);

@@ -12,7 +12,7 @@ app.use(bodyparser.json());
 const db = mysql.createConnection({
 	user: "root",
 	host: "localhost",
-	password: "mysqlpassword",
+	password: "password1!",
 	database: "library",
 });
 
@@ -632,10 +632,10 @@ app.get("/holds", (req, res) => {
  *
  * Output: item copy removed from user record, item_availability = true for that copy
  */
-app.put("/returnItem", (req, res) => {
+app.put("/returnItem/:card_no", (req, res) => {
 	//finding the copy of item being returned from the checked out items
 	var checked_out_copy = [];
-	var return_query = `SELECT * FROM signed_out WHERE item_barcode='${req.body.item_barcode}' AND card_no='${req.body.card_no}'`;
+	var return_query = `SELECT * FROM signed_out WHERE item_barcode='${req.body.item_barcode}' AND card_no='${req.params.card_no}'`;
 	db.query(return_query, function (err, result) {
 		if (err) {
 			console.log(err);
@@ -653,7 +653,7 @@ app.put("/returnItem", (req, res) => {
 			});
 		} else {
 			//removing the checked out item
-			var sql_query = `DELETE FROM signed_out WHERE item_barcode='${req.body.item_barcode}' AND card_no='${req.body.card_no}'`;
+			var sql_query = `DELETE FROM signed_out WHERE item_barcode='${req.body.item_barcode}' AND card_no='${req.params.card_no}'`;
 			db.query(sql_query, function (err) {
 				if (err) {
 					res.status(400);
@@ -1411,8 +1411,9 @@ app.get("/events", (_, res) => {
 				var event_location = result[i].e_location;
 				var staff_id = result[i].staff_id;
 				var event_id = result[i].event_id;
-
-				events[event_id] = { event_name, event_time, event_location, staff_id };
+				var event_hour = result[i].start_time;
+				var event_hour_end = result[i].end_time;
+				events[event_id] = { event_name, event_time, event_location, staff_id, event_hour, event_hour_end  };
 			}
 		}
 		res.status(200);

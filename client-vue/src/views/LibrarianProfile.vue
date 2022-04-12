@@ -2,6 +2,7 @@
   <div class="container" width="80%">
     <event-modal ref="modal"></event-modal>
     <item-modal ref="itemmodal"></item-modal>
+    <item-copy-modal ref="itemcopymodal"></item-copy-modal>
     <v-toolbar color="orange accent-1">
       <v-app-bar-nav-icon class="hidden-sm-and-down"></v-app-bar-nav-icon>
       <v-toolbar-title class="text-h6 mr-6 hidden-sm-and-down">
@@ -76,6 +77,11 @@
           <v-tab>
             <v-btn class="ma-2" color="secondary" @click="addItem">
               Add Item
+            </v-btn>
+          </v-tab>
+          <v-tab>
+            <v-btn class="ma-2" color="secondary" @click="addCopy">
+              Add Copy
             </v-btn>
           </v-tab>
           <v-tab
@@ -174,6 +180,7 @@
 <script>
 import EventModal from "../Components/EventModal.vue";
 import ItemModal from "../Components/ItemModal.vue";
+import ItemCopyModal from "../Components/ItemCopyModal.vue";
 import {
   getAllLibraryCustomers,
   getAllEvents,
@@ -184,7 +191,7 @@ import {
 } from "../services/apiServices";
 
 export default {
-  components: { EventModal, ItemModal },
+  components: { EventModal, ItemModal, ItemCopyModal },
   data() {
     return {
       isLoading: false,
@@ -250,6 +257,9 @@ export default {
     },
     addItem() {
       this.$refs.itemmodal.show();
+    },
+    addCopy() {
+      this.$refs.itemcopymodal.show();
     },
     goToCustPage(val) {
       //console.log(val);
