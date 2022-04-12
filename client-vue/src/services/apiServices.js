@@ -102,8 +102,8 @@ export async function getUserByID(userId) {
  * @returns response with the provided info once its removed from the database
  * or error message if something went wrong
  */
- export async function returnItemAPI(card_no, item) {
-	const response = await axios.post(`${API_URL}/returnItem/${card_no}`, item);
+ export async function returnItemAPI(card_no, item_barcode) {
+	const response = await axios.put(`${API_URL}/returnItem/${card_no}/${item_barcode}`);
 	console.log(response);
 	return response;
   }
