@@ -15,7 +15,7 @@
 					><v-icon small left>mdi-cart</v-icon>View Cart</v-btn
 				>
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToEvents()"
-					><v-icon small left>mdi-cart</v-icon>Browse Events</v-btn
+					><v-icon small left>mdi-calendar-search</v-icon>Browse Events</v-btn
 				>
 			</div>
 			<div v-if="page === 'cart'">
@@ -24,7 +24,7 @@
 				>
 
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToEvents()"
-					><v-icon small left>mdi-cart</v-icon>Browse Events</v-btn
+					><v-icon small left>mdi-calendar-search</v-icon>Browse Events</v-btn
 				>
 
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToProfile()"
@@ -37,7 +37,7 @@
 				>
 
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToEvents()"
-					><v-icon small left>mdi-cart</v-icon>Browse Events</v-btn
+					><v-icon small left>mdi-calendar-search</v-icon>Browse Events</v-btn
 				>
 				<v-btn color="blue-grey lighten-5" class="mr-4" @click="goToProfile()"
 					><v-icon small left>mdi-account</v-icon>Back To Profile</v-btn
