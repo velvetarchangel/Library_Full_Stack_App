@@ -46,7 +46,7 @@
         </v-list-item-content>
 
         <v-list-item-action>
-          <v-btn rounded color="primary" dark> Return Item </v-btn>
+          <!-- <v-btn rounded color="primary" dark> Return Item </v-btn> -->
         </v-list-item-action>
       </v-list-item>
 
@@ -74,7 +74,7 @@
         </v-list-item-content>
 
         <v-list-item-action>
-          <v-btn rounded color="primary" dark> Remove Hold </v-btn>
+          <!-- <v-btn rounded color="primary" dark> Remove Hold </v-btn> -->
         </v-list-item-action>
       </v-list-item>
 
@@ -115,7 +115,7 @@
         </v-list-item-content>
 
         <v-list-item-action>
-          <v-btn rounded color="primary" dark> Remove Participant </v-btn>
+          <!-- <v-btn rounded color="primary" dark> Remove Participant </v-btn> -->
         </v-list-item-action>
       </v-list-item>
     </v-list>
@@ -147,7 +147,6 @@ export default {
     },
     async getUserLoanedItems() {
       await getUserLoanedItems(this.customer_card).then((response) => {
-        //console.log(response.data);
         if (response.status == 200) {
           for (var i = 0; i < response.data.length; i++) {
             var loaned_item = {

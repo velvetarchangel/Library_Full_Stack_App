@@ -145,7 +145,9 @@
                   </v-card-subtitle>
                 </v-col>
                 <v-col align-left>
-                  <v-btn @click="removeParticipant()">
+                  <v-btn
+                    @click="removeParticipant(i.card_no, item.event_id, index)"
+                  >
                     Remove Participant</v-btn
                   >
                 </v-col>
@@ -224,6 +226,7 @@ import {
   getSearchResults,
   getStaffInformation,
   getEventParticipants,
+  unregisterFromEvent,
 } from "../services/apiServices";
 
 export default {
@@ -356,12 +359,10 @@ export default {
       this.getEventParticipants();
     },
     async getEventParticipants() {
-      //console.log("Event participants triggered");
       for (let i = 0; i < this.events.length; i++) {
         await getEventParticipants(this.events[i].event_id).then((response) => {
           if (response.status == 200) {
             var participants = response.data;
-            console.log(participants);
             this.events[i].participants = participants;
           }
         });
@@ -407,10 +408,22 @@ export default {
       );
     },
     expandRow(item) {
-      console.log("Expanding row");
+      //console.log("Expanding row");
       this.expanded = item === this.expanded[0] ? [] : [item];
     },
+
+    async removeParticipant(card_no, event_id) {
+      await unregisterFromEvent(card_no, event_id).then((response) => {
+        if (response.status == 200) {
+          console.log("Successfully removed participants");
+        }
+      });
+      this.events = [];
+      this.getEvents();
+      this.$router.go();
+    },
   },
+
   //Functions that are triggered when page is loaded
   mounted: function () {
     this.getCustomers();
@@ -426,7 +439,6 @@ export default {
     },
     mselect(val) {
       if (val != null) this.searchCategory = val;
-      console.log(this.searchCategory);
     },
   },
 };

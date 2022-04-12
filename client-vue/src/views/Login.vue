@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { testAPI, getUserByEmailAndPassword } from "../services/apiServices";
+import { getUserByEmailAndPassword } from "../services/apiServices";
 export default {
   name: "Login",
   data: () => ({
@@ -66,24 +66,11 @@ export default {
     select: null,
   }),
 
-  created: function () {
-    this.testAPI();
-  },
-
   methods: {
-    // this is a test function and must be removed when actual
-    // functionality is implented
-    async testAPI() {
-      await testAPI().then((response) => {
-        this.apiRes = response;
-      });
-    },
-
     async login() {
       this.validate();
       var user = { email: this.email, password: this.password };
       await getUserByEmailAndPassword(user).then((response) => {
-        //console.log(user);
         if (response.data.status == 200) {
           user = response.data.user; //update the user information
           if (user.isLibrarian === 1) {
