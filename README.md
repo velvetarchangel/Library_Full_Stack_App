@@ -19,6 +19,15 @@ npm run serve
 
 Connect database to backend
 ```
-Add your password into server/index.js
+Add your SQL password into server/index.js (line 12)
+const db = mysql.createConnection({
+	...
+	...
+	password: "InsertSQLpasswordHere!",
+	...
+});
+
+
+
 Copy over scripts/my_library_tables.sql into mySQL and generate database
 ```
