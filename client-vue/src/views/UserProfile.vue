@@ -43,6 +43,13 @@
 							Events you registered for:
 						</div>
 
+						<div v-if="!this.userEvents.length">
+							<v-card outlined class="mx-auto" max-width="1450" height="100">
+								<v-card-text class="text-center">
+									You have not registered for any events.
+								</v-card-text>
+							</v-card>
+						</div>
 						<v-timeline align-top dense>
 							<v-timeline-item
 								v-for="(event, index) in this.userEvents"
@@ -75,6 +82,13 @@
 					</v-card-text>
 
 					<h2 class="text-button ma-4">Your borrowed items:</h2>
+					<div v-if="!this.loanedItems.length">
+						<v-card outlined class="mx-auto" max-width="1450" height="100">
+							<v-card-text class="text-center">
+								You currently do not have any borrowed items.
+							</v-card-text>
+						</v-card>
+					</div>
 					<v-slide-group
 						v-model="loanDisplay"
 						class="pa-4"
@@ -107,18 +121,6 @@
 										</div>
 										<v-spacer
 									/></v-card-title>
-
-									<v-row class="fill-height" align="center" justify="center">
-										<v-scale-transition>
-											<v-btn
-												v-if="active"
-												color="yellow"
-												size="48"
-												@click="returnItem()"
-												>Return Item</v-btn
-											>
-										</v-scale-transition>
-									</v-row>
 								</v-col>
 							</v-card>
 						</v-slide-item>
@@ -137,6 +139,13 @@
 					</v-expand-transition>
 
 					<h2 class="text-button ma-4">Items you have on hold:</h2>
+					<div v-if="!this.holds.length">
+						<v-card outlined class="mx-auto" max-width="1450" height="100">
+							<v-card-text class="text-center">
+								You do not have any items on hold.
+							</v-card-text>
+						</v-card>
+					</div>
 					<v-slide-group
 						v-model="holdDisplay"
 						class="pa-4"
@@ -160,23 +169,14 @@
 									<v-card-title primary-title class="justify-center">
 										<v-spacer />
 										<div class="text-center">
-											<h1 class="font-weight-light">{{ item }}</h1>
-											<v-card-text class="text-caption">Date: </v-card-text>
+											<h1 class="font-weight-light">{{ item.short_name }}</h1>
+											<v-card-text class="text-button text-weight-bold"
+												>Waitlist position:
+												{{ item.hold_position }}</v-card-text
+											>
 										</div>
 										<v-spacer
 									/></v-card-title>
-
-									<v-row class="fill-height" align="center" justify="center">
-										<v-scale-transition>
-											<v-btn
-												v-if="active"
-												color="blue"
-												size="48"
-												@click="removeHold()"
-												>Remove Hold</v-btn
-											>
-										</v-scale-transition>
-									</v-row>
 								</v-col>
 							</v-card>
 						</v-slide-item>
@@ -185,9 +185,11 @@
 						<v-sheet v-if="holdDisplay != null" height="200" tile>
 							<v-row class="fill-height" align="center" justify="center">
 								<h3 class="text-h6">
-									{{ this.holds[holdDisplay] }}
+									{{ this.holds[holdDisplay].item_name }}
 								</h3>
-								<v-card-text class="text-center">description</v-card-text>
+								<v-card-text class="text-center">{{
+									this.holds[holdDisplay].item_desc
+								}}</v-card-text>
 							</v-row>
 						</v-sheet>
 					</v-expand-transition>
@@ -226,6 +228,7 @@ import Cart from "./Cart.vue";
 import {
 	getRegisteredEvent,
 	getUserLoanedItems,
+	getUserHoldItems,
 } from "../services/apiServices";
 
 export default {
@@ -241,9 +244,9 @@ export default {
 			movies: [],
 			availableItems: [],
 			databaseReloaded: true,
-			userEvents: [], //temp
+			userEvents: [],
 			loanedItems: [],
-			holds: [1, 2, 3], // temp
+			holds: [],
 			eventDisplay: null,
 			loanDisplay: null,
 			holdDisplay: null,
@@ -292,7 +295,26 @@ export default {
 				}
 			});
 		},
-		async getHolds() {},
+		async getHolds() {
+			await getUserHoldItems(this.card_no).then((response) => {
+				if (response.status == 200) {
+					var objects = response.data;
+
+					for (let i in objects) {
+						var obj = {
+							item_id: objects[i]["item_id"],
+							item_name: objects[i]["item_name"],
+							release_date: objects[i]["release_date"],
+							item_desc: objects[i]["item_desc"],
+							hold_position: objects[i]["hold_position"],
+							//shortened title
+							short_name: objects[i]["item_name"].split(":")[0],
+						};
+						this.holds.push(obj);
+					}
+				}
+			});
+		},
 		unregisterFromEvent() {},
 		returnItem() {},
 		getItems() {
