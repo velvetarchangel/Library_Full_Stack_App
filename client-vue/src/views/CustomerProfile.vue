@@ -1,5 +1,5 @@
 <template>
-  <v-card max-width="600" class="mx-auto">
+  <v-card max-width="800" class="mx-auto">
     <v-toolbar color="light-blue" dark>
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
@@ -46,9 +46,7 @@
         </v-list-item-content>
 
         <v-list-item-action>
-          <v-btn icon>
-            <v-icon color="grey lighten-1">mdi-information</v-icon>
-          </v-btn>
+          <v-btn rounded color="primary" dark> Return Item </v-btn>
         </v-list-item-action>
       </v-list-item>
 
@@ -76,9 +74,7 @@
         </v-list-item-content>
 
         <v-list-item-action>
-          <v-btn icon>
-            <v-icon color="grey lighten-1">mdi-information</v-icon>
-          </v-btn>
+          <v-btn rounded color="primary" dark> Remove Hold </v-btn>
         </v-list-item-action>
       </v-list-item>
 
@@ -119,9 +115,7 @@
         </v-list-item-content>
 
         <v-list-item-action>
-          <v-btn icon>
-            <v-icon color="grey lighten-1">mdi-information</v-icon>
-          </v-btn>
+          <v-btn rounded color="primary" dark> Remove Participant </v-btn>
         </v-list-item-action>
       </v-list-item>
     </v-list>
