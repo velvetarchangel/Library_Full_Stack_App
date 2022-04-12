@@ -765,11 +765,12 @@ app.get("/getUserRegisteredEvents/:card_no", (req, res) => {
 			for (let i = 0; i < result.length; i++) {
 				var event_id = result[i].event_id;
 				var event_name = result[i].event_name;
-				var event_start_date = result[i].event_start_date;
-				var end_date = result[i].end_date;
+				var event_start_date = result[i].event_start_date.toDateString();
+				var end_date = result[i].end_date.toDateString();
 				var start_time = result[i].start_time;
 				var end_time = result[i].end_time;
 				var e_location = result[i].e_location;
+
 				var event = {
 					event_id,
 					event_name,
