@@ -426,7 +426,7 @@ export default {
 		viewRegisteredEvents() {
 			this.$refs.viewregisteredmodal.show();
 		},
-		
+
 	},
 	mounted: function () {
 		this.getEvents();
