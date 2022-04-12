@@ -192,7 +192,7 @@
             <v-col>
               <v-card-title> Event Name: {{ result.event_name }} </v-card-title>
               <v-card-subtitle>
-                <b>Coordinator:</b> {{ result.e_coordinator }}</v-card-subtitle
+                <b>Coordinator:</b> {{ result.coordinator }}</v-card-subtitle
               >
               <v-divider class="mx-4"></v-divider>
               <v-card-text>
@@ -243,7 +243,7 @@ export default {
         },
         { text: "Event Location", value: "e_location" },
         { text: "Event Time", value: "time" },
-        { text: "Event coordinator", value: "e_coordinator" },
+        { text: "Event coordinator", value: "staff_name" },
       ],
       searchResults: [],
       options: ["Movies", "Books", "Events"],
@@ -336,6 +336,7 @@ export default {
               event_name: curr_events[e]["event_name"],
               e_location: curr_events[e]["event_location"],
               time: curr_events[e]["event_time"].substring(0, 10),
+              staff_name: curr_events[e]["name"],
               e_coordinator: curr_events[e]["staff_id"],
             };
             this.events.push(event);

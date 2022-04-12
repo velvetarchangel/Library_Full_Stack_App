@@ -1322,12 +1322,13 @@ app.get("/users", (_, res) => {
  */
 app.get("/events", (_, res) => {
   var events = {};
-  var event_query = `SELECT DISTINCT h.event_id, event_name, event_start_date, end_date, start_time, end_time, card_no, staff_id, e_location, branch_id
-  FROM lib_events as l, coordinates as c, event_location as el, hosts_event as h
+  var event_query = `SELECT DISTINCT h.event_id, event_name, event_start_date, end_date, start_time, end_time, u.card_no, staff_id, e_location, branch_id, first_name, last_name
+  FROM lib_events as l, coordinates as c, event_location as el, hosts_event as h, library_user as u
   WHERE h.event_id = l.event_id 
 	AND c.event_id = el.event_id
   AND h.event_id = el.event_id
-  AND c.event_id = l.event_id`;
+  AND c.event_id = l.event_id
+  AND c.card_no = u.card_no`;
   db.query(event_query, function (err, result) {
     if (err) {
       console.log(err);
@@ -1338,8 +1339,15 @@ app.get("/events", (_, res) => {
         var event_location = result[i].e_location;
         var staff_id = result[i].staff_id;
         var event_id = result[i].event_id;
+        var name = result[i].first_name + " " + result[i].last_name;
 
-        events[event_id] = { event_name, event_time, event_location, staff_id };
+        events[event_id] = {
+          event_name,
+          event_time,
+          event_location,
+          staff_id,
+          name,
+        };
       }
     }
     res.status(200);
