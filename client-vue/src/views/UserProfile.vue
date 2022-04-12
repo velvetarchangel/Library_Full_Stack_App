@@ -420,6 +420,9 @@ export default {
 			this.page = "events";
 		},
 		goToProfile() {
+			this.userEvents = [];
+			this.loanedItems = [];
+			this.holds = [];
 			this.getUserEvents();
 			this.getLoanedItems();
 			this.getHolds();
