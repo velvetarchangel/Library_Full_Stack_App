@@ -12,7 +12,7 @@ app.use(bodyparser.json());
 const db = mysql.createConnection({
 	user: "root",
 	host: "localhost",
-	password: "password1!",
+	password: "mysqlpassword",
 	database: "library",
 });
 
@@ -645,7 +645,7 @@ app.put("/returnItem/:card_no/:item_barcode", (req, res) => {
 			}
 		}
 		// check if item copy is checked out by the user registered
-		if (checked_out_copy[0] !=(req.params.item_barcode)) {
+		if (checked_out_copy[0] != req.params.item_barcode) {
 			res.send({
 				status: 400,
 				message: "The user does not have this item signed out",
@@ -678,7 +678,9 @@ app.put("/returnItem/:card_no/:item_barcode", (req, res) => {
 					});
 				} else {
 					res.status(200);
-					console.log("added item " + req.params.item_barcode + " back in stock");
+					console.log(
+						"added item " + req.params.item_barcode + " back in stock"
+					);
 					res.send("added item " + req.params.item_barcode + " back in stock");
 				}
 			});
@@ -1713,6 +1715,46 @@ app.get("/participants/:eventId", (req, res) => {
 			}
 			res.status(200);
 			res.send(users);
+		}
+	});
+});
+
+//kelly
+app.put("/unregisterEvent/:userId/:eventId", async (req, res) => {
+	var target = [];
+	var event_query = `SELECT * from registers WHERE card_no=${req.params.userId} AND event_id=${req.params.eventId}`;
+
+	db.query(event_query, function (err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			for (let i = 0; i < result.length; i++) {
+				target.push(parseInt(result[i]["card_no"]));
+			}
+		}
+
+		// If the user is not in table (somehow)
+		if (!target.length) {
+			res.send({
+				status: 400,
+				message: "User is not signed out for this event.",
+			});
+		} else {
+			var sql_query = `DELETE from registers WHERE card_no=${req.params.userId} AND event_id=${req.params.eventId}`;
+
+			db.query(sql_query, function (err) {
+				if (err) {
+					console.log(err);
+				} else {
+					res.send({
+						status: 200,
+						message:
+							req.params.userId +
+							" has been removed from event " +
+							req.params.eventId,
+					});
+				}
+			});
 		}
 	});
 });
