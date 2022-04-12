@@ -108,7 +108,7 @@
 											event.end_time.split(":")[1]
 										}}
 									</div>
-									<v-btn text color="grey" @click="unregisterFromEvent()"
+									<v-btn text color="grey" @click="unregisterEvent(event.id)"
 										>Unregister from this event</v-btn
 									>
 								</div>
@@ -264,12 +264,8 @@
 			/>
 		</div>
 		<!-- update the next field and add functionality to create the visuals for user profile -->
-		<div v-if="page === 'events'"> 
-			<Events
-			
-				:events="events"
-				
-			/>
+		<div v-if="page === 'events'">
+			<Events :events="events" />
 		</div>
 	</div>
 </template>
@@ -280,15 +276,17 @@ import Cart from "./Cart.vue";
 import Events from "./Events.vue";
 import RegisterEventModal from "../Components/RegisterEventModal.vue";
 import ViewRegisteredModal from "../Components/ViewRegisteredModal.vue";
-import { getUserLoanedItems, returnItemAPI } from "../services/apiServices";
 import {
+	getUserLoanedItems,
+	returnItemAPI,
 	getRegisteredEvent,
 	getUserHoldItems,
+	unregisterFromEvent,
 } from "../services/apiServices";
 
 export default {
 	//name: "UserProfile",
-	
+
 	data() {
 		return {
 			card_no: this.$route.params.card_no,
@@ -298,7 +296,7 @@ export default {
 			items: [],
 			books: [],
 			movies: [],
-			events:[],
+			events: [],
 			availableItems: [],
 			databaseReloaded: true,
 			userEvents: [],
@@ -352,22 +350,30 @@ export default {
 				}
 			});
 		},
-		
-		
+
+		async unregisterEvent(event_id) {
+			console.log(event_id);
+			await unregisterFromEvent(this.card_no, event_id).then((response) => {
+				if (response.status == 200) {
+					var result = response.data;
+					console.log(result.message);
+				}
+			});
+			this.userEvents = [];
+			this.getUserEvents();
+		},
 
 		async returnItem(item_barcode) {
 			console.log("test " + item_barcode);
-        await returnItemAPI(this.card_no,item_barcode).then((response) => {
-          if (response.status == 200) {
-            this.showModal = false;
-            if (response.data.status == 400) {
-              this.errormessage = response.data.message;
-            } 
-          }
-        });
-      
-    },
-
+			await returnItemAPI(this.card_no, item_barcode).then((response) => {
+				if (response.status == 200) {
+					this.showModal = false;
+					if (response.data.status == 400) {
+						this.errormessage = response.data.message;
+					}
+				}
+			});
+		},
 
 		removeHold() {},
 		async getHolds() {
@@ -453,7 +459,6 @@ export default {
 		viewRegisteredEvents() {
 			this.$refs.viewregisteredmodal.show();
 		},
-
 	},
 	mounted: function () {
 		this.getUserEvents();
