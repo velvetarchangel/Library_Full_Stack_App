@@ -322,7 +322,7 @@ VALUES
 (8761346354, 'Kelly', 'Osena', 'kelly@test.com', 'abc', 1),
 (8611038770, 'Eric', 'Tan', 'erictan@test.com', 'abc', 1),
 (3912281595, 'Sarah', 'Silverman', 'silverman@test.com', 'abc', 1),
-(2238324761, 'Fake', 'Foo', 'fakefoo@test.com', 'abc', 1),
+(2238324761, 'Test', 'Librarian', 'testlibrarian@test.com', 'abc', 1),
 (6306195165, 'Fake', 'Datatype', 'datatype@test.com', 'abc', 1);
 
 INSERT INTO librarian (card_no, staff_id, staff_start_date, salary)
