@@ -117,13 +117,33 @@
               <v-row v-if="item.participants.length === 0">
                 No one is currently registered for this event</v-row
               >
-              <v-card
-                width="100%"
+              <v-spacer></v-spacer>
+              <v-card-actions
+                width="50%"
                 v-for="(i, index) in item.participants"
                 :key="index"
+                height="150px"
+                cols="2"
+                elevation="2"
               >
-                <b>Name: </b>{{ i.name }}, <b>Email: </b>{{ i.email }}</v-card
-              >
+                <v-col>
+                  <v-avatar color="indigo">
+                    <v-icon dark> mdi-account-circle </v-icon>
+                  </v-avatar>
+                </v-col>
+                <v-col>
+                  <v-card-title><b>Name: </b> {{ i.name }}</v-card-title>
+                  <v-card-subtitle>
+                    <div><b>Email: </b> {{ i.email }}</div>
+                    <div><b>Card No:</b> {{ i.card_no }}</div>
+                  </v-card-subtitle>
+                </v-col>
+                <v-col align-left>
+                  <v-btn @click="removeParticipant()">
+                    Remove Participant</v-btn
+                  >
+                </v-col>
+              </v-card-actions>
             </td>
           </template>
         </v-data-table>
@@ -140,32 +160,48 @@
         grid-list-xl
       >
         <v-container v-if="searchCategory === 'Books' && showSearchResult">
-          <v-card v-for="(result, index) in searchResults" :key="index">
-            <v-card-title> Title: {{ result.item_name }} </v-card-title>
-            <v-card-subtitle>
-              <b>Author name:</b> {{ result.author_name }}</v-card-subtitle
-            >
-            <v-divider class="mx-4"></v-divider>
-            <v-card-text
-              ><b>Release Date:</b> {{ result.release_date }}</v-card-text
-            >
-            <v-card-text><b>ISBN:</b> {{ result.isbn }}</v-card-text>
-            <v-card-text>{{ result.item_desc }} </v-card-text>
-          </v-card>
+          <v-card-actions v-for="(result, index) in searchResults" :key="index">
+            <v-col>
+              <v-img src="https://picsum.photos/510/200?image=20"></v-img>
+            </v-col>
+            <v-col>
+              <v-card-title> Title: {{ result.item_name }} </v-card-title>
+              <v-card-subtitle>
+                <b>Author name:</b> {{ result.author_name }}</v-card-subtitle
+              >
+              <v-divider class="mx-4"></v-divider>
+              <v-card-text>
+                <div>
+                  <b>Release Date:</b>{{ result.release_date.substring(0, 10) }}
+                </div>
+                <div><b>ISBN:</b> {{ result.isbn }}</div>
+                <div><b>Synopsys:</b>{{ result.item_desc }}</div>
+              </v-card-text>
+            </v-col>
+          </v-card-actions>
         </v-container>
         <v-container v-if="searchCategory === 'Events' && showSearchResult">
-          <v-card v-for="(result, index) in searchResults" :key="index">
-            <v-card-title> Event Name: {{ result.event_name }} </v-card-title>
-            <v-card-subtitle>
-              <b>Coordinator:</b> {{ result.e_coordinator }}</v-card-subtitle
-            >
-            <v-divider class="mx-4"></v-divider>
-            <v-card-text><b>Location:</b> {{ result.e_location }}</v-card-text>
-            <v-card-text
-              ><b>Start Date:</b> {{ result.start_date }}</v-card-text
-            >
-            <v-card-text><b>End Date: </b>{{ result.end_date }} </v-card-text>
-          </v-card>
+          <v-card-actions
+            class="pa-md-4 mx-lg-auto"
+            v-for="(result, index) in searchResults"
+            :key="index"
+          >
+            <v-col>
+              <v-img src="https://picsum.photos/510/200?image=20"></v-img>
+            </v-col>
+            <v-col>
+              <v-card-title> Event Name: {{ result.event_name }} </v-card-title>
+              <v-card-subtitle>
+                <b>Coordinator:</b> {{ result.e_coordinator }}</v-card-subtitle
+              >
+              <v-divider class="mx-4"></v-divider>
+              <v-card-text>
+                <div><b>Location:</b> {{ result.e_location }}</div>
+                <div><b>Start Date:</b>{{ result.start_date }}</div>
+                <div><b>End Date: </b>{{ result.end_date }}</div>
+              </v-card-text>
+            </v-col>
+          </v-card-actions>
         </v-container>
       </v-container>
     </v-container>
@@ -288,25 +324,14 @@ export default {
         }
       });
     },
-    // getStaffName(staffId) {
-    //   var name;
-    //   console.log(this.staff_map);
-    //   //console.log(Array.from(this.staff_map));
-    //   for (let i = 0; i < this.staff_map.length; i++) {
-    //     if (this.staff_map[i].substring(0, 3) == staffId) {
-    //       name = this.staff_map[i].substring(4, this.staff_map[i].length);
-    //     }
-    //   }
-    //   return name;
-    // },
     async getEvents() {
-      //console.log(JSON.stringify(this.staff_map)));
       await getAllEvents().then((response) => {
         if (response.status == 200) {
           let curr_events = response.data;
           console.log(curr_events);
           for (let e in curr_events) {
             var event = {
+              img: "https://picsum.photos/510/300?random",
               event_id: e,
               event_name: curr_events[e]["event_name"],
               e_location: curr_events[e]["event_location"],
@@ -320,11 +345,12 @@ export default {
       this.getEventParticipants();
     },
     async getEventParticipants() {
-      console.log("Event participants triggered");
+      //console.log("Event participants triggered");
       for (let i = 0; i < this.events.length; i++) {
         await getEventParticipants(this.events[i].event_id).then((response) => {
           if (response.status == 200) {
             var participants = response.data;
+            console.log(participants);
             this.events[i].participants = participants;
           }
         });
@@ -357,8 +383,10 @@ export default {
               var event = {
                 event_name: events[i].event_name,
                 e_location: events[i].e_location,
-                start_date: events[i].event_start_date,
-                end_date: events[i].end_date,
+                start_date: events[i].event_start_date.substring(0, 10),
+                end_date: events[i].end_date.substring(0, 10),
+                start_time: events[i].start_time,
+                end_time: events[i].end_time,
                 e_coordinator: events[i].staff_id,
               };
               this.searchResults.push(event);
