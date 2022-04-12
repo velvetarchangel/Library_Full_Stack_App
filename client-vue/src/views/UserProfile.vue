@@ -73,81 +73,43 @@
 				></v-parallax>
 				<h2 class="text-button ma-4">Welcome back!<br /></h2>
 				<v-sheet class="mx-auto" elevation="8" max-width="1100">
-					<h2 class="text-button ma-4">
-						Check out these events going on at our locations!
-					</h2>
-					<v-slide-group
-						v-model="eventDisplay"
-						class="pa-4"
-						active-class="success"
-						show-arrows
-					>
-						<v-slide-item
-							v-for="(event, index) in this.events"
-							:key="index"
-							v-slot="{ active, toggle }"
-						>
-							<v-card
-								:color="active ? undefined : 'grey lighten-1'"
-								img="https://calgarylibrary.ca/assets/Central/communitylivingroom720x560__ScaleMaxWidthWzE4MDBd.jpg"
-								class="ma-4"
-								height="200"
-								width="300"
-								@click="toggle"
-							>
-								<v-col class="fill-height" align="center" justify="center">
-									<v-card-title primary-title class="justify-center">
-										<v-spacer />
-										<div class="text-center">
-											<h1 class="font-weight-light">{{ event }}</h1>
-											<v-card-text class="text-caption">Date: </v-card-text>
-										</div>
-										<v-spacer
-									/></v-card-title>
-
-									<v-row class="fill-height" align="center" justify="center">
-										<v-scale-transition>
-											<v-btn
-												v-if="active"
-												color="orange"
-												size="48"
-												@click="registerForEvent()"
-												>Register for Event</v-btn
-											>
-										</v-scale-transition>
-									</v-row>
-								</v-col>
-							</v-card>
-						</v-slide-item>
-					</v-slide-group>
-					<v-expand-transition>
-						<v-sheet v-if="eventDisplay != null" height="200" tile>
-							<v-row class="fill-height" align="center" justify="center">
-								<h3 class="text-h6">
-									{{ this.events[eventDisplay] }}
-								</h3>
-								<v-card-text class="text-center">description</v-card-text>
-							</v-row>
-						</v-sheet>
-					</v-expand-transition>
-
 					<v-card-text>
-						<div class="text-caption ml-8 mb-2">Events you registered for:</div>
+						<div class="text-overline ml-8 mb-2">
+							Events you registered for:
+						</div>
 
+						<div v-if="!this.userEvents.length">
+							<v-card outlined class="mx-auto" max-width="1450" height="100">
+								<v-card-text class="text-center">
+									You have not registered for any events.
+								</v-card-text>
+							</v-card>
+						</div>
 						<v-timeline align-top dense>
 							<v-timeline-item
-								v-for="event in this.userEvents"
-								:key="event"
+								v-for="(event, index) in this.userEvents"
+								:key="index"
 								color="purple"
 								small
 							>
 								<div>
 									<div class="font-weight-normal">
-										<strong>Event name</strong> @location
+										<strong>{{ event.name }}</strong> — {{ event.location }}
 									</div>
-									<div>Date, from this time to that time</div>
-									<v-btn text color="grey" @click="unregisterForEvent()"
-										>Unregister for this event</v-btn
+									<div>
+										Start: {{ event.start_date }},
+										{{ event.start_time.split(":")[0] }}:{{
+											event.start_time.split(":")[1]
+										}}
+									</div>
+									<div>
+										End: {{ event.end_date }},
+										{{ event.end_time.split(":")[0] }}:{{
+											event.end_time.split(":")[1]
+										}}
+									</div>
+									<v-btn text color="grey" @click="unregisterFromEvent()"
+										>Unregister from this event</v-btn
 									>
 								</div>
 							</v-timeline-item>
@@ -155,6 +117,13 @@
 					</v-card-text>
 
 					<h2 class="text-button ma-4">Your borrowed items:</h2>
+					<div v-if="!this.loanedItems.length">
+						<v-card outlined class="mx-auto" max-width="1450" height="100">
+							<v-card-text class="text-center">
+								You currently do not have any borrowed items.
+							</v-card-text>
+						</v-card>
+					</div>
 					<v-slide-group
 						v-model="loanDisplay"
 						class="pa-4"
@@ -187,18 +156,15 @@
 										</div>
 										<v-spacer
 									/></v-card-title>
-
-									<v-row class="fill-height" align="center" justify="center">
-										<v-scale-transition>
-											<v-btn
-												v-if="active"
-												color="yellow"
-												size="48"
-												@click="returnItem(item.item_barcode)"
-												>Return Item</v-btn
-											>
-										</v-scale-transition>
-									</v-row>
+									<v-scale-transition>
+										<v-btn
+											v-if="active"
+											color="yellow"
+											size="48"
+											@click="returnItem()"
+											>Return Item</v-btn
+										>
+									</v-scale-transition>
 								</v-col>
 							</v-card>
 						</v-slide-item>
@@ -216,7 +182,14 @@
 						</v-sheet>
 					</v-expand-transition>
 
-					<h2 class="text-button ma-4">Items you put on hold:</h2>
+					<h2 class="text-button ma-4">Items you have on hold:</h2>
+					<div v-if="!this.holds.length">
+						<v-card outlined class="mx-auto" max-width="1450" height="100">
+							<v-card-text class="text-center">
+								You do not have any items on hold.
+							</v-card-text>
+						</v-card>
+					</div>
 					<v-slide-group
 						v-model="holdDisplay"
 						class="pa-4"
@@ -240,23 +213,14 @@
 									<v-card-title primary-title class="justify-center">
 										<v-spacer />
 										<div class="text-center">
-											<h1 class="font-weight-light">{{ item }}</h1>
-											<v-card-text class="text-caption">Date: </v-card-text>
+											<h1 class="font-weight-light">{{ item.short_name }}</h1>
+											<v-card-text class="text-button text-weight-bold"
+												>Waitlist position:
+												{{ item.hold_position }}</v-card-text
+											>
 										</div>
 										<v-spacer
 									/></v-card-title>
-
-									<v-row class="fill-height" align="center" justify="center">
-										<v-scale-transition>
-											<v-btn
-												v-if="active"
-												color="blue"
-												size="48"
-												@click="removeHold()"
-												>Remove Hold</v-btn
-											>
-										</v-scale-transition>
-									</v-row>
 								</v-col>
 							</v-card>
 						</v-slide-item>
@@ -265,9 +229,11 @@
 						<v-sheet v-if="holdDisplay != null" height="200" tile>
 							<v-row class="fill-height" align="center" justify="center">
 								<h3 class="text-h6">
-									{{ this.holds[holdDisplay] }}
+									{{ this.holds[holdDisplay].item_name }}
 								</h3>
-								<v-card-text class="text-center">description</v-card-text>
+								<v-card-text class="text-center">{{
+									this.holds[holdDisplay].item_desc
+								}}</v-card-text>
 							</v-row>
 						</v-sheet>
 					</v-expand-transition>
@@ -315,6 +281,11 @@ import Events from "./Events.vue";
 import RegisterEventModal from "../Components/RegisterEventModal.vue";
 import ViewRegisteredModal from "../Components/ViewRegisteredModal.vue";
 import { getUserLoanedItems, returnItemAPI } from "../services/apiServices";
+import {
+	getRegisteredEvent,
+	getUserLoanedItems,
+	getUserHoldItems,
+} from "../services/apiServices";
 
 export default {
 	//name: "UserProfile",
@@ -331,17 +302,35 @@ export default {
 			events:[],
 			availableItems: [],
 			databaseReloaded: true,
-			userEvents: [1, 2, 3], //temp
-			//events: [0, 1, 2], //temp
+			userEvents: [],
 			loanedItems: [],
-			holds: [1, 2, 3], // temp
+			holds: [],
 			eventDisplay: null,
 			loanDisplay: null,
 			holdDisplay: null,
 		};
 	},
 	methods: {
-		async getEvents() {},
+		async getUserEvents() {
+			await getRegisteredEvent(this.card_no).then((response) => {
+				if (response.status == 200) {
+					var allEvents = response.data;
+
+					for (let i in allEvents) {
+						var event = {
+							id: allEvents[i]["event_id"],
+							name: allEvents[i]["event_name"],
+							start_date: allEvents[i]["event_start_date"],
+							end_date: allEvents[i]["end_date"],
+							start_time: allEvents[i]["start_time"],
+							end_time: allEvents[i]["end_time"],
+							location: allEvents[i]["e_location"],
+						};
+						this.userEvents.push(event);
+					}
+				}
+			});
+		},
 		async getLoanedItems() {
 			await getUserLoanedItems(this.card_no).then((response) => {
 				if (response.status == 200) {
@@ -351,22 +340,21 @@ export default {
 						var obj = {
 							item_id: objects[i]["item_id"],
 							item_name: objects[i]["item_name"],
-							//shorten title
-							short_name: objects[i]["item_name"].split(":")[0],
 							release_date: objects[i]["release_date"],
 							item_desc: objects[i]["item_desc"],
 							item_barcode: objects[i]["item_barcode"],
 							checkout_date: objects[i]["checkout_date"],
 							return_date: objects[i]["return_date"],
+							//shortened title
+							short_name: objects[i]["item_name"].split(":")[0],
 						};
 						this.loanedItems.push(obj);
 					}
 				}
 			});
 		},
-		async getHolds() {},
-		registerForEvent() {},
-		unregisterForEvent() {},
+		
+		
 
 		async returnItem(item_barcode) {
 			console.log("test " + item_barcode);
@@ -383,6 +371,26 @@ export default {
 
 
 		removeHold() {},
+		async getHolds() {
+			await getUserHoldItems(this.card_no).then((response) => {
+				if (response.status == 200) {
+					var objects = response.data;
+
+					for (let i in objects) {
+						var obj = {
+							item_id: objects[i]["item_id"],
+							item_name: objects[i]["item_name"],
+							release_date: objects[i]["release_date"],
+							item_desc: objects[i]["item_desc"],
+							hold_position: objects[i]["hold_position"],
+							//shortened title
+							short_name: objects[i]["item_name"].split(":")[0],
+						};
+						this.holds.push(obj);
+					}
+				}
+			});
+		},
 		getItems() {
 			this.databaseReloaded = false;
 		},
@@ -429,6 +437,12 @@ export default {
 			this.page = "events";
 		},
 		goToProfile() {
+			this.userEvents = [];
+			this.loanedItems = [];
+			this.holds = [];
+			this.getUserEvents();
+			this.getLoanedItems();
+			this.getHolds();
 			this.page = "userprofile";
 		},
 		signOut() {
@@ -443,7 +457,7 @@ export default {
 
 	},
 	mounted: function () {
-		this.getEvents();
+		this.getUserEvents();
 		this.getLoanedItems();
 		this.getHolds();
 	},
