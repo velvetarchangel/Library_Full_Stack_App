@@ -121,6 +121,15 @@
 										</div>
 										<v-spacer
 									/></v-card-title>
+									<v-scale-transition>
+										<v-btn
+											v-if="active"
+											color="yellow"
+											size="48"
+											@click="returnItem()"
+											>Return Item</v-btn
+										>
+									</v-scale-transition>
 								</v-col>
 							</v-card>
 						</v-slide-item>
@@ -360,6 +369,9 @@ export default {
 			this.page = "items";
 		},
 		goToProfile() {
+			this.getUserEvents();
+			this.getLoanedItems();
+			this.getHolds();
 			this.page = "userprofile";
 		},
 		signOut() {
