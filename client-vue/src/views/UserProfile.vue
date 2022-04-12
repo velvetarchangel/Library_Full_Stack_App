@@ -283,7 +283,6 @@ import ViewRegisteredModal from "../Components/ViewRegisteredModal.vue";
 import { getUserLoanedItems, returnItemAPI } from "../services/apiServices";
 import {
 	getRegisteredEvent,
-	getUserLoanedItems,
 	getUserHoldItems,
 } from "../services/apiServices";
 
