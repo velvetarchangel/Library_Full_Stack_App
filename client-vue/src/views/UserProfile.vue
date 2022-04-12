@@ -161,7 +161,7 @@
 											v-if="active"
 											color="yellow"
 											size="48"
-											@click="returnItem()"
+											@click="returnItem(item.item_barcode)"
 											>Return Item</v-btn
 										>
 									</v-scale-transition>
@@ -280,9 +280,9 @@ import Cart from "./Cart.vue";
 import Events from "./Events.vue";
 import RegisterEventModal from "../Components/RegisterEventModal.vue";
 import ViewRegisteredModal from "../Components/ViewRegisteredModal.vue";
+import { getUserLoanedItems, returnItemAPI } from "../services/apiServices";
 import {
 	getRegisteredEvent,
-	getUserLoanedItems,
 	getUserHoldItems,
 } from "../services/apiServices";
 
@@ -352,6 +352,24 @@ export default {
 				}
 			});
 		},
+		
+		
+
+		async returnItem(item_barcode) {
+			console.log("test " + item_barcode);
+        await returnItemAPI(this.card_no,item_barcode).then((response) => {
+          if (response.status == 200) {
+            this.showModal = false;
+            if (response.data.status == 400) {
+              this.errormessage = response.data.message;
+            } 
+          }
+        });
+      
+    },
+
+
+		removeHold() {},
 		async getHolds() {
 			await getUserHoldItems(this.card_no).then((response) => {
 				if (response.status == 200) {
@@ -372,8 +390,6 @@ export default {
 				}
 			});
 		},
-		unregisterFromEvent() {},
-		returnItem() {},
 		getItems() {
 			this.databaseReloaded = false;
 		},

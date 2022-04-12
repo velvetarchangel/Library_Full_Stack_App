@@ -621,21 +621,21 @@ app.get("/holds", (req, res) => {
 });
 
 /**
- * ENDPOINT URL: localhost:5001/returnItem
+ * ENDPOINT URL: localhost:5001/returnItem/:card_no/:item_barcode
  *
  * Method: put
  *
  * Description: The library user is able to return an item back to the branch. The item will be removed from the
  * users record, and that item copy will be marked as available.
  *
- * Input: card_no, item_barcode
+ * Input: card_no, item_barcode (as path variables)
  *
  * Output: item copy removed from user record, item_availability = true for that copy
  */
-app.put("/returnItem/:card_no", (req, res) => {
+app.put("/returnItem/:card_no/:item_barcode", (req, res) => {
 	//finding the copy of item being returned from the checked out items
 	var checked_out_copy = [];
-	var return_query = `SELECT * FROM signed_out WHERE item_barcode='${req.body.item_barcode}' AND card_no='${req.params.card_no}'`;
+	var return_query = `SELECT * FROM signed_out WHERE item_barcode='${req.params.item_barcode}' AND card_no='${req.params.card_no}'`;
 	db.query(return_query, function (err, result) {
 		if (err) {
 			console.log(err);
@@ -644,16 +644,15 @@ app.put("/returnItem/:card_no", (req, res) => {
 				checked_out_copy.push(parseInt(result[i]["item_barcode"]));
 			}
 		}
-
 		// check if item copy is checked out by the user registered
-		if (!checked_out_copy.includes(req.body.item_barcode)) {
+		if (checked_out_copy[0] !=(req.params.item_barcode)) {
 			res.send({
 				status: 400,
 				message: "The user does not have this item signed out",
 			});
 		} else {
 			//removing the checked out item
-			var sql_query = `DELETE FROM signed_out WHERE item_barcode='${req.body.item_barcode}' AND card_no='${req.params.card_no}'`;
+			var sql_query = `DELETE FROM signed_out WHERE item_barcode='${req.params.item_barcode}' AND card_no='${req.params.card_no}'`;
 			db.query(sql_query, function (err) {
 				if (err) {
 					res.status(400);
@@ -663,14 +662,14 @@ app.put("/returnItem/:card_no", (req, res) => {
 				} else {
 					res.status(200);
 					console.log(
-						req.body.item_barcode +
-							"has been deleted from user " +
-							req.body_card_no
+						req.params.item_barcode +
+							" has been deleted from user " +
+							req.params.card_no
 					);
 				}
 			});
 			//update the availability of the item to available
-			var update_query = `UPDATE has_for_branch_and_item SET item_availability = 1 WHERE item_barcode='${req.body.item_barcode}'`;
+			var update_query = `UPDATE has_for_branch_and_item SET item_availability = 1 WHERE item_barcode='${req.params.item_barcode}'`;
 			db.query(update_query, function (err) {
 				if (err) {
 					res.status(400);
@@ -679,8 +678,8 @@ app.put("/returnItem/:card_no", (req, res) => {
 					});
 				} else {
 					res.status(200);
-					console.log("added item " + req.body.item_barcode + " back in stock");
-					res.send("added item " + req.body.item_barcode + " back in stock");
+					console.log("added item " + req.params.item_barcode + " back in stock");
+					res.send("added item " + req.params.item_barcode + " back in stock");
 				}
 			});
 		}
