@@ -58,6 +58,68 @@ export async function getUserByID(userId) {
 	return response;
 }
 
+
+/**
+ *
+ * @param {*} event object with information to add event to the database
+ * @returns response with the event object once its added to the database
+ * or error message if the event is already in the database
+ */
+ export async function createEventAPI(event) {
+  const response = await axios.post(`${API_URL}/createEvent`, event);
+  console.log(response);
+  return response;
+}
+
+/**
+ *
+ * @param {*} item object with information to add item to the database
+ * @returns response with the item object once its added to the database
+ * or error message if the item is already in the database
+ */
+ export async function createItemAPI(item) {
+  const response = await axios.post(`${API_URL}/addItem`, item);
+  console.log(response);
+  return response;
+}
+
+/**
+ *
+ * @param {*} item object with information to add item copy to the database
+ * @returns response with the item copy object once its added to the database
+ * or error message if the item is not in the database
+ */
+ export async function createItemCopyAPI(item) {
+  const response = await axios.post(`${API_URL}/addItemCopy`, item);
+  console.log(response);
+  return response;
+}
+
+
+/**
+ *
+ * @param {*} item object with information about user and item to return to the database
+ * @returns response with the provided info once its removed from the database
+ * or error message if something went wrong
+ */
+ export async function returnItemAPI(card_no, item) {
+	const response = await axios.post(`${API_URL}/returnItem/${card_no}`, item);
+	console.log(response);
+	return response;
+  }
+
+/**
+ *
+ * @param {*} event object with information about user and event to register to the database
+ * @returns response with the provided info once its added to the database
+ * or error message if the event is already registered in the database
+ */
+ export async function registerEventAPI(event) {
+  const response = await axios.post(`${API_URL}/userRegistersEvents`, event);
+  console.log(response);
+  return response;
+}
+
 // kelly
 /**
  * @returns array of item objects retreived from the database
