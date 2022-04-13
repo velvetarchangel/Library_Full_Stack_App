@@ -645,10 +645,11 @@ app.get("/holds", (_, res) => {
  * users record, and that item copy will be marked as available.
  *
  * Input:
- * @param card_no,
- * @param item_barcode (as path variables)
+ * @param card_no, (as path variables) library card number of the user
+ * @param item_barcode (as path variables) item copy being returned
  *
- * Output: item copy removed from user record, item_availability = true for that copy
+ * Output: 
+ * @returns item copy removed from user record, item_availability = true for that copy
  */
 app.put("/returnItem/:card_no/:item_barcode", (req, res) => {
   //finding the copy of item being returned from the checked out items
@@ -708,14 +709,14 @@ app.put("/returnItem/:card_no/:item_barcode", (req, res) => {
 
 /**
  * User registers for an event. If the user hasn't been registered for that event yet, they will be allowed
- * to register for it. If they previously been registered for this event, they won't be able to register for it again.
+ * to register for it. If they are currently registered for this event, they won't be able to register for it again.
  *
  * Inputs:
  * @param event_id: event to register
  * @param card_no: card number of the user
  *
  * Output:
- * user is registered for that event.
+ * @returns user is registered for that event.
  */
 app.post("/userRegistersEvents", (req, res) => {
   //add to the registers table.
@@ -760,7 +761,6 @@ app.post("/userRegistersEvents", (req, res) => {
   });
 });
 
-//update this so it sends all the event info, not just the name of the event
 /**
  * Finds all the events that a user is registered for
  *
@@ -770,11 +770,9 @@ app.post("/userRegistersEvents", (req, res) => {
  * Output:
  * @returns array containing the event_id(s) that the user is registered for
  */
-//TODO: add more event info here
 app.get("/getUserRegisteredEvents/:card_no", (req, res) => {
   //add to the registers table.
   var registered_events = [];
-  //var event_query = `SELECT * FROM registers NATURAL JOIN lib_events WHERE card_no='${req.body.card_no}'`; //natural join with events?
   var event_query = `SELECT DISTINCT * FROM registers as r, lib_events as l, event_location as e WHERE 
 					          (r.card_no = '${req.params.card_no}' AND l.event_id = r.event_id AND r.event_id = e.event_id);`;
   db.query(event_query, function (err, result) {
@@ -809,7 +807,7 @@ app.get("/getUserRegisteredEvents/:card_no", (req, res) => {
 
 /**
  * create event endpoint where a librarian is able to add events to the database.
- * Inputs:
+ * Inputs: information about the event being created
  * @param body containing
  * 							{
  * 							event_id,
@@ -820,13 +818,11 @@ app.get("/getUserRegisteredEvents/:card_no", (req, res) => {
  * 							end_time,
  * 							e_location
  * 							}
- * Outputs: event is created
+ * Outputs: 
+ * @return event is created
  *
- * CURRENT IMPLEMENTATION: The librarian needs to add a unique event ID as they are entering events to the database;
- * this is because there can be multiple events with the same name and we need a way to identify these.
  */
 
-//add query for coordinates info and hosts_event
 app.post("/createEvent", (req, res) => {
   var all_events = [];
   var all_event_id = [];
@@ -849,7 +845,7 @@ app.post("/createEvent", (req, res) => {
       console.log(err);
     } else {
       for (let i = 0; i < result.length; i++) {
-        all_events.push(result[i]["event_name"]); //change to ???
+        all_events.push(result[i]["event_name"]); 
         all_event_id.push(parseInt(result[i]["event_id"]));
       }
     }
@@ -909,16 +905,6 @@ app.post("/createEvent", (req, res) => {
           });
         } else {
           res.status(200);
-          /* var addedEventInfo = [
-          event_to_add.event_id,
-          event_to_add.event_name,
-          event_to_add.event_start_date,
-          event_to_add.end_date,
-          event_to_add.start_time,
-          event_to_add.end_time,
-          event_location_to_add.e_location,
-        ];
-          res.send( addedEventInfo ); */
         }
       });
       var branches;
@@ -927,7 +913,6 @@ app.post("/createEvent", (req, res) => {
         if (err) {
           console.log(err);
         } else {
-          //res.status(200);
           branches = result[0]["branch_id"];
 
           var host_event_query =
@@ -941,16 +926,6 @@ app.post("/createEvent", (req, res) => {
               });
             } else {
               res.status(200);
-              /*   var addedEventInfo = [
-          event_to_add.event_id,
-          event_to_add.event_name,
-          event_to_add.event_start_date,
-          event_to_add.end_date,
-          event_to_add.start_time,
-          event_to_add.end_time,
-          event_location_to_add.e_location,
-        ];
-          res.send( addedEventInfo ); */
             }
           });
         }
@@ -991,7 +966,25 @@ app.post("/createEvent", (req, res) => {
 
 /**
  * add item endpoint where a librarian is able to add items to the database.
- * minimal input needed (from item superclass): item name, item description, item release date.
+ * 
+ * Inputs:
+ * @param item_name: name of item being added to the database
+ * @param item_desc: description of item being added to the database
+ * @param release_date: release date of item being added to the database
+ * 
+ * //movie item attributes
+ * @param production_company: 
+ * @param imdb_id: 
+ * @param duration: 
+ * 
+ * //book item attributes
+ * @param publisher_name: 
+ * @param isbn: 
+ * @param book_type:
+ * 
+ * Output:
+ * @returns item being created
+ * 
  * IMPORTANT: each item added will need 2 fields with imdb and isbn values; 1 of these will be null (string type) depending on item type
  * corresponding item types (book or movie) will also have fields that are specific to their type eg. isbn, imdb, etc.
  *
@@ -999,7 +992,6 @@ app.post("/createEvent", (req, res) => {
  * it will also be added to the movie/book database depending on the type of the item. May be modified to check whether a complete matching
  * record is in DB via SQL.
  */
-//make sure to send 1 of book or movie isbn/imdb as null depending on item type during front-end connection
 app.post("/addItem", (req, res) => {
   var all_items = []; //for creating new item ids
   var all_item_name = []; //for checking if item exists in db yet
@@ -1069,7 +1061,6 @@ app.post("/addItem", (req, res) => {
             });
           } else {
             res.status(200);
-            // res.send({ item_to_add });
           }
         });
       }
@@ -1092,7 +1083,6 @@ app.post("/addItem", (req, res) => {
             });
           } else {
             res.status(200);
-            // res.send({ item_to_add });
           }
         });
       }
@@ -1104,9 +1094,7 @@ app.post("/addItem", (req, res) => {
         if (err) {
           console.log(err);
         } else {
-          //var max_barcode;
           for (let i = 0; i < result.length; i++) {
-            //console.log(result[i]["item_barcode"]);
             copy_barcodes.push(parseInt(result[i]["item_barcode"]));
           }
 
@@ -1125,13 +1113,12 @@ app.post("/addItem", (req, res) => {
               });
             } else {
               res.status(200);
-              //res.send({item_to_add, copy_item_rec });
 
               //add copy to has for branch and items
               var branch_item_copy_query =
                 "INSERT INTO has_for_branch_and_item (branch_id, item_id, item_barcode, item_availability) VALUES (?,?, ?, ?)";
               var branch_item_copy_rec = [
-                1, //library location; can change this, but default is central library
+                1, //library location; default is central library
                 item_to_add.item_id,
                 max_barcode,
                 1, //item is initially available
@@ -1156,16 +1143,25 @@ app.post("/addItem", (req, res) => {
                   }
                 }
               );
-            } //semicolon for else
+            } 
           });
         }
       });
     }
   });
-}); //added this
+}); 
 
 /**
- * ERIC TO DOCUMENT THIS
+ * add item copy endpoint where a librarian is able to add copies of items to the database.
+ * input: 
+ * @param item_name: item name of copy to be created
+ * @param branch_id: copy being created to this branch
+ * 
+ * output: 
+ * @returns copy of the item name is created for the specified branch
+ *
+ * This checks whether the item to make a copy of is inserted to the database already, and if so, it will add a copy of the item database 
+ * for the specified branch. If the item is not currently in the database, this function will not add that item (need to use addItem endpoint).
  */
 app.post("/addItemCopy", (req, res) => {
   var all_item_name = []; //for checking if item exists in db yet
@@ -1191,7 +1187,6 @@ app.post("/addItemCopy", (req, res) => {
         if (err) {
           console.log(err);
         } else {
-          //res.status(200);
           item_copy_id = result[0]["item_id"];
         }
       });
@@ -1204,9 +1199,7 @@ app.post("/addItemCopy", (req, res) => {
         if (err) {
           console.log(err);
         } else {
-          //var max_barcode;
           for (let i = 0; i < result.length; i++) {
-            //console.log(result[i]["item_barcode"]);
             copy_barcodes.push(parseInt(result[i]["item_barcode"]));
           }
 
@@ -1225,13 +1218,13 @@ app.post("/addItemCopy", (req, res) => {
               });
             } else {
               res.status(200);
-              // res.send({copy_item_rec });
+            
 
               //add copy to has for branch and items
               var branch_item_copy_query =
                 "INSERT INTO has_for_branch_and_item (branch_id, item_id, item_barcode, item_availability) VALUES (?,?, ?, ?)";
               var branch_item_copy_rec = [
-                req.body.branch_id, //library location; can change this, but default is central library. replace with req.body.branch_id and add 2nd input
+                req.body.branch_id, 
                 item_copy_id,
                 max_barcode,
                 1, //item is initially available
