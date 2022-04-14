@@ -1440,13 +1440,16 @@ app.get("/events", (_, res) => {
         var staff_id = result[i].staff_id;
         var event_id = result[i].event_id;
         var name = result[i].first_name + " " + result[i].last_name;
-
+        var start_time = result[i].start_time;
+        var end_time = result[i].end_time;
         events[event_id] = {
           event_name,
           event_time,
           event_location,
           staff_id,
           name,
+          start_time,
+          end_time
         };
       }
     }

@@ -86,8 +86,8 @@ export default {
               e_location: curr_events[e]["event_location"],
               time: curr_events[e]["event_time"].substring(0, 10),
              e_coordinator: curr_events[e]["staff_id"],
-             e_hour: curr_events[e]["event_hour"],
-             e_hour_end: curr_events[e]["event_hour_end"],
+             e_hour: curr_events[e]["start_time"],
+             e_hour_end: curr_events[e]["end_time"],
             };
             this.events.push(event);
           }
