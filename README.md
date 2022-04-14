@@ -33,3 +33,16 @@ npm install
 npm run serve
 ```
 
+Login Credentials: (can also view through the my_library_tables.SQL file through the "library_user" relation
+
+```
+Example Library Customer Login Credentials:
+Email: margot@outlook.com
+Password: abc
+```
+
+```
+Example Librarian Login Credentials:
+Email: testlibrarian@test.com
+Password: abc
+```
