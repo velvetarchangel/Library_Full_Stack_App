@@ -13,6 +13,7 @@ const db = mysql.createConnection({
 	...
 });
 
+Note: may need MySQL to be set up using "Legacy Password Encryption" to get application working
 
 
 Copy over scripts/my_library_tables.sql into mySQL and generate database
