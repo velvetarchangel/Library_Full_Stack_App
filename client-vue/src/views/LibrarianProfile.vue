@@ -256,7 +256,7 @@ export default {
         { text: "Event coordinator", value: "staff_name" },
       ],
       searchResults: [],
-      options: ["Movies", "Books", "Events"],
+      options: ["Books", "Events"],
       model: null,
       mselect: null,
       searchTerm: null,
